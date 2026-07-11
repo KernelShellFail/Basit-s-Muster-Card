@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-safety-50: #fffbeb;
+  --color-safety-100: #fef3c7;
+  --color-safety-200: #fde68a;
+  --color-safety-300: #fcd34d;
+  --color-safety-400: #fbbf24;
+  --color-safety-500: #f59e0b;
+  --color-safety-600: #d97706;
+  --color-safety-700: #b45309;
+  --color-safety-800: #92400e;
+  --color-safety-900: #78350f;
+  --color-safety-950: #451a03;
+
+  --color-construction-50: #f8fafc;
+  --color-construction-100: #f1f5f9;
+  --color-construction-200: #e2e8f0;
+  --color-construction-300: #cbd5e1;
+  --color-construction-400: #94a3b8;
+  --color-construction-500: #64748b;
+  --color-construction-600: #475569;
+  --color-construction-700: #334155;
+  --color-construction-800: #1e293b;
+  --color-construction-900: #0f172a;
+  --color-construction-950: #020617;
+}
+
+body {
+  background-color: var(--color-construction-50);
+  color: var(--color-construction-900);
+  transition-property: color, background-color;
+  transition-duration: 200ms;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.dark body {
+  background-color: var(--color-construction-950);
+  color: var(--color-construction-100);
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-construction-300);
+  border-radius: 9999px;
+  transition-property: all;
+  transition-duration: 200ms;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: var(--color-construction-800);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-construction-400);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-construction-700);
+}
+
+/* Custom drawing canvas style */
+.signature-canvas {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* Animate Pulse Amber for real-time connection */
+@keyframes pulse-amber {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: .5;
+    transform: scale(1.1);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-amber 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
