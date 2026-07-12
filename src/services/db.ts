@@ -156,9 +156,22 @@ export interface SystemNotification {
 // Check server status
 let isBackendOnline = false;
 
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('mm_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const headers = {
+    ...options.headers,
+    ...getAuthHeaders(),
+  };
+  return fetch(url, { ...options, headers });
+};
+
 const checkServer = async (): Promise<boolean> => {
   try {
-    const res = await fetch('/api/organization');
+    const res = await fetch('/api/health');
     isBackendOnline = res.ok;
     return isBackendOnline;
   } catch {
@@ -204,7 +217,7 @@ export const LocalDB = {
   // Organizations
   async getOrganization(): Promise<Organization> {
     if (await checkServer()) {
-      const res = await fetch('/api/organization');
+      const res = await authenticatedFetch('/api/organization');
       return res.json();
     }
     const local = localStorage.getItem('mm_org');
@@ -213,7 +226,7 @@ export const LocalDB = {
 
   async saveOrganization(org: Organization): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/organization', {
+      await authenticatedFetch('/api/organization', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(org)
@@ -226,7 +239,7 @@ export const LocalDB = {
   // Users
   async getUsers(): Promise<UserProfile[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/users');
+      const res = await authenticatedFetch('/api/users');
       return res.json();
     }
     // Static fallback users
@@ -242,7 +255,7 @@ export const LocalDB = {
   // Workers
   async getWorkers(): Promise<Worker[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/workers');
+      const res = await authenticatedFetch('/api/workers');
       return res.json();
     }
     const local = localStorage.getItem('mm_workers');
@@ -251,7 +264,7 @@ export const LocalDB = {
 
   async saveWorker(worker: Worker): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/workers', {
+      await authenticatedFetch('/api/workers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(worker)
@@ -267,7 +280,7 @@ export const LocalDB = {
 
   async deleteWorker(id: string): Promise<void> {
     if (await checkServer()) {
-      await fetch(`/api/workers/${id}`, { method: 'DELETE' });
+      await authenticatedFetch(`/api/workers/${id}`, { method: 'DELETE' });
       return;
     }
     const workers = await this.getWorkers();
@@ -277,7 +290,7 @@ export const LocalDB = {
   // Sites
   async getSites(): Promise<Site[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/sites');
+      const res = await authenticatedFetch('/api/sites');
       return res.json();
     }
     const local = localStorage.getItem('mm_sites');
@@ -286,7 +299,7 @@ export const LocalDB = {
 
   async saveSite(site: Site): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/sites', {
+      await authenticatedFetch('/api/sites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(site)
@@ -303,7 +316,7 @@ export const LocalDB = {
   // Attendance
   async getAttendance(): Promise<AttendanceRecord[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/attendance');
+      const res = await authenticatedFetch('/api/attendance');
       return res.json();
     }
     const local = localStorage.getItem('mm_attendance');
@@ -312,7 +325,7 @@ export const LocalDB = {
 
   async saveAttendanceRecords(records: AttendanceRecord[]): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/attendance', {
+      await authenticatedFetch('/api/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(records)
@@ -331,7 +344,7 @@ export const LocalDB = {
   // Leaves
   async getLeaves(): Promise<LeaveRequest[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/leaves');
+      const res = await authenticatedFetch('/api/leaves');
       return res.json();
     }
     const local = localStorage.getItem('mm_leaves');
@@ -340,7 +353,7 @@ export const LocalDB = {
 
   async saveLeaveRequest(request: LeaveRequest): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/leaves', {
+      await authenticatedFetch('/api/leaves', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request)
@@ -357,7 +370,7 @@ export const LocalDB = {
   // Payments
   async getPayments(): Promise<PaymentRecord[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/payments');
+      const res = await authenticatedFetch('/api/payments');
       return res.json();
     }
     const local = localStorage.getItem('mm_payments');
@@ -366,7 +379,7 @@ export const LocalDB = {
 
   async savePayment(payment: PaymentRecord): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/payments', {
+      await authenticatedFetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payment)
@@ -381,7 +394,7 @@ export const LocalDB = {
   // Notifications
   async getNotifications(): Promise<SystemNotification[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/notifications');
+      const res = await authenticatedFetch('/api/notifications');
       return res.json();
     }
     const local = localStorage.getItem('mm_notifications');
@@ -390,7 +403,7 @@ export const LocalDB = {
 
   async markNotificationsRead(): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/notifications/read', { method: 'POST' });
+      await authenticatedFetch('/api/notifications/read', { method: 'POST' });
       return;
     }
     const notifs = await this.getNotifications();
@@ -401,7 +414,7 @@ export const LocalDB = {
   // Chat
   async getChat(siteId: string): Promise<ChatMessage[]> {
     if (await checkServer()) {
-      const res = await fetch(`/api/chat/${siteId}`);
+      const res = await authenticatedFetch(`/api/chat/${siteId}`);
       return res.json();
     }
     const chat = localStorage.getItem('mm_chat') ? JSON.parse(localStorage.getItem('mm_chat') || '[]') : [];
@@ -410,7 +423,7 @@ export const LocalDB = {
 
   async addChatMessage(msg: ChatMessage): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/chat', {
+      await authenticatedFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(msg)
@@ -424,7 +437,7 @@ export const LocalDB = {
 
   async saveUser(user: UserProfile): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/users', {
+      await authenticatedFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user)
@@ -440,7 +453,7 @@ export const LocalDB = {
 
   async deleteUser(uid: string): Promise<void> {
     if (await checkServer()) {
-      await fetch(`/api/users/${uid}`, { method: 'DELETE' });
+      await authenticatedFetch(`/api/users/${uid}`, { method: 'DELETE' });
       return;
     }
     const users = await this.getUsers();
@@ -449,7 +462,7 @@ export const LocalDB = {
 
   async deleteSite(id: string): Promise<void> {
     if (await checkServer()) {
-      await fetch(`/api/sites/${id}`, { method: 'DELETE' });
+      await authenticatedFetch(`/api/sites/${id}`, { method: 'DELETE' });
       return;
     }
     const sites = await this.getSites();
@@ -458,7 +471,7 @@ export const LocalDB = {
 
   async deletePayment(id: string): Promise<void> {
     if (await checkServer()) {
-      await fetch(`/api/payments/${id}`, { method: 'DELETE' });
+      await authenticatedFetch(`/api/payments/${id}`, { method: 'DELETE' });
       return;
     }
     const payments = await this.getPayments();
@@ -467,7 +480,7 @@ export const LocalDB = {
 
   async getLabourSubmissions(): Promise<LabourSubmission[]> {
     if (await checkServer()) {
-      const res = await fetch('/api/labour/submissions');
+      const res = await authenticatedFetch('/api/labour/submissions');
       return res.json();
     }
     const local = localStorage.getItem('mm_labour_subs');
@@ -476,7 +489,7 @@ export const LocalDB = {
 
   async saveLabourSubmission(submission: LabourSubmission): Promise<void> {
     if (await checkServer()) {
-      await fetch('/api/labour/submissions', {
+      await authenticatedFetch('/api/labour/submissions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submission)

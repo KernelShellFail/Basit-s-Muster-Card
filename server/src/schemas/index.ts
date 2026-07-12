@@ -96,3 +96,40 @@ export const PaymentSchema = z.object({
   deductions: z.number().default(0).optional(),
   bonuses: z.number().default(0).optional(),
 });
+
+export const LeaveSchema = z.object({
+  id: z.string().optional(),
+  workerId: z.string(),
+  workerName: z.string().optional(),
+  leaveType: z.enum(['Medical', 'Personal', 'Emergency', 'Paid', 'Unpaid']),
+  startDate: z.string(),
+  endDate: z.string(),
+  reason: z.string().optional(),
+  status: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),
+  comment: z.string().optional(),
+  createdAt: z.string().optional(),
+});
+
+export const ChatMessageSchema = z.object({
+  id: z.string().optional(),
+  siteId: z.string(),
+  senderId: z.string(),
+  senderName: z.string(),
+  senderRole: z.string(),
+  text: z.string().optional(),
+  imageUrl: z.string().optional(),
+  createdAt: z.string().optional(),
+});
+
+export const LabourSubmissionSchema = z.object({
+  id: z.string().optional(),
+  workerId: z.string(),
+  date: z.string(),
+  status: z.string(),
+  isNightShift: z.boolean().default(false),
+  overtimeHours: z.number().default(0),
+  timeIn: z.string().optional(),
+  timeOut: z.string().optional(),
+  remarks: z.string().optional(),
+  createdAt: z.string().optional(),
+});

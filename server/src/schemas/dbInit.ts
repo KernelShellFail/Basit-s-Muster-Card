@@ -1,10 +1,8 @@
 import { pool } from '../db';
 
 export const initSchema = async () => {
-  const client = await pool.connect();
+  const client = pool; // Directly use pool since queries are simple and pool is a pool of clients.
   try {
-    await client.query('BEGIN');
-
     // 1. Organization Table
     await client.query(`
       CREATE TABLE IF NOT EXISTS organizations (
@@ -33,10 +31,6 @@ export const initSchema = async () => {
         worker_id VARCHAR(50)
       );
     `);
-
-    // Ensure columns added dynamically if table existed previously
-    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password TEXT;');
-    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS worker_id VARCHAR(50);');
 
     // 3. Sites Table
     await client.query(`
@@ -71,40 +65,36 @@ export const initSchema = async () => {
         bank_name VARCHAR(255),
         account_number VARCHAR(50),
         ifsc_code VARCHAR(20),
-        uan VARCHAR(50),
-        esic VARCHAR(50),
-        category VARCHAR(50),
-        site_id VARCHAR(50),
-        contractor_id VARCHAR(50),
-        wage_rate DECIMAL(10,2) DEFAULT 0,
-        overtime_rate DECIMAL(10,2) DEFAULT 0,
-        shift VARCHAR(20),
-        status VARCHAR(20) DEFAULT 'active',
-        photo TEXT,
-        join_date VARCHAR(20),
+        upi_id VARCHAR(100),
+        joining_date VARCHAR(20),
+        trade VARCHAR(50),
+        department VARCHAR(50),
         skill_level VARCHAR(50),
-        pin VARCHAR(4)
+        daily_wage DECIMAL(10,2) DEFAULT 0,
+        overtime_rate DECIMAL(10,2) DEFAULT 0,
+        current_site_id VARCHAR(50),
+        status VARCHAR(20) DEFAULT 'Active',
+        photo TEXT,
+        notes TEXT
       );
     `);
-
-    // Ensure PIN is added
-    await client.query('ALTER TABLE workers ADD COLUMN IF NOT EXISTS pin VARCHAR(4);');
 
     // 5. Attendance Table
     await client.query(`
       CREATE TABLE IF NOT EXISTS attendance (
         id VARCHAR(50) PRIMARY KEY,
         worker_id VARCHAR(50) NOT NULL,
-        site_id VARCHAR(50) NOT NULL,
         date VARCHAR(20) NOT NULL,
         status VARCHAR(20) NOT NULL,
+        is_night_shift BOOLEAN DEFAULT false,
+        overtime_hours DECIMAL(4,2) DEFAULT 0,
         time_in VARCHAR(20),
         time_out VARCHAR(20),
-        overtime_hours DECIMAL(4,2) DEFAULT 0,
+        gps_coordinates VARCHAR(100),
+        photo_proof TEXT,
         supervisor_id VARCHAR(50),
-        gps_location VARCHAR(100),
-        notes TEXT,
-        verification_method VARCHAR(20)
+        site_id VARCHAR(50) NOT NULL,
+        remarks TEXT
       );
     `);
 
@@ -113,17 +103,15 @@ export const initSchema = async () => {
       CREATE TABLE IF NOT EXISTS payments (
         id VARCHAR(50) PRIMARY KEY,
         worker_id VARCHAR(50) NOT NULL,
-        amount DECIMAL(10,2) NOT NULL,
+        worker_name VARCHAR(255),
         date VARCHAR(20) NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        payment_type VARCHAR(20) NOT NULL,
+        reference_number VARCHAR(100),
         type VARCHAR(20) NOT NULL,
-        payment_mode VARCHAR(20),
-        reference_no VARCHAR(100),
-        status VARCHAR(20) DEFAULT 'completed',
-        period_start VARCHAR(20),
-        period_end VARCHAR(20),
-        notes TEXT,
-        deductions DECIMAL(10,2) DEFAULT 0,
-        bonuses DECIMAL(10,2) DEFAULT 0
+        worker_signature TEXT,
+        supervisor_signature TEXT,
+        notes TEXT
       );
     `);
 
@@ -132,12 +120,14 @@ export const initSchema = async () => {
       CREATE TABLE IF NOT EXISTS leaves (
         id VARCHAR(50) PRIMARY KEY,
         worker_id VARCHAR(50) NOT NULL,
+        worker_name VARCHAR(255),
+        leave_type VARCHAR(20) NOT NULL,
         start_date VARCHAR(20) NOT NULL,
         end_date VARCHAR(20) NOT NULL,
-        type VARCHAR(20) NOT NULL,
         reason TEXT,
-        status VARCHAR(20) DEFAULT 'pending',
-        approved_by VARCHAR(50)
+        status VARCHAR(20) DEFAULT 'Pending',
+        comment TEXT,
+        created_at VARCHAR(30) NOT NULL
       );
     `);
 
@@ -157,35 +147,35 @@ export const initSchema = async () => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS chat (
         id VARCHAR(50) PRIMARY KEY,
+        site_id VARCHAR(50) NOT NULL,
         sender_id VARCHAR(50) NOT NULL,
         sender_name VARCHAR(255) NOT NULL,
-        site_id VARCHAR(50) NOT NULL,
+        sender_role VARCHAR(20) NOT NULL,
         text TEXT,
         image_url TEXT,
-        timestamp VARCHAR(30) NOT NULL
+        created_at VARCHAR(30) NOT NULL
       );
     `);
 
-    // 10. Labour Submissions (Pending verifications)
+    // 10. Labour Submissions (Verification claims by labour)
     await client.query(`
       CREATE TABLE IF NOT EXISTS labour_submissions (
         id VARCHAR(50) PRIMARY KEY,
         worker_id VARCHAR(50) NOT NULL,
-        site_id VARCHAR(50) NOT NULL,
         date VARCHAR(20) NOT NULL,
-        type VARCHAR(20) NOT NULL,
-        timestamp VARCHAR(30) NOT NULL,
-        status VARCHAR(20) DEFAULT 'pending',
-        reviewed_by VARCHAR(50)
+        status VARCHAR(20) NOT NULL,
+        is_night_shift BOOLEAN DEFAULT false,
+        overtime_hours DECIMAL(4,2) DEFAULT 0,
+        time_in VARCHAR(20),
+        time_out VARCHAR(20),
+        remarks TEXT,
+        created_at VARCHAR(30) NOT NULL,
+        CONSTRAINT unique_worker_date UNIQUE (worker_id, date)
       );
     `);
 
-    await client.query('COMMIT');
-    console.log('Database schema initialized successfully.');
+    console.log('Database schema synchronized and initialized successfully.');
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error('Error initializing schema:', error);
-  } finally {
-    client.release();
   }
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../utils/i18n';
@@ -38,6 +38,14 @@ export const Workers = () => {
   const [editingWorkerId, setEditingWorkerId] = useState<string | null>(null);
   const [selfLoginEnabled, setSelfLoginEnabled] = useState(false);
   const [labourPassword, setLabourPassword] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, []);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -308,7 +316,42 @@ export const Workers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredWorkers.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="animate-pulse">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-border" />
+                        <div className="space-y-1">
+                          <div className="h-4 w-28 bg-border rounded" />
+                          <div className="h-3 w-16 bg-border rounded mt-1" />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="h-4 w-20 bg-border rounded" />
+                        <div className="h-3 w-14 bg-border rounded mt-1" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-6 w-16 bg-border rounded-full" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-20 bg-border rounded" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-24 bg-border rounded" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-6 w-14 bg-border rounded-full" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="h-8 w-16 bg-border rounded ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : filteredWorkers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No workers match your filter criteria.

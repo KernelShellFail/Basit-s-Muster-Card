@@ -266,6 +266,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const data = await res.json();
       if (data.success && data.user) {
         localStorage.setItem('mm_session_user', JSON.stringify(data.user));
+        localStorage.setItem('mm_token', data.token);
         set({ 
           currentUser: data.user, 
           selectedRole: data.user.role, 
@@ -296,6 +297,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const data = await res.json();
       if (data.success && data.user) {
         localStorage.setItem('mm_session_user', JSON.stringify(data.user));
+        localStorage.setItem('mm_token', data.token);
         set({ 
           currentUser: data.user, 
           selectedRole: data.user.role, 
@@ -314,6 +316,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   logoutUser: async () => {
     localStorage.removeItem('mm_session_user');
+    localStorage.removeItem('mm_token');
     set({ 
       currentUser: null,
       selectedRole: 'owner',
