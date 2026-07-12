@@ -1,62 +1,157 @@
 @import "tailwindcss";
 
 @theme {
-  --color-safety-50: #fffbeb;
-  --color-safety-100: #fef3c7;
-  --color-safety-200: #fde68a;
-  --color-safety-300: #fcd34d;
-  --color-safety-400: #fbbf24;
-  --color-safety-500: #f59e0b;
-  --color-safety-600: #d97706;
-  --color-safety-700: #b45309;
-  --color-safety-800: #92400e;
-  --color-safety-900: #78350f;
-  --color-safety-950: #451a03;
+  /* ─── Core Brand Colors ─── */
+  --color-electric-lime: #beff50;
+  --color-off-black-ink: #14140f;
+  --color-off-white-canvas: #f5f5eb;
+  --color-pure-white: #ffffff;
+  --color-ash: #d2d2c8;
+  --color-graphite: #6e6e64;
+  --color-deep-charcoal: #30302a;
+  --color-stone: #919183;
+  --color-smoke: #b9b9b7;
 
-  --color-construction-50: #f8fafc;
-  --color-construction-100: #f1f5f9;
-  --color-construction-200: #e2e8f0;
-  --color-construction-300: #cbd5e1;
-  --color-construction-400: #94a3b8;
-  --color-construction-500: #64748b;
-  --color-construction-600: #475569;
-  --color-construction-700: #334155;
-  --color-construction-800: #1e293b;
-  --color-construction-900: #0f172a;
-  --color-construction-950: #020617;
+  /* ─── Brand Scale (Electric Lime) ─── */
+  --color-brand-400: #d4ff7a;
+  --color-brand-500: #beff50;
+  --color-brand-600: #a8e636;
+  --color-brand-700: #8cc41e;
+  --color-brand-foreground: #14140f;
+
+  /* ─── Construction Palette (for CrossCheck / Labour pages) ─── */
+  --color-construction-50: #f8f8f6;
+  --color-construction-100: #efefeb;
+  --color-construction-150: #e5e5df;
+  --color-construction-200: #d2d2c8;
+  --color-construction-250: #c5c5ba;
+  --color-construction-350: #adadA0;
+  --color-construction-400: #9e9e8f;
+  --color-construction-450: #919183;
+  --color-construction-500: #7a7a6e;
+  --color-construction-550: #6e6e64;
+  --color-construction-650: #52524a;
+  --color-construction-800: #30302a;
+  --color-construction-850: #232320;
+  --color-construction-900: #1c1c18;
+  --color-construction-950: #14140f;
+
+  /* ─── Safety Accent (for Labour/Verification pages) ─── */
+  --color-safety-500: #beff50;
+  --color-safety-600: #a8e636;
+
+  /* ─── Semantic Aliases ─── */
+  --color-background: var(--color-pure-white);
+  --color-foreground: var(--color-off-black-ink);
+  --color-card: var(--color-off-white-canvas);
+  --color-card-foreground: var(--color-off-black-ink);
+  --color-primary: var(--color-electric-lime);
+  --color-primary-foreground: var(--color-off-black-ink);
+  --color-secondary: var(--color-off-white-canvas);
+  --color-secondary-foreground: var(--color-off-black-ink);
+  --color-muted: var(--color-ash);
+  --color-muted-foreground: var(--color-graphite);
+  --color-accent: var(--color-off-white-canvas);
+  --color-accent-foreground: var(--color-off-black-ink);
+  --color-destructive: #e54545;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-ash);
+  --color-input: var(--color-pure-white);
+  --color-ring: var(--color-off-black-ink);
+
+  /* ─── Typography ─── */
+  --font-otsono: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* ─── Typography — Scale ─── */
+  --text-eyebrow: 10px;
+  --leading-eyebrow: 1.4;
+  --tracking-eyebrow: 1px;
+  --text-caption: 12px;
+  --leading-caption: 1.33;
+  --tracking-caption: 1.2px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.29;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --text-subheading: 22px;
+  --leading-subheading: 1.18;
+  --text-heading: 28px;
+  --leading-heading: 1.14;
+  --tracking-heading: -0.56px;
+  --text-heading-lg: 60px;
+  --leading-heading-lg: 1;
+  --tracking-heading-lg: -1.8px;
+  --text-display: 90px;
+  --leading-display: 0.89;
+  --tracking-display: -2.7px;
+
+  /* ─── Spacing ─── */
+  --spacing-4: 4px;
+  --spacing-4_5: 18px;
+  --spacing-5_5: 22px;
+  --spacing-6_5: 26px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-60: 60px;
+  --spacing-64: 64px;
+  --spacing-72: 72px;
+  --spacing-80: 80px;
+  --spacing-96: 96px;
+  --spacing-220: 220px;
+  --spacing-224: 224px;
+
+  /* ─── Border Radius ─── */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-2xl: 18px;
+  --radius-3xl: 28px;
+  --radius-full: 9999px;
+
+  /* ─── Shadows ─── */
+  --shadow-premium: 0 4px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(190, 255, 80, 0.25), 0 0 4px rgba(190, 255, 80, 0.15);
+
+  /* ─── Animations ─── */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.3);
+  }
 }
 
 body {
-  background-color: var(--color-construction-50);
-  color: var(--color-construction-900);
-  transition-property: color, background-color;
-  transition-duration: 200ms;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-pure-white);
+  color: var(--color-off-black-ink);
+  font-family: var(--font-otsono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.dark body {
-  background-color: var(--color-construction-950);
-  color: var(--color-construction-100);
-}
-
-/* Glassmorphism Styles */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-}
-
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-}
-
-/* Custom Scrollbar */
+/* ─── Custom Scrollbar — Minimal ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -67,42 +162,79 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-construction-300);
+  background-color: var(--color-smoke);
   border-radius: 9999px;
-  transition-property: all;
-  transition-duration: 200ms;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: var(--color-construction-800);
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-construction-400);
+  background-color: var(--color-graphite);
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-construction-700);
+/* ─── Utility: custom-scrollbar (for inner scroll areas) ─── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
 }
 
-/* Custom drawing canvas style */
-.signature-canvas {
-  touch-action: none;
-  cursor: crosshair;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* Animate Pulse Amber for real-time connection */
-@keyframes pulse-amber {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: .5;
-    transform: scale(1.1);
-  }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-ash);
+  border-radius: 9999px;
 }
 
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-graphite);
+}
+
+/* ─── Utility: glass-panel ─── */
+.glass-panel {
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+}
+
+/* ─── Utility: pulse-dot (live status indicator) ─── */
 .pulse-dot {
-  animation: pulse-amber 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ─── Icon Typographic Styling ─── */
+.lucide {
+  stroke-width: 1.5px;
+}
+
+/* ─── Lenis Smooth Scroll ─── */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ─── Print Styles ─── */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import { useTranslation } from '../utils/i18n';
+import { cn } from '../utils/cn';
 import { 
   LayoutDashboard, 
   Users, 
@@ -28,7 +30,6 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
   const { t } = useTranslation(currentLanguage);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Role based navigation config
   const getNavItems = () => {
     switch (selectedRole) {
       case 'owner':
@@ -41,6 +42,7 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
           { id: 'payments', label: t('payments'), icon: <IndianRupee className="w-5 h-5" /> },
           { id: 'leaves', label: t('leaves'), icon: <CalendarDays className="w-5 h-5" /> },
           { id: 'chat', label: t('chat'), icon: <MessageSquare className="w-5 h-5" /> },
+          { id: 'settings', label: t('settings'), icon: <Settings className="w-5 h-5" /> },
         ];
       case 'admin':
         return [
@@ -52,6 +54,7 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
           { id: 'payments', label: t('payments'), icon: <IndianRupee className="w-5 h-5" /> },
           { id: 'leaves', label: t('leaves'), icon: <CalendarDays className="w-5 h-5" /> },
           { id: 'chat', label: t('chat'), icon: <MessageSquare className="w-5 h-5" /> },
+          { id: 'settings', label: t('settings'), icon: <Settings className="w-5 h-5" /> },
         ];
       case 'supervisor':
         return [
@@ -72,77 +75,99 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
   const navItems = getNavItems();
 
   return (
-    <aside 
-      className={`h-screen border-r border-construction-200 dark:border-construction-800 bg-white/80 dark:bg-construction-900/80 backdrop-blur-md flex flex-col justify-between transition-all duration-300 relative ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+    <motion.aside 
+      layout
+      initial={false}
+      animate={{ width: isCollapsed ? 80 : 256 }}
+      transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+      className="h-screen border-r border-border bg-card/80 backdrop-blur-xl flex flex-col justify-between relative z-20 shrink-0"
     >
-      <div>
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Brand header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-construction-200 dark:border-construction-800">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-10 h-10 rounded-lg bg-safety-500 text-construction-950 flex items-center justify-center font-bold shrink-0 shadow-md">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border shrink-0">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-black flex items-center justify-center font-bold shrink-0 shadow-glow">
               <HardHat className="w-5 h-5" />
             </div>
             {!isCollapsed && (
-              <span className="font-extrabold text-lg bg-gradient-to-r from-construction-900 to-construction-600 dark:from-white dark:to-construction-400 bg-clip-text text-transparent truncate">
+              <motion.span 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="font-extrabold text-lg tracking-tight truncate"
+              >
                 MusterMate
-              </span>
+              </motion.span>
             )}
           </div>
           
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-8 w-6 h-6 rounded-full bg-construction-700 dark:bg-construction-800 text-white flex items-center justify-center border border-construction-600 shadow-md hover:bg-safety-500 hover:text-construction-950 transition-colors"
+            className="absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-card text-foreground flex items-center justify-center border shadow-sm hover:bg-accent transition-colors z-50"
           >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Navigation list */}
-        <nav className="mt-6 px-3 flex flex-col gap-1.5">
-          {navItems.map(item => {
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setCurrentTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-safety-500 text-construction-950 shadow-md' 
-                    : 'text-construction-600 dark:text-construction-400 hover:bg-construction-100 dark:hover:bg-construction-800/50 hover:text-construction-900 dark:hover:text-white'
-                }`}
-              >
-                {item.icon}
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
-              </button>
-            );
-          })}
-        </nav>
+        <div className="flex-1 overflow-y-auto py-6 px-3 custom-scrollbar">
+          <nav className="flex flex-col gap-1.5">
+            {navItems.map(item => {
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentTab(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={cn(
+                    "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                    isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-primary rounded-xl"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{item.icon}</span>
+                  {!isCollapsed && (
+                    <span className="relative z-10 truncate">{item.label}</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
       {/* Session User Profile & Logout */}
-      <div className="p-4 border-t border-construction-200 dark:border-construction-800 bg-construction-50/50 dark:bg-construction-950/20 space-y-3">
+      <div className="p-4 border-t border-border bg-muted/30 shrink-0">
         {currentUser && !isCollapsed && (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-safety-500 text-construction-950 flex items-center justify-center font-extrabold text-xs uppercase shrink-0">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-brand-500 text-black flex items-center justify-center font-bold text-xs uppercase shrink-0">
               {currentUser.name.slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-construction-850 dark:text-white truncate leading-normal">{currentUser.name}</p>
-              <p className="text-[9px] text-construction-450 uppercase tracking-widest font-extrabold truncate">{currentUser.role}</p>
+              <p className="text-sm font-semibold truncate leading-tight">{currentUser.name}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold truncate">
+                {currentUser.role}
+              </p>
             </div>
           </div>
         )}
         
         <button
           onClick={() => logoutUser()}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-200 dark:border-red-950/30 hover:bg-red-500/10 text-xs font-bold text-red-500 transition-colors"
+          className={cn(
+            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-colors border",
+            "border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          )}
         >
-          <LogOut className="w-4 h-4" />
-          {!isCollapsed && <span>Logout Session</span>}
+          <LogOut className="w-5 h-5" />
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
-    </aside>
+    </motion.aside>
   );
 };

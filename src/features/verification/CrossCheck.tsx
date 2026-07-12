@@ -16,6 +16,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { AttendanceRecord, LabourSubmission, Worker } from '../../services/db';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 
 export const CrossCheck = () => {
   const { 
@@ -248,14 +250,14 @@ export const CrossCheck = () => {
                     <td className="p-4">
                       {item.status === 'match' && (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600">
-                          <CheckCircle className="w-3.5 h-3.5" />
+                          <CheckCircle className="w-5 h-5" />
                           Verified Match
                         </span>
                       )}
                       
                       {item.status === 'pending' && (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                          <HelpCircle className="w-3.5 h-3.5" />
+                          <HelpCircle className="w-5 h-5" />
                           Awaiting Claim
                         </span>
                       )}
@@ -269,7 +271,7 @@ export const CrossCheck = () => {
                           })}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-red-500 hover:bg-red-600 text-white shadow-sm transition-colors"
                         >
-                          <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                          <AlertTriangle className="w-5 h-5 animate-pulse" />
                           Resolve Discrepancy
                         </button>
                       )}
@@ -283,19 +285,15 @@ export const CrossCheck = () => {
       </div>
 
       {/* Discrepancy Resolution Modal */}
-      {resolvingDiscrepancy && (
-        <div className="fixed inset-0 z-50 bg-construction-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-2xl p-6 relative">
-            
-            <h3 className="text-sm font-black text-construction-850 dark:text-white flex items-center gap-2 mb-2">
-              <ShieldCheck className="w-5 h-5 text-safety-500" />
-              Resolve Muster Discrepancy
-            </h3>
-            <p className="text-[11px] text-construction-500 mb-6">
-              Compare the logged hours for <strong>{resolvingDiscrepancy.worker.name}</strong> on <strong>{selectedDate}</strong>. Select the entry to set as the official database record.
-            </p>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
+      <Modal
+        isOpen={!!resolvingDiscrepancy}
+        onClose={() => setResolvingDiscrepancy(null)}
+        title="Resolve Muster Discrepancy"
+        description={resolvingDiscrepancy ? `Compare the logged hours for ${resolvingDiscrepancy.worker.name} on ${selectedDate}. Select the entry to set as the official database record.` : undefined}
+      >
+        {resolvingDiscrepancy && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
               
               {/* Option A: Supervisor */}
               <button
@@ -338,17 +336,16 @@ export const CrossCheck = () => {
             </div>
 
             <div className="flex justify-end pt-3 border-t border-construction-150 dark:border-construction-800/40">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setResolvingDiscrepancy(null)}
-                className="px-4 py-2 border border-construction-250 dark:border-construction-800 rounded-xl text-xs font-bold text-construction-600 dark:text-construction-350 hover:bg-construction-50 dark:hover:bg-construction-950 transition-colors"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
-
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

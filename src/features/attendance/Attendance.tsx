@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../utils/i18n';
 import { showToast } from '../../components/Toast';
@@ -8,30 +9,26 @@ import {
   Moon, 
   Clock, 
   FileCheck, 
-  Upload, 
   Camera, 
-  CheckCircle,
-  HelpCircle,
-  AlertTriangle,
   Search
 } from 'lucide-react';
 import { AttendanceRecord, AttendanceStatus, Worker } from '../../services/db';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { slideUp, staggerContainer } from '../../utils/animations';
 
 export const Attendance = () => {
-  const { workers, sites, activeSiteId, saveAttendance, currentLanguage, selectedRole } = useAppStore();
+  const { workers, sites, activeSiteId, saveAttendance, currentLanguage } = useAppStore();
   const { t } = useTranslation(currentLanguage);
 
-  // States
   const [selectedDate, setSelectedDate] = useState('2026-07-04');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Local state grid for attendance before committing
   const [attendanceSheet, setAttendanceSheet] = useState<Record<string, Partial<AttendanceRecord>>>({});
 
-  // Filter workers assigned to the active site
   const siteWorkers = workers.filter(w => w.currentSiteId === activeSiteId && w.status === 'Active');
 
-  // Load existing records from LocalDB if present for this date & site
   useEffect(() => {
     const existing = localStorage.getItem('mm_attendance') 
       ? JSON.parse(localStorage.getItem('mm_attendance') || '[]') 
@@ -44,11 +41,10 @@ export const Attendance = () => {
       if (record) {
         sheet[worker.id] = { ...record };
       } else {
-        // Defaults
         sheet[worker.id] = {
           workerId: worker.id,
           date: selectedDate,
-          status: 'Present', // default optimistic state
+          status: 'Present', 
           isNightShift: false,
           overtimeHours: 0,
           siteId: activeSiteId,
@@ -100,7 +96,6 @@ export const Attendance = () => {
     }));
   };
 
-  // Simulate Geo GPS checkin
   const triggerGpsCheckin = (workerId: string) => {
     const siteCoords = sites.find(s => s.id === activeSiteId)?.gpsCoordinates || '19.0264, 73.0725';
     setAttendanceSheet(prev => ({
@@ -113,7 +108,6 @@ export const Attendance = () => {
     showToast(`GPS verified for worker inside Geofence.`);
   };
 
-  // Simulate Photo Upload Proof
   const triggerPhotoUpload = (workerId: string) => {
     const mockPhoto = 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=150&q=80';
     setAttendanceSheet(prev => ({
@@ -128,8 +122,6 @@ export const Attendance = () => {
 
   const handleSaveSheet = () => {
     const recordsToSave = Object.values(attendanceSheet) as AttendanceRecord[];
-    
-    // Ensure all records have valid keys
     const sanitized = recordsToSave.map(r => ({
       ...r,
       id: r.id || `att-${r.workerId}-${r.date}`
@@ -139,56 +131,58 @@ export const Attendance = () => {
     showToast(`Attendance muster sheet finalized for ${selectedDate}.`);
   };
 
-  // Filter workers based on search
   const filteredSiteWorkers = siteWorkers.filter(w => 
     w.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     w.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
       {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-construction-850 dark:text-white">{t('attendance')} Logs</h1>
-          <p className="text-xs text-construction-500 mt-1">Supervisors: Mark daily presence, shift statuses, and attach geolocated photo proofs.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('attendance')} Logs</h1>
+          <p className="text-sm text-muted-foreground mt-1">Supervisors: Mark daily presence, shift statuses, and attach geolocated photo proofs.</p>
         </div>
         
         {/* Date Selector */}
         <div className="flex items-center gap-2 shrink-0">
-          <Calendar className="w-4 h-4 text-construction-500" />
+          <Calendar className="w-5 h-5 text-muted-foreground" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="text-xs font-bold border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white px-3 py-2 rounded-xl focus:ring-2 focus:ring-safety-500 focus:outline-none"
+            className="text-sm font-bold bg-background border border-input rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Grid Settings Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm flex flex-col sm:flex-row items-center gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="w-4.5 h-4.5 text-construction-450 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search workers in this site..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs pl-9 pr-4 py-2.5 rounded-xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-800 dark:text-white focus:ring-2 focus:ring-safety-500 focus:outline-none"
-          />
-        </div>
+      <motion.div variants={slideUp}>
+        <Card glass>
+          <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full">
+              <Input
+                type="text"
+                placeholder="Search workers in this site..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                icon={<Search className="w-5 h-5 text-muted-foreground" />}
+              />
+            </div>
 
-        <div className="text-[10px] font-bold text-construction-500 shrink-0">
-          Workers count: {filteredSiteWorkers.length} active
-        </div>
-      </div>
+            <div className="text-sm font-bold text-muted-foreground shrink-0 bg-accent/50 px-4 py-2 rounded-xl border border-border">
+              Workers count: <span className="text-foreground">{filteredSiteWorkers.length}</span> active
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Workers Attendance List */}
-      <div className="space-y-3">
+      <motion.div variants={slideUp} className="space-y-3">
         {filteredSiteWorkers.length === 0 ? (
-          <div className="p-12 text-center text-xs font-medium text-construction-450 border border-dashed border-construction-200 dark:border-construction-800 rounded-2xl">
+          <div className="p-12 text-center text-sm font-medium text-muted-foreground border-2 border-dashed border-border rounded-2xl bg-accent/30">
             No active workers found assigned to this site. Assign workers in Workers Directory.
           </div>
         ) : (
@@ -202,149 +196,137 @@ export const Attendance = () => {
             const remarks = sheetRecord.remarks || '';
 
             return (
-              <div 
-                key={worker.id}
-                className="p-4 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all hover:shadow-md"
-              >
-                {/* Worker basic profile */}
-                <div className="flex items-center gap-3 shrink-0">
-                  <img src={worker.photo} alt={worker.name} className="w-10 h-10 rounded-full object-cover border border-construction-200" />
-                  <div>
-                    <h4 className="text-xs font-bold text-construction-850 dark:text-white leading-tight">{worker.name}</h4>
-                    <p className="text-[10px] text-construction-500 mt-0.5">{worker.id} • {worker.trade} ({worker.skillLevel})</p>
+              <Card key={worker.id} glass className="overflow-visible hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                  {/* Worker basic profile */}
+                  <div className="flex items-center gap-4 shrink-0 lg:w-[220px]">
+                    <img src={worker.photo} alt={worker.name} className="w-12 h-12 rounded-full object-cover border border-border" />
+                    <div>
+                      <h4 className="text-sm font-bold text-foreground leading-tight">{worker.name}</h4>
+                      <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{worker.id} • {worker.trade}</p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Status Marking Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                  {(['Present', 'Half-Day', 'Absent', 'Paid-Leave', 'Weekly-Off'] as AttendanceStatus[]).map(st => {
-                    const btnStyleMap: Record<AttendanceStatus, string> = {
-                      'Present': 'border-emerald-200 text-emerald-700 hover:bg-emerald-500/10 dark:border-emerald-800/40 dark:text-emerald-400',
-                      'Half-Day': 'border-amber-200 text-amber-700 hover:bg-amber-500/10 dark:border-amber-800/40 dark:text-amber-400',
-                      'Absent': 'border-red-200 text-red-700 hover:bg-red-500/10 dark:border-red-800/40 dark:text-red-400',
-                      'Paid-Leave': 'border-sky-200 text-sky-700 hover:bg-sky-500/10 dark:border-sky-800/40 dark:text-sky-400',
-                      'Weekly-Off': 'border-slate-200 text-slate-700 hover:bg-slate-500/10 dark:border-slate-800/40 dark:text-slate-400',
-                      'Unpaid-Leave': '',
-                      'Holiday': ''
-                    };
+                  {/* Status Marking Buttons */}
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {(['Present', 'Half-Day', 'Absent', 'Paid-Leave', 'Weekly-Off'] as AttendanceStatus[]).map(st => {
+                      const isActive = status === st;
+                      let baseClass = "text-[11px] font-bold border px-3 py-1.5 rounded-xl transition-all ";
+                      
+                      if (isActive) {
+                        if (st === 'Present') baseClass += "bg-emerald-500 text-white border-emerald-500 shadow-sm";
+                        else if (st === 'Half-Day') baseClass += "bg-amber-400 text-amber-950 border-amber-400 shadow-sm";
+                        else if (st === 'Absent') baseClass += "bg-destructive text-white border-destructive shadow-sm";
+                        else if (st === 'Paid-Leave') baseClass += "bg-blue-500 text-white border-blue-500 shadow-sm";
+                        else if (st === 'Weekly-Off') baseClass += "bg-muted-foreground text-background border-muted-foreground shadow-sm";
+                      } else {
+                        if (st === 'Present') baseClass += "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10";
+                        else if (st === 'Half-Day') baseClass += "border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10";
+                        else if (st === 'Absent') baseClass += "border-destructive/30 text-destructive hover:bg-destructive/10";
+                        else if (st === 'Paid-Leave') baseClass += "border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10";
+                        else if (st === 'Weekly-Off') baseClass += "border-border text-muted-foreground hover:bg-accent";
+                      }
+                      
+                      if (st === 'Unpaid-Leave' || st === 'Holiday') return null;
 
-                    const activeStyleMap: Record<AttendanceStatus, string> = {
-                      'Present': 'bg-emerald-500 text-white font-extrabold shadow-sm border-emerald-500 hover:bg-emerald-500',
-                      'Half-Day': 'bg-amber-400 text-construction-950 font-extrabold shadow-sm border-amber-400 hover:bg-amber-400',
-                      'Absent': 'bg-red-500 text-white font-extrabold shadow-sm border-red-500 hover:bg-red-500',
-                      'Paid-Leave': 'bg-sky-500 text-white font-extrabold shadow-sm border-sky-500 hover:bg-sky-500',
-                      'Weekly-Off': 'bg-slate-400 text-white font-extrabold shadow-sm border-slate-400 hover:bg-slate-400',
-                      'Unpaid-Leave': '',
-                      'Holiday': ''
-                    };
+                      return (
+                        <button
+                          key={st}
+                          onClick={() => handleStatusChange(worker.id, st)}
+                          className={baseClass}
+                        >
+                          {st === 'Present' ? 'Present' :
+                           st === 'Half-Day' ? 'Half-Day' :
+                           st === 'Absent' ? 'Absent' :
+                           st === 'Paid-Leave' ? 'Paid Leave' : 'Weekly Off'}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                    const isActive = status === st;
-                    
-                    return (
-                      <button
-                        key={st}
-                        onClick={() => handleStatusChange(worker.id, st)}
-                        className={`text-[10px] font-bold border px-2.5 py-1.5 rounded-xl transition-all ${
-                          isActive ? activeStyleMap[st] : btnStyleMap[st]
-                        }`}
-                      >
-                        {st === 'Present' ? 'Present (हाजिर)' :
-                         st === 'Half-Day' ? 'Half-Day (आधा दिन)' :
-                         st === 'Absent' ? 'Absent (गैरहाजिर)' :
-                         st === 'Paid-Leave' ? 'Paid Leave (सवैतनिक)' : 'Weekly Off (साप्ताहिक छुट्टी)'}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Overtime & Night Shift Panel */}
-                <div className="flex flex-wrap items-center gap-3">
-                  {/* Night Shift Toggle */}
-                  <button
-                    onClick={() => handleToggleNightShift(worker.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all ${
-                      isNightShift 
-                        ? 'bg-construction-800 text-white border-construction-700 dark:bg-construction-700 dark:border-construction-600' 
-                        : 'border-construction-200 dark:border-construction-800 text-construction-600 dark:text-construction-400 hover:bg-construction-50'
-                    }`}
-                  >
-                    <Moon className="w-3.5 h-3.5" />
-                    Night (रात)
-                  </button>
-
-                  {/* OT Hours Slider/Input */}
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-construction-450" />
-                    <span className="text-[10px] font-bold text-construction-600 dark:text-construction-400">OT:</span>
-                    <select
-                      value={overtimeHours}
-                      onChange={(e) => handleOTChange(worker.id, Number(e.target.value))}
-                      className="text-[10px] font-bold bg-white dark:bg-construction-950 border border-construction-200 dark:border-construction-800 rounded-lg px-2 py-1 focus:outline-none"
+                  {/* Overtime & Night Shift Panel */}
+                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => handleToggleNightShift(worker.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all ${
+                        isNightShift 
+                          ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm' 
+                          : 'border-border text-muted-foreground hover:bg-accent'
+                      }`}
                     >
-                      <option value={0}>0 hrs</option>
-                      <option value={1}>1 hr</option>
-                      <option value={2}>2 hrs</option>
-                      <option value={3}>3 hrs</option>
-                      <option value={4}>4 hrs</option>
-                    </select>
+                      <Moon className="w-5 h-5" />
+                      Night
+                    </button>
+
+                    <div className="flex items-center gap-2 bg-accent/50 px-3 py-1.5 rounded-xl border border-border">
+                      <Clock className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-[11px] font-bold text-foreground">OT:</span>
+                      <select
+                        value={overtimeHours}
+                        onChange={(e) => handleOTChange(worker.id, Number(e.target.value))}
+                        className="text-[11px] font-bold bg-transparent border-none p-0 text-foreground focus:ring-0 cursor-pointer"
+                      >
+                        <option value={0}>0 hrs</option>
+                        <option value={1}>1 hr</option>
+                        <option value={2}>2 hrs</option>
+                        <option value={3}>3 hrs</option>
+                        <option value={4}>4 hrs</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                {/* Remarks & Proof Upload */}
-                <div className="flex flex-1 items-center gap-2 min-w-[150px]">
-                  <input
-                    type="text"
-                    placeholder="Remarks / notes..."
-                    value={remarks}
-                    onChange={(e) => handleRemarksChange(worker.id, e.target.value)}
-                    className="flex-1 text-[10px] px-2 py-1.5 rounded-lg border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-800 dark:text-white focus:outline-none"
-                  />
-                  
-                  {/* GPS Coordinates verify */}
-                  <button
-                    onClick={() => triggerGpsCheckin(worker.id)}
-                    className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
-                      hasGps 
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-300' 
-                        : 'border-construction-200 dark:border-construction-800 text-construction-550 hover:bg-construction-50'
-                    }`}
-                    title="Simulate Site GPS Scan"
-                  >
-                    <MapPin className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Remarks & Proof Upload */}
+                  <div className="flex flex-1 items-center gap-2 min-w-[200px]">
+                    <Input
+                      type="text"
+                      placeholder="Remarks / notes..."
+                      value={remarks}
+                      onChange={(e) => handleRemarksChange(worker.id, e.target.value)}
+                      className="h-8 text-xs px-3"
+                    />
+                    
+                    <button
+                      onClick={() => triggerGpsCheckin(worker.id)}
+                      className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
+                        hasGps 
+                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' 
+                          : 'border-border text-muted-foreground hover:bg-accent'
+                      }`}
+                      title="Simulate Site GPS Scan"
+                    >
+                      <MapPin className="w-5 h-5" />
+                    </button>
 
-                  {/* Photo proof checkin */}
-                  <button
-                    onClick={() => triggerPhotoUpload(worker.id)}
-                    className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
-                      hasPhoto 
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-300' 
-                        : 'border-construction-200 dark:border-construction-800 text-construction-550 hover:bg-construction-50'
-                    }`}
-                    title="Attach Camera Check-in Photo"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+                    <button
+                      onClick={() => triggerPhotoUpload(worker.id)}
+                      className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
+                        hasPhoto 
+                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' 
+                          : 'border-border text-muted-foreground hover:bg-accent'
+                      }`}
+                      title="Attach Camera Check-in Photo"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
             );
           })
         )}
-      </div>
+      </motion.div>
 
       {/* Save Button */}
-      {siteWorkers.length > 0 && (
-        <div className="flex justify-end p-4 bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 rounded-2xl shadow-sm">
-          <button
-            onClick={handleSaveSheet}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 shadow-md transition-colors"
-          >
-            <FileCheck className="w-4 h-4" />
-            Finalize & Save Attendance Muster
-          </button>
-        </div>
-      )}
+      <AnimatePresence>
+        {siteWorkers.length > 0 && (
+          <motion.div variants={slideUp} initial="hidden" animate="visible" exit="hidden" className="flex justify-end pt-2">
+            <Button onClick={handleSaveSheet} size="lg" leftIcon={<FileCheck className="w-5 h-5" />}>
+              Finalize & Save Attendance Muster
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 };

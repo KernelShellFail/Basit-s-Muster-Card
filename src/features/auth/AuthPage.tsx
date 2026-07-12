@@ -9,9 +9,11 @@ import {
   User, 
   ShieldAlert, 
   HardHat,
-  ArrowRight,
-  UserSquare2
+  ArrowRight
 } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Card } from '../../components/ui/Card';
 
 export const AuthPage = () => {
   const { loginUser, registerUser } = useAppStore();
@@ -40,10 +42,6 @@ export const AuthPage = () => {
     setLoading(true);
     const success = await loginUser(loginId, loginPassword);
     setLoading(false);
-    
-    if (success) {
-      // Toast and redirect are handled inside store action
-    }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
@@ -62,49 +60,39 @@ export const AuthPage = () => {
       organizationName: orgName
     });
     setLoading(false);
-
-    if (success) {
-      // Handled in store
-    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      
-      {/* Visual Background Aesthetics */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-safety-500/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-amber-500/10 blur-[100px] pointer-events-none" />
-
-      {/* Main Container */}
-      <div className="w-full max-w-md rounded-3xl bg-slate-800/80 border border-slate-700/60 backdrop-blur-xl shadow-2xl overflow-hidden p-8 space-y-6">
+    <div className="min-h-screen bg-pure-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 md:p-12 space-y-10 border border-ash bg-off-white-canvas">
         
         {/* Branding header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-safety-500 text-slate-950 font-black shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[28px] bg-electric-lime text-off-black-ink mb-4">
             <HardHat className="w-8 h-8" />
           </div>
-          <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">MusterMate</h2>
-          <p className="text-xs text-slate-400">Labour Muster Management & Verification Portal</p>
+          <h2 className="text-[28px] font-medium tracking-[-0.03em] text-off-black-ink">MusterMate</h2>
+          <p className="text-[16px] text-graphite">Labour Muster & Verification</p>
         </div>
 
         {/* Tab Selector */}
-        <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold">
+        <div className="flex p-1 bg-pure-white border border-ash rounded-full">
           <button
             onClick={() => setIsLogin(true)}
-            className={`py-2 rounded-lg transition-all ${
+            className={`flex-1 py-2 rounded-full text-[14px] font-medium transition-colors ${
               isLogin 
-                ? 'bg-slate-800 text-white shadow-sm' 
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-electric-lime text-off-black-ink' 
+                : 'text-graphite hover:bg-off-white-canvas hover:text-off-black-ink'
             }`}
           >
-            Staff & Labour Login
+            Login
           </button>
           <button
             onClick={() => setIsLogin(false)}
-            className={`py-2 rounded-lg transition-all ${
+            className={`flex-1 py-2 rounded-full text-[14px] font-medium transition-colors ${
               !isLogin 
-                ? 'bg-slate-800 text-white shadow-sm' 
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-electric-lime text-off-black-ink' 
+                : 'text-graphite hover:bg-off-white-canvas hover:text-off-black-ink'
             }`}
           >
             Register Owner
@@ -113,160 +101,129 @@ export const AuthPage = () => {
 
         {isLogin ? (
           /* LOGIN FORM */
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">Login ID (Email, Phone, or Worker ID)</label>
-              <div className="relative">
-                <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  required
-                  value={loginId}
-                  onChange={(e) => setLoginId(e.target.value)}
-                  placeholder="e.g. owner@mustermate.com or WRK-2026-001"
-                  className="w-full text-xs pl-10 pr-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none outline-none"
-                />
-              </div>
+          <form onSubmit={handleLoginSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <Input
+                label="Login ID"
+                icon={<User className="w-5 h-5" />}
+                placeholder="e.g. owner@mustermate.com"
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
+                required
+              />
+              <Input
+                label="Password"
+                type="password"
+                icon={<Lock className="w-5 h-5" />}
+                placeholder="••••••••"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                required
+              />
             </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="password"
-                  required
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full text-xs pl-10 pr-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none outline-none"
-                />
-              </div>
-            </div>
-
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md mt-6 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2"
+              size="lg"
             >
-              {loading ? 'Validating...' : 'Log In Session'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              {loading ? 'Validating...' : 'Log In'}
+              <ArrowRight className="w-5 h-5" />
+            </Button>
 
             {/* Quick Demo Info Alert */}
-            <div className="p-3.5 rounded-xl border border-slate-750 bg-slate-900/60 text-[10px] text-slate-400 leading-normal space-y-1.5 mt-4">
-              <p className="font-bold text-safety-500 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                Demo Credentials Setup
+            <div className="p-4 rounded-[18px] bg-pure-white border border-ash text-[12px] text-graphite leading-relaxed space-y-2">
+              <p className="font-medium text-off-black-ink flex items-center gap-1.5 uppercase tracking-[0.1em]">
+                <ShieldAlert className="w-5 h-5 shrink-0 text-electric-lime" />
+                Demo Setup
               </p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Owner: <code className="text-white">owner@mustermate.com</code> / <code className="text-white">owner123</code></li>
-                <li>Supervisor: <code className="text-white">satish@mustermate.com</code> / <code className="text-white">super123</code></li>
-                <li>Labour link: <code className="text-white">WRK-2026-001</code> / <code className="text-white">labour123</code></li>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Owner: owner@mustermate.com / owner123</li>
+                <li>Supervisor: satish@mustermate.com / super123</li>
+                <li>Labour: WRK-2026-001 / labour123</li>
               </ul>
             </div>
           </form>
         ) : (
           /* OWNER REGISTRATION FORM */
-          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+          <form onSubmit={handleRegisterSubmit} className="space-y-8">
             
-            <div className="space-y-3">
-              <h4 className="text-[10px] font-bold text-safety-500 uppercase tracking-wider block mb-1">1. Owner Profile</h4>
+            <div className="space-y-4">
+              <span className="inline-block px-3 py-1 bg-pure-white border border-ash rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-off-black-ink">
+                1. Owner Profile
+              </span>
               
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 block mb-1">Full Name</label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={registerName}
-                    onChange={(e) => setRegisterName(e.target.value)}
-                    placeholder="e.g. Rajesh Singhania"
-                    className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none"
-                  />
-                </div>
+              <Input
+                label="Full Name"
+                icon={<User className="w-5 h-5" />}
+                placeholder="e.g. Rajesh Singhania"
+                value={registerName}
+                onChange={(e) => setRegisterName(e.target.value)}
+                required
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Email"
+                  type="email"
+                  icon={<Mail className="w-5 h-5" />}
+                  placeholder="e.g. name@firm.com"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  required
+                />
+                <Input
+                  label="Phone Number"
+                  icon={<Phone className="w-5 h-5" />}
+                  placeholder="e.g. +91 98765 43210"
+                  value={registerPhone}
+                  onChange={(e) => setRegisterPhone(e.target.value)}
+                  required
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Email</label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="email"
-                      required
-                      value={registerEmail}
-                      onChange={(e) => setRegisterEmail(e.target.value)}
-                      placeholder="e.g. name@firm.com"
-                      className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      required
-                      value={registerPhone}
-                      onChange={(e) => setRegisterPhone(e.target.value)}
-                      placeholder="e.g. +91 98765 43210"
-                      className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 block mb-1">Set Password</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    required
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    placeholder="Create Password"
-                    className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Set Password"
+                type="password"
+                icon={<Lock className="w-5 h-5" />}
+                placeholder="Create Password"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                required
+              />
             </div>
 
-            <div className="space-y-3 pt-3 border-t border-slate-750">
-              <h4 className="text-[10px] font-bold text-safety-500 uppercase tracking-wider block mb-1">2. Company Profile</h4>
+            <div className="h-px bg-ash w-full" />
+
+            <div className="space-y-4">
+              <span className="inline-block px-3 py-1 bg-pure-white border border-ash rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-off-black-ink">
+                2. Company Profile
+              </span>
               
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 block mb-1">Organization / Firm Name</label>
-                <div className="relative">
-                  <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={orgName}
-                    onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="e.g. Singhania Infrastructures Ltd."
-                    className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-safety-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Organization / Firm Name"
+                icon={<Building className="w-5 h-5" />}
+                placeholder="e.g. Singhania Infrastructures Ltd."
+                value={orgName}
+                onChange={(e) => setOrgName(e.target.value)}
+                required
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md mt-6 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2"
+              size="lg"
             >
-              {loading ? 'Creating Account...' : 'Register Company & Owner'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              {loading ? 'Creating Account...' : 'Register Company'}
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </form>
         )}
 
-      </div>
+      </Card>
     </div>
   );
 };

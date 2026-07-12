@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { pool, initSchema, hashPassword } from './db.js';
+import { pool, hashPassword } from './db';
+import { initSchema } from './schemas/dbInit';
 
 dotenv.config();
 

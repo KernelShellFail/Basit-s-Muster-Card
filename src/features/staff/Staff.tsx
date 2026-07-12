@@ -1,22 +1,26 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../utils/i18n';
 import { showToast } from '../../components/Toast';
 import { 
   UserPlus, 
   Search, 
-  Filter, 
   Mail, 
   Phone, 
   MapPin, 
   ShieldAlert, 
   Edit3, 
   Trash2, 
-  X, 
   HardHat, 
   UserSquare2
 } from 'lucide-react';
 import { UserProfile, Role } from '../../services/db';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { slideUp, staggerContainer } from '../../utils/animations';
 
 export const Staff = () => {
   const { users, sites, addUser, removeUser, currentLanguage } = useAppStore();
@@ -39,7 +43,6 @@ export const Staff = () => {
   const [assignedSiteId, setAssignedSiteId] = useState('');
   const [password, setPassword] = useState('');
 
-  // Handle Edit Trigger
   const handleEditClick = (staff: UserProfile) => {
     setEditingStaff(staff);
     setName(staff.name);
@@ -51,7 +54,6 @@ export const Staff = () => {
     setShowModal(true);
   };
 
-  // Handle Open Create Modal
   const handleCreateClick = () => {
     setEditingStaff(null);
     setName('');
@@ -63,7 +65,6 @@ export const Staff = () => {
     setShowModal(true);
   };
 
-  // Save staff member
   const handleSaveStaff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone) {
@@ -88,7 +89,6 @@ export const Staff = () => {
     setShowModal(false);
   };
 
-  // Delete staff member
   const handleDeleteStaff = (uid: string, userName: string) => {
     if (confirm(`Are you sure you want to remove ${userName} from staff list?`)) {
       removeUser(uid);
@@ -96,14 +96,12 @@ export const Staff = () => {
     }
   };
 
-  // Get site name helper
   const getSiteName = (siteId?: string) => {
     if (!siteId) return 'Global (Unassigned)';
     const site = sites.find(s => s.id === siteId);
     return site ? site.name : 'Unknown Site';
   };
 
-  // Filter list of users (excluding 'owner' and 'labour' mock users for staff list)
   const staffList = users.filter(u => u.role === 'admin' || u.role === 'supervisor');
 
   const filteredStaff = staffList.filter(u => {
@@ -117,242 +115,241 @@ export const Staff = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
       {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-construction-850 dark:text-white">Staff Directory</h1>
-          <p className="text-xs text-construction-500 mt-1">Manage project administrators, field supervisors, and assign their job sites.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Staff Directory</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage project administrators, field supervisors, and assign their job sites.</p>
         </div>
         
-        <button
+        <Button
           onClick={handleCreateClick}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 shadow-md transition-colors shrink-0 align-self-start"
+          leftIcon={<UserPlus className="w-5 h-5" />}
+          className="shrink-0"
         >
-          <UserPlus className="w-4 h-4" />
           Add Staff (स्टाफ जोड़ें)
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Search and Filters */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-construction-400" />
-          <input
-            type="text"
-            placeholder="Search by name, phone, email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs pl-9 pr-4 py-2.5 border border-construction-250 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 placeholder-construction-400 outline-none"
-          />
-        </div>
+      <motion.div variants={slideUp}>
+        <Card glass>
+          <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name, phone, email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
 
-        <div className="flex flex-wrap gap-2.5">
-          {/* Role Filter */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 border border-construction-250 dark:border-construction-800 rounded-xl bg-white dark:bg-construction-950">
-            <ShieldAlert className="w-3.5 h-3.5 text-construction-400" />
-            <select
-              value={roleFilter}
-              onChange={(e: any) => setRoleFilter(e.target.value)}
-              className="text-xs bg-transparent text-construction-650 dark:text-construction-300 outline-none border-none pr-2"
-            >
-              <option value="All">All Roles</option>
-              <option value="admin">Administrators</option>
-              <option value="supervisor">Supervisors</option>
-            </select>
-          </div>
+            <div className="flex flex-wrap sm:flex-nowrap gap-3">
+              {/* Role Filter */}
+              <div className="flex items-center gap-2 px-3 py-1.5 border border-input rounded-xl bg-background/50 focus-within:ring-1 focus-within:ring-ring">
+                <ShieldAlert className="w-5 h-5 text-brand-500 shrink-0" />
+                <select
+                  value={roleFilter}
+                  onChange={(e: any) => setRoleFilter(e.target.value)}
+                  className="text-sm bg-transparent text-foreground outline-none border-none cursor-pointer w-full"
+                >
+                  <option value="All">All Roles</option>
+                  <option value="admin">Administrators</option>
+                  <option value="supervisor">Supervisors</option>
+                </select>
+              </div>
 
-          {/* Site Filter */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 border border-construction-250 dark:border-construction-800 rounded-xl bg-white dark:bg-construction-950">
-            <MapPin className="w-3.5 h-3.5 text-construction-400" />
-            <select
-              value={siteFilter}
-              onChange={(e) => setSiteFilter(e.target.value)}
-              className="text-xs bg-transparent text-construction-650 dark:text-construction-300 outline-none border-none pr-2 max-w-[150px]"
-            >
-              <option value="All">All Sites</option>
-              {sites.map(site => (
-                <option key={site.id} value={site.id}>{site.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid List */}
-      {filteredStaff.length === 0 ? (
-        <div className="p-12 text-center text-xs text-construction-450 border border-dashed border-construction-200 dark:border-construction-800 rounded-2xl bg-white dark:bg-construction-900 shadow-sm">
-          No staff members match the selected filter criteria.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredStaff.map(staff => (
-            <div 
-              key={staff.uid}
-              className="p-5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm relative group overflow-hidden flex flex-col justify-between"
-            >
-              <div>
-                {/* Header Profile */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-construction-100 dark:bg-construction-800/80 text-construction-800 dark:text-white font-extrabold flex items-center justify-center border border-construction-200 dark:border-construction-700/60 uppercase">
-                      {staff.name.slice(0, 2)}
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-black text-construction-850 dark:text-white flex items-center gap-1.5">
-                        {staff.name}
-                      </h3>
-                      <span className={`mt-1 inline-flex text-[9px] font-black px-2 py-0.5 rounded-full ${
-                        staff.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/20 dark:text-purple-400' 
-                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
-                      }`}>
-                        {staff.role === 'admin' ? 'Administrator' : 'Supervisor'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleEditClick(staff)}
-                      className="p-1.5 rounded-lg border border-construction-150 dark:border-construction-800/50 hover:bg-construction-50 dark:hover:bg-construction-950 text-construction-600 dark:text-construction-450 transition-colors"
-                      title="Edit Staff"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteStaff(staff.uid, staff.name)}
-                      className="p-1.5 rounded-lg border border-red-200 hover:bg-red-500/10 text-red-500 dark:border-red-950/25 transition-colors"
-                      title="Delete Staff"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Details list */}
-                <div className="space-y-2 border-t border-construction-100 dark:border-construction-800/40 pt-3 text-[11px] font-semibold text-construction-650 dark:text-construction-350">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-construction-400" />
-                    <span>{staff.phone}</span>
-                  </div>
-                  {staff.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-construction-400" />
-                      <span className="truncate">{staff.email}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-safety-500" />
-                    <span className="truncate text-construction-800 dark:text-white font-bold">{getSiteName(staff.siteId)}</span>
-                  </div>
-                </div>
+              {/* Site Filter */}
+              <div className="flex items-center gap-2 px-3 py-1.5 border border-input rounded-xl bg-background/50 focus-within:ring-1 focus-within:ring-ring">
+                <MapPin className="w-5 h-5 text-brand-500 shrink-0" />
+                <select
+                  value={siteFilter}
+                  onChange={(e) => setSiteFilter(e.target.value)}
+                  className="text-sm bg-transparent text-foreground outline-none border-none cursor-pointer w-full sm:w-[150px] truncate"
+                >
+                  <option value="All">All Sites</option>
+                  {sites.map(site => (
+                    <option key={site.id} value={site.id}>{site.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Grid List */}
+      <motion.div variants={slideUp}>
+        {filteredStaff.length === 0 ? (
+          <Card glass className="border-dashed">
+            <CardContent className="p-12 text-center text-sm text-muted-foreground font-medium">
+              No staff members match the selected filter criteria.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredStaff.map((staff, idx) => (
+              <motion.div key={staff.uid} variants={slideUp} custom={idx}>
+                <Card glass className="h-full hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+                  <CardContent className="p-6 sm:p-8">
+                    {/* Header Profile */}
+                    <div className="flex items-start justify-between gap-3 mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-accent text-foreground font-black flex items-center justify-center border border-border shadow-inner text-lg">
+                          {staff.name.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-foreground">
+                            {staff.name}
+                          </h3>
+                          <span className={`mt-1.5 inline-flex text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest border ${
+                            staff.role === 'admin' 
+                              ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' 
+                              : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          }`}>
+                            {staff.role === 'admin' ? 'Administrator' : 'Supervisor'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditClick(staff)}
+                          title="Edit Staff"
+                          className="h-8 w-8 text-muted-foreground"
+                        >
+                          <Edit3 className="w-5 h-5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteStaff(staff.uid, staff.name)}
+                          title="Delete Staff"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Details list */}
+                    <div className="space-y-3 pt-4 border-t border-border text-sm font-semibold text-muted-foreground">
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-5 h-5 text-brand-500 shrink-0" />
+                        <span>{staff.phone}</span>
+                      </div>
+                      {staff.email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-5 h-5 text-brand-500 shrink-0" />
+                          <span className="truncate">{staff.email}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-5 h-5 text-brand-500 shrink-0" />
+                        <span className="truncate text-foreground">{getSiteName(staff.siteId)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
 
       {/* Add / Edit Staff Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-construction-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-2xl p-6 relative">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute right-5 top-5 p-1.5 rounded-lg text-construction-400 hover:bg-construction-50 dark:hover:bg-construction-950 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <h3 className="text-sm font-black text-construction-850 dark:text-white flex items-center gap-2 mb-4">
-              <UserSquare2 className="w-5 h-5 text-safety-500" />
-              {editingStaff ? 'Edit Staff Profile' : 'Register New Staff'}
-            </h3>
-
-            <form onSubmit={handleSaveStaff} className="space-y-4">
+      <AnimatePresence>
+        {showModal && (
+          <Modal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            title={editingStaff ? 'Edit Staff Profile' : 'Register New Staff'}
+          >
+            <form onSubmit={handleSaveStaff} className="space-y-5">
               {/* Full Name */}
               <div>
-                <label className="text-[10px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Full Name *</label>
-                <input
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">Full Name *</label>
+                <Input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Ramesh Kamble"
-                  className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 placeholder-construction-400 outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Phone */}
                 <div>
-                  <label className="text-[10px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Phone Number *</label>
-                  <input
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">Phone Number *</label>
+                  <Input
                     type="text"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +91 98765 43210"
-                    className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 placeholder-construction-400 outline-none"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="text-[10px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Email Address</label>
-                  <input
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">Email Address</label>
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. name@mustermate.com"
-                    className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 placeholder-construction-400 outline-none"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="text-[10px] font-bold text-construction-660 dark:text-construction-400 block mb-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">
                   {editingStaff ? 'Change Password (leave blank to keep current)' : 'Password *'}
                 </label>
-                <input
+                <Input
                   type="password"
                   required={!editingStaff}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={editingStaff ? 'Keep current password' : 'Set login password'}
-                  className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 placeholder-construction-400 outline-none"
                 />
               </div>
 
               {/* Role */}
               <div>
-                <label className="text-[10px] font-bold text-construction-600 dark:text-construction-400 block mb-1">System Role</label>
-                <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">System Role</label>
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setRole('supervisor')}
-                    className={`p-2.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors ${
+                    className={`p-3 text-sm font-bold rounded-xl border flex items-center justify-center gap-2 transition-all ${
                       role === 'supervisor'
-                        ? 'bg-amber-500/10 border-amber-500 text-amber-600'
-                        : 'border-construction-200 dark:border-construction-800 text-construction-600 dark:text-construction-400 hover:bg-construction-50 dark:hover:bg-construction-950'
+                        ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm'
+                        : 'border-border text-muted-foreground hover:bg-accent/50'
                     }`}
                   >
-                    <HardHat className="w-4 h-4" />
+                    <HardHat className="w-5 h-5" />
                     Supervisor
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('admin')}
-                    className={`p-2.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors ${
+                    className={`p-3 text-sm font-bold rounded-xl border flex items-center justify-center gap-2 transition-all ${
                       role === 'admin'
-                        ? 'bg-purple-500/10 border-purple-500 text-purple-600'
-                        : 'border-construction-200 dark:border-construction-800 text-construction-600 dark:text-construction-400 hover:bg-construction-50 dark:hover:bg-construction-950'
+                        ? 'bg-purple-500/10 border-purple-500 text-purple-500 shadow-sm'
+                        : 'border-border text-muted-foreground hover:bg-accent/50'
                     }`}
                   >
-                    <ShieldAlert className="w-4 h-4" />
+                    <ShieldAlert className="w-5 h-5" />
                     Administrator
                   </button>
                 </div>
@@ -360,11 +357,11 @@ export const Staff = () => {
 
               {/* Assigned Site */}
               <div>
-                <label className="text-[10px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Assigned Job Site</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest block mb-2">Assigned Job Site</label>
                 <select
                   value={assignedSiteId}
                   onChange={(e) => setAssignedSiteId(e.target.value)}
-                  className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500 outline-none"
+                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                 >
                   <option value="">Global Assignment (All Sites / Owner)</option>
                   {sites.map(site => (
@@ -374,25 +371,18 @@ export const Staff = () => {
               </div>
 
               {/* Actions */}
-              <div className="pt-4 border-t border-construction-150 dark:border-construction-800/40 flex justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-construction-250 dark:border-construction-800 rounded-xl text-xs font-bold text-construction-600 dark:text-construction-350 hover:bg-construction-50 dark:hover:bg-construction-950 transition-colors"
-                >
+              <div className="pt-4 border-t border-border flex justify-end gap-3 mt-6">
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md"
-                >
+                </Button>
+                <Button type="submit">
                   {editingStaff ? 'Save Changes' : 'Register Staff'}
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-    </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };

@@ -12,9 +12,12 @@ import {
   CalendarRange,
   MessageSquare,
   FileCheck2,
-  HelpCircle
+  HelpCircle,
+  ShieldAlert
 } from 'lucide-react';
 import { AttendanceStatus } from '../../services/db';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 
 export const LabourDashboard = () => {
   const { 
@@ -150,7 +153,7 @@ export const LabourDashboard = () => {
       {/* Wage Calculation Breakdown Formula Alert */}
       <div className="p-4.5 rounded-2xl border border-sky-100 dark:border-sky-950/25 bg-sky-500/5 text-[11px] text-sky-850 dark:text-sky-350 font-semibold space-y-1 shadow-sm">
         <p className="font-extrabold flex items-center gap-1.5 text-sky-700 dark:text-sky-400">
-          <HelpCircle className="w-4 h-4 text-sky-500" />
+          <HelpCircle className="w-5 h-5 text-sky-500" />
           Wages Tally Formula (कमाई की गणना का सूत्र):
         </p>
         <p className="pl-5.5 text-construction-550 dark:text-construction-400 text-[10px]">
@@ -221,7 +224,7 @@ export const LabourDashboard = () => {
                       : 'border-construction-200 dark:border-construction-800 text-construction-500 dark:text-construction-400 hover:bg-construction-50'
                   }`}
                 >
-                  <Clock className="w-3.5 h-3.5" />
+                  <Clock className="w-5 h-5" />
                   {isNightShift ? 'Yes' : 'No'}
                 </button>
               </div>
@@ -238,13 +241,13 @@ export const LabourDashboard = () => {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-xl text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md disabled:opacity-50"
+              isLoading={loading}
+              className="w-full text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md"
             >
-              {loading ? 'Submitting...' : 'Submit Work Claim'}
-            </button>
+              Submit Work Claim
+            </Button>
           </form>
         </div>
 
@@ -288,10 +291,10 @@ export const LabourDashboard = () => {
                                     roster.isNightShift === claim.isNightShift;
                 if (matchStatus) {
                   statusColor = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-400';
-                  verifyIcon = <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 absolute top-1 right-1" />;
+                  verifyIcon = <CheckCircle2 className="w-5 h-5 text-emerald-500 absolute top-1 right-1" />;
                 } else {
                   statusColor = 'bg-red-500/10 border-red-500/40 text-red-700 dark:text-red-400';
-                  verifyIcon = <AlertTriangle className="w-3.5 h-3.5 text-red-500 absolute top-1 right-1 animate-pulse" />;
+                  verifyIcon = <AlertTriangle className="w-5 h-5 text-red-500 absolute top-1 right-1 animate-pulse" />;
                 }
               } else if (roster && !claim) {
                 // Official marked, but labour haven't self-claimed
@@ -333,9 +336,4 @@ export const LabourDashboard = () => {
   );
 };
 
-// Simple icon safeguard
-const ShieldAlert = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-  </svg>
-);
+

@@ -8,7 +8,6 @@ interface AppState {
   activeSiteId: string;
   activeWorkerId: string | null;
   currentLanguage: 'en' | 'hi' | 'mr' | 'gu' | 'ta';
-  isDarkMode: boolean;
   
   // Data lists synced from LocalDB
   organization: Organization | null;
@@ -28,7 +27,6 @@ interface AppState {
   setActiveSite: (siteId: string) => void;
   setActiveWorker: (workerId: string | null) => void;
   setLanguage: (lang: 'en' | 'hi' | 'mr' | 'gu' | 'ta') => void;
-  toggleDarkMode: () => void;
   
   // Database update proxy triggers (updates LocalDB and syncs Zustand)
   refreshData: () => Promise<void>;
@@ -57,7 +55,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeSiteId: 'site-01',
   activeWorkerId: null,
   currentLanguage: 'en',
-  isDarkMode: false,
   
   organization: null,
   users: [],
@@ -107,7 +104,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentUser: sessionUser,
       selectedRole: sessionUser ? sessionUser.role : 'owner',
       activeSiteId: sessionUser?.siteId || 'site-01',
-      isDarkMode: isDark,
       currentLanguage: lang,
       organization: org,
       users: loadedUsers,
@@ -143,19 +139,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setLanguage: (lang) => {
     localStorage.setItem('mm_lang', lang);
     set({ currentLanguage: lang });
-  },
-
-  toggleDarkMode: () => {
-    const isDark = !get().isDarkMode;
-    localStorage.setItem('mm_dark_mode', String(isDark));
-    
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    set({ isDarkMode: isDark });
   },
 
   refreshData: async () => {

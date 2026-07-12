@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../utils/i18n';
 import { showToast } from '../../components/Toast';
@@ -6,21 +7,22 @@ import {
   MapPin, 
   Map, 
   Plus, 
-  X, 
-  User, 
   Users, 
-  Activity, 
-  CheckCircle,
-  Clock,
-  Navigation
+  Navigation,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import type { Site } from '../../services/db';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { slideUp, staggerContainer } from '../../utils/animations';
 
 export const Sites = () => {
   const { sites, addSite, removeSite, currentLanguage, users } = useAppStore();
   const { t } = useTranslation(currentLanguage);
 
-  // States
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -29,7 +31,6 @@ export const Sites = () => {
   const [status, setStatus] = useState<'active' | 'completed' | 'on-hold'>('active');
   const [supervisorId, setSupervisorId] = useState('');
 
-  // Mock list of supervisors
   const supervisorsList = users.filter(u => u.role === 'supervisor');
 
   const handleEditSiteClick = (site: Site) => {
@@ -99,16 +100,16 @@ export const Sites = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       
       {/* Title */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-construction-850 dark:text-white">{t('sites')} Logs</h1>
-          <p className="text-xs text-construction-500 mt-1">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('sites')} Logs</h1>
+          <p className="text-sm text-muted-foreground mt-1">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
         </div>
         
-        <button
+        <Button
           onClick={() => {
             setEditingSiteId(null);
             setName('');
@@ -118,168 +119,158 @@ export const Sites = () => {
             setSupervisorId('');
             setShowAddModal(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 shadow-md transition-colors shrink-0"
+          leftIcon={<Plus className="w-5 h-5" />}
+          className="shrink-0"
         >
-          <Plus className="w-4 h-4" />
           {t('registerSite')}
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Sites Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div variants={slideUp} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {sites.map(site => {
           const supervisorName = getSupervisorName(site.supervisorId);
           
           return (
-            <div 
-              key={site.id}
-              className="rounded-2xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
-            >
+            <Card key={site.id} glass className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group">
               {/* Image banner mock */}
-              <div className="h-32 bg-construction-100 dark:bg-construction-850 relative flex items-center justify-center border-b border-construction-200 dark:border-construction-800">
-                <Map className="w-12 h-12 text-construction-400 opacity-60" />
-                <span className={`absolute top-4 right-4 text-[9px] font-black px-2.5 py-0.5 rounded-full ${
-                  site.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' :
-                  site.status === 'on-hold' ? 'bg-amber-500/10 text-amber-600' :
-                  'bg-slate-500/10 text-slate-600'
+              <div className="h-36 bg-accent/50 relative flex items-center justify-center border-b border-border overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/20" />
+                <Map className="w-16 h-16 text-muted-foreground opacity-30 transform group-hover:scale-110 transition-transform duration-500" />
+                <span className={`absolute top-4 right-4 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
+                  site.status === 'active' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                  site.status === 'on-hold' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                  'bg-muted-foreground/10 text-muted-foreground border border-muted-foreground/20'
                 }`}>
-                  {site.status.toUpperCase()}
+                  {site.status}
                 </span>
-                <span className="absolute bottom-4 left-4 text-[9px] font-bold bg-construction-900/60 text-white px-2 py-0.5 rounded-md">
+                <span className="absolute bottom-4 left-4 text-[10px] font-bold bg-background/80 backdrop-blur-md text-foreground px-2.5 py-1 rounded-md border border-border">
                   ID: {site.id}
                 </span>
               </div>
 
               {/* Site Details */}
-              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+              <CardContent className="p-6 sm:p-8 space-y-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-construction-850 dark:text-white truncate" title={site.name}>
+                  <h3 className="text-lg font-bold text-foreground truncate" title={site.name}>
                     {site.name}
                   </h3>
-                  <p className="text-xs text-construction-500 mt-1 flex items-start gap-1">
-                    <MapPin className="w-4 h-4 text-safety-500 shrink-0 mt-0.5" />
-                    <span className="truncate">{site.address}</span>
+                  <p className="text-sm text-muted-foreground mt-1.5 flex items-start gap-1.5">
+                    <MapPin className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                    <span className="line-clamp-2">{site.address}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-construction-100 dark:border-construction-800/60 text-xs">
+                <div className="grid grid-cols-2 gap-4 py-4 border-y border-border text-sm">
                   {/* Supervisor */}
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-construction-400 uppercase tracking-wider block">Supervisor</span>
-                    <span className="font-semibold text-construction-800 dark:text-white truncate block">{supervisorName}</span>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Supervisor</span>
+                    <span className="font-semibold text-foreground truncate block">{supervisorName}</span>
                   </div>
 
                   {/* Workers count */}
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-construction-400 uppercase tracking-wider block">Workers Active</span>
-                    <span className="font-extrabold text-construction-900 dark:text-white flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5 text-construction-500" />
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Workers Active</span>
+                    <span className="font-extrabold text-foreground flex items-center gap-1.5 text-lg">
+                      <Users className="w-5 h-5 text-brand-500" />
                       {site.workersCount}
                     </span>
                   </div>
                 </div>
 
                 {/* GPS and Navigation details */}
-                <div className="flex items-center justify-between pt-3 border-t border-construction-100 dark:border-construction-800/40 mt-3">
-                  <div className="flex items-center gap-1.5 text-[10px] text-construction-500 font-semibold">
-                    <Navigation className="w-3.5 h-3.5 text-safety-500" />
-                    <span>{site.gpsCoordinates}</span>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-semibold">
+                    <Navigation className="w-5 h-5 text-brand-500" />
+                    <span className="truncate max-w-[100px]" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <a 
-                      href={`https://maps.google.com/?q=${site.gpsCoordinates}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[10px] font-bold text-safety-600 hover:text-safety-500"
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open(`https://maps.google.com/?q=${site.gpsCoordinates}`, '_blank')}
+                      title="View Map"
                     >
-                      View Map
-                    </a>
-                    <button
+                      <MapPin className="w-5 h-5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleEditSiteClick(site)}
-                      className="text-[10px] font-bold text-construction-650 hover:text-construction-950 dark:text-construction-400 dark:hover:text-white"
+                      title="Edit Site"
                     >
-                      Edit
-                    </button>
-                    <button
+                      <Edit2 className="w-5 h-5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleDeleteSiteClick(site.id, site.name)}
-                      className="text-[10px] font-bold text-red-500 hover:text-red-700"
+                      title="Delete Site"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
-                      Delete
-                    </button>
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Modal: Register Site */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white dark:bg-construction-950 rounded-2xl border border-construction-200 dark:border-construction-800 shadow-2xl overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-construction-200 dark:border-construction-800 flex items-center justify-between bg-construction-50 dark:bg-construction-900/50">
-              <h3 className="text-sm font-black text-construction-850 dark:text-white">
-                {editingSiteId ? 'Edit Construction Site' : 'Register New Construction Site'}
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1.5 rounded-lg hover:bg-construction-200 dark:hover:bg-construction-800 text-construction-600 dark:text-construction-355"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleRegisterSite} className="p-6 space-y-4">
+      <AnimatePresence>
+        {showAddModal && (
+          <Modal
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+            title={editingSiteId ? 'Edit Construction Site' : 'Register New Construction Site'}
+          >
+            <form onSubmit={handleRegisterSite} className="space-y-6">
               {/* Name */}
               <div>
-                <label className="text-[11px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Site Location Name *</label>
-                <input
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Site Location Name *</label>
+                <Input
                   type="text"
                   required
                   placeholder="e.g. BKC Commercial Towers"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white rounded-lg focus:outline-none"
                 />
               </div>
 
               {/* Address */}
               <div>
-                <label className="text-[11px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Physical Address *</label>
-                <input
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Physical Address *</label>
+                <Input
                   type="text"
                   required
                   placeholder="Street and area coordinates..."
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white rounded-lg focus:outline-none"
                 />
               </div>
 
               {/* GPS Coordinates */}
               <div>
-                <label className="text-[11px] font-bold text-construction-600 dark:text-construction-400 block mb-1">GPS Coordinates (Latitude, Longitude)</label>
-                <input
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">GPS Coordinates (Latitude, Longitude)</label>
+                <Input
                   type="text"
                   placeholder="e.g. 19.0596, 72.8682"
                   value={gpsCoordinates}
                   onChange={(e) => setGpsCoordinates(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white rounded-lg focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 {/* Status */}
                 <div>
-                  <label className="text-[11px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Site Status</label>
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Site Status</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white rounded-lg focus:ring-2 focus:ring-safety-500"
+                    className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
@@ -289,11 +280,11 @@ export const Sites = () => {
 
                 {/* Supervisor Assign */}
                 <div>
-                  <label className="text-[11px] font-bold text-construction-600 dark:text-construction-400 block mb-1">Assign Supervisor</label>
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Assign Supervisor</label>
                   <select
                     value={supervisorId}
                     onChange={(e) => setSupervisorId(e.target.value)}
-                    className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-850 dark:text-white rounded-lg focus:ring-2 focus:ring-safety-500"
+                    className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="">Select Supervisor</option>
                     {supervisorsList.map(s => <option key={s.uid} value={s.uid}>{s.name}</option>)}
@@ -302,26 +293,19 @@ export const Sites = () => {
               </div>
 
               {/* Actions */}
-              <div className="pt-4 border-t border-construction-150 dark:border-construction-800 flex justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-construction-250 dark:border-construction-800 rounded-lg text-xs font-bold text-construction-600 dark:text-construction-350 hover:bg-construction-50 dark:hover:bg-construction-900 transition-colors"
-                >
+              <div className="pt-4 border-t border-border flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setShowAddModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-lg text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 shadow-md transition-colors"
-                >
-                  Register Site
-                </button>
+                </Button>
+                <Button type="submit">
+                  {editingSiteId ? 'Update Site' : 'Register Site'}
+                </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+          </Modal>
+        )}
+      </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 };
