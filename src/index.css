@@ -12,34 +12,6 @@
   --color-stone: #919183;
   --color-smoke: #b9b9b7;
 
-  /* ─── Brand Scale (Electric Lime) ─── */
-  --color-brand-400: #d4ff7a;
-  --color-brand-500: #beff50;
-  --color-brand-600: #a8e636;
-  --color-brand-700: #8cc41e;
-  --color-brand-foreground: #14140f;
-
-  /* ─── Construction Palette (for CrossCheck / Labour pages) ─── */
-  --color-construction-50: #f8f8f6;
-  --color-construction-100: #efefeb;
-  --color-construction-150: #e5e5df;
-  --color-construction-200: #d2d2c8;
-  --color-construction-250: #c5c5ba;
-  --color-construction-350: #adadA0;
-  --color-construction-400: #9e9e8f;
-  --color-construction-450: #919183;
-  --color-construction-500: #7a7a6e;
-  --color-construction-550: #6e6e64;
-  --color-construction-650: #52524a;
-  --color-construction-800: #30302a;
-  --color-construction-850: #232320;
-  --color-construction-900: #1c1c18;
-  --color-construction-950: #14140f;
-
-  /* ─── Safety Accent (for Labour/Verification pages) ─── */
-  --color-safety-500: #beff50;
-  --color-safety-600: #a8e636;
-
   /* ─── Semantic Aliases ─── */
   --color-background: var(--color-pure-white);
   --color-foreground: var(--color-off-black-ink);
@@ -51,7 +23,7 @@
   --color-secondary-foreground: var(--color-off-black-ink);
   --color-muted: var(--color-ash);
   --color-muted-foreground: var(--color-graphite);
-  --color-accent: var(--color-off-white-canvas);
+  --color-accent: var(--color-electric-lime);
   --color-accent-foreground: var(--color-off-black-ink);
   --color-destructive: #e54545;
   --color-destructive-foreground: #ffffff;
@@ -87,9 +59,6 @@
 
   /* ─── Spacing ─── */
   --spacing-4: 4px;
-  --spacing-4_5: 18px;
-  --spacing-5_5: 22px;
-  --spacing-6_5: 26px;
   --spacing-8: 8px;
   --spacing-12: 12px;
   --spacing-16: 16px;
@@ -112,9 +81,9 @@
   --radius-3xl: 28px;
   --radius-full: 9999px;
 
-  /* ─── Shadows ─── */
-  --shadow-premium: 0 4px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 20px rgba(190, 255, 80, 0.25), 0 0 4px rgba(190, 255, 80, 0.15);
+  /* ─── Typography Utilities ─── */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
 
   /* ─── Animations ─── */
   --animate-fade-in: fade-in 0.3s ease-out;
@@ -149,6 +118,12 @@ body {
   font-family: var(--font-otsono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Accessibility: WCAG AA Focus Rings ─── */
+*:focus-visible {
+  outline: 2px solid var(--color-off-black-ink);
+  outline-offset: 2px;
 }
 
 /* ─── Custom Scrollbar — Minimal ─── */

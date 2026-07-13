@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAppStore } from '../../store/useAppStore';
-import { showToast } from '../../components/Toast';
 import { 
   Building, 
   Lock, 
@@ -15,215 +17,210 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 
+const loginSchema = z.object({
+  loginId: z.string().min(1, 'Login ID is required'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  organizationName: z.string().min(2, 'Organization Name must be at least 2 characters'),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
 export const AuthPage = () => {
   const { loginUser, registerUser } = useAppStore();
   const [isLogin, setIsLogin] = useState(true);
-
-  // Login States
-  const [loginId, setLoginId] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-
-  // Register (Owner Only) States
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPhone, setRegisterPhone] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [orgName, setOrgName] = useState('');
-
   const [loading, setLoading] = useState(false);
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginId || !loginPassword) {
-      showToast('Please enter your login ID and password.', 'warning');
-      return;
-    }
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      loginId: '',
+      password: '',
+    },
+  });
 
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      organizationName: '',
+    },
+  });
+
+  const onLoginSubmit = async (data: LoginFormValues) => {
     setLoading(true);
-    const success = await loginUser(loginId, loginPassword);
+    await loginUser(data.loginId, data.password);
     setLoading(false);
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!registerName || !registerPhone || !registerPassword || !orgName) {
-      showToast('Name, Phone, Password, and Organization Name are required!', 'warning');
-      return;
-    }
-
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
     setLoading(true);
-    const success = await registerUser({
-      name: registerName,
-      email: registerEmail,
-      phone: registerPhone,
-      password: registerPassword,
-      organizationName: orgName
-    });
+    await registerUser(data);
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-pure-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 md:p-12 space-y-10 border border-ash bg-off-white-canvas">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      {/* Navbar / Logo area for the page */}
+      <div className="w-full max-w-[1200px] absolute top-8 left-0 right-0 px-8 flex justify-between items-center">
+        <h1 className="text-2xl font-medium tracking-tight text-foreground">Perk / MusterMate</h1>
+      </div>
+
+      <div className="w-full max-w-[480px]">
         
         {/* Branding header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[28px] bg-electric-lime text-off-black-ink mb-4">
-            <HardHat className="w-8 h-8" />
-          </div>
-          <h2 className="text-[28px] font-medium tracking-[-0.03em] text-off-black-ink">MusterMate</h2>
-          <p className="text-[16px] text-graphite">Labour Muster & Verification</p>
+        <div className="mb-12 text-center">
+          <h2 className="text-[60px] leading-[1] tracking-[-1.8px] font-medium text-foreground mb-4">
+            Welcome<br/>back.
+          </h2>
+          <p className="text-[16px] text-muted-foreground font-medium">Enter your credentials to access the command center.</p>
         </div>
 
-        {/* Tab Selector */}
-        <div className="flex p-1 bg-pure-white border border-ash rounded-full">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 rounded-full text-[14px] font-medium transition-colors ${
-              isLogin 
-                ? 'bg-electric-lime text-off-black-ink' 
-                : 'text-graphite hover:bg-off-white-canvas hover:text-off-black-ink'
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 rounded-full text-[14px] font-medium transition-colors ${
-              !isLogin 
-                ? 'bg-electric-lime text-off-black-ink' 
-                : 'text-graphite hover:bg-off-white-canvas hover:text-off-black-ink'
-            }`}
-          >
-            Register Owner
-          </button>
-        </div>
-
-        {isLogin ? (
-          /* LOGIN FORM */
-          <form onSubmit={handleLoginSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <Input
-                label="Login ID"
-                icon={<User className="w-5 h-5" />}
-                placeholder="e.g. owner@mustermate.com"
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
-                required
-              />
-              <Input
-                label="Password"
-                type="password"
-                icon={<Lock className="w-5 h-5" />}
-                placeholder="••••••••"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2"
-              size="lg"
+        {/* Parallax Card Container */}
+        <Card className="w-full p-[48px] bg-background border border-border rounded-[28px] shadow-none space-y-10">
+          
+          {/* Tab Selector - Underline Link Style */}
+          <div className="flex gap-6 border-b border-border">
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`py-3 text-[16px] font-medium transition-all ${
+                isLogin 
+                  ? 'text-foreground border-b-[3px] border-foreground' 
+                  : 'text-muted-foreground hover:text-foreground border-b-[3px] border-transparent'
+              }`}
             >
-              {loading ? 'Validating...' : 'Log In'}
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+              Login
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`py-3 text-[16px] font-medium transition-all ${
+                !isLogin 
+                  ? 'text-foreground border-b-[3px] border-foreground' 
+                  : 'text-muted-foreground hover:text-foreground border-b-[3px] border-transparent'
+              }`}
+            >
+              Register
+            </button>
+          </div>
 
-            {/* Quick Demo Info Alert */}
-            <div className="p-4 rounded-[18px] bg-pure-white border border-ash text-[12px] text-graphite leading-relaxed space-y-2">
-              <p className="font-medium text-off-black-ink flex items-center gap-1.5 uppercase tracking-[0.1em]">
-                <ShieldAlert className="w-5 h-5 shrink-0 text-electric-lime" />
-                Demo Setup
-              </p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Owner: owner@mustermate.com / owner123</li>
-                <li>Supervisor: satish@mustermate.com / super123</li>
-                <li>Labour: WRK-2026-001 / labour123</li>
-              </ul>
-            </div>
-          </form>
-        ) : (
-          /* OWNER REGISTRATION FORM */
-          <form onSubmit={handleRegisterSubmit} className="space-y-8">
-            
-            <div className="space-y-4">
-              <span className="inline-block px-3 py-1 bg-pure-white border border-ash rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-off-black-ink">
-                1. Owner Profile
-              </span>
-              
-              <Input
-                label="Full Name"
-                icon={<User className="w-5 h-5" />}
-                placeholder="e.g. Rajesh Singhania"
-                value={registerName}
-                onChange={(e) => setRegisterName(e.target.value)}
-                required
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {isLogin ? (
+            /* LOGIN FORM */
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-8">
+              <div className="space-y-6">
                 <Input
-                  label="Email"
-                  type="email"
-                  icon={<Mail className="w-5 h-5" />}
-                  placeholder="e.g. name@firm.com"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  required
+                  label="Login ID"
+                  placeholder="owner@mustermate.com"
+                  error={loginForm.formState.errors.loginId?.message}
+                  {...loginForm.register('loginId')}
                 />
                 <Input
-                  label="Phone Number"
-                  icon={<Phone className="w-5 h-5" />}
-                  placeholder="e.g. +91 98765 43210"
-                  value={registerPhone}
-                  onChange={(e) => setRegisterPhone(e.target.value)}
-                  required
+                  label="Password"
+                  type="password"
+                  placeholder="••••••••"
+                  error={loginForm.formState.errors.password?.message}
+                  {...loginForm.register('password')}
                 />
               </div>
 
-              <Input
-                label="Set Password"
-                type="password"
-                icon={<Lock className="w-5 h-5" />}
-                placeholder="Create Password"
-                value={registerPassword}
-                onChange={(e) => setRegisterPassword(e.target.value)}
-                required
-              />
-            </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                isLoading={loading}
+                className="w-full"
+                size="lg"
+              >
+                Log in
+              </Button>
 
-            <div className="h-px bg-ash w-full" />
+              {/* Quick Demo Info Alert */}
+              <div className="pt-8 border-t border-border space-y-4">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+                  Demo Credentials
+                </span>
+                <ul className="text-[14px] text-muted-foreground font-medium space-y-3">
+                  <li className="flex justify-between border-b border-border pb-2"><span>Owner</span> <span className="text-foreground">owner123</span></li>
+                  <li className="flex justify-between"><span>Supervisor</span> <span className="text-foreground">super123</span></li>
+                </ul>
+              </div>
+            </form>
+          ) : (
+            /* OWNER REGISTRATION FORM */
+            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-8">
+              <div className="space-y-6">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+                  1. Profile Details
+                </span>
+                
+                <Input
+                  label="Full Name"
+                  placeholder="Rajesh Singhania"
+                  error={registerForm.formState.errors.name?.message}
+                  {...registerForm.register('name')}
+                />
 
-            <div className="space-y-4">
-              <span className="inline-block px-3 py-1 bg-pure-white border border-ash rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-off-black-ink">
-                2. Company Profile
-              </span>
-              
-              <Input
-                label="Organization / Firm Name"
-                icon={<Building className="w-5 h-5" />}
-                placeholder="e.g. Singhania Infrastructures Ltd."
-                value={orgName}
-                onChange={(e) => setOrgName(e.target.value)}
-                required
-              />
-            </div>
+                <Input
+                  label="Email"
+                  type="email"
+                  placeholder="name@firm.com"
+                  error={registerForm.formState.errors.email?.message}
+                  {...registerForm.register('email')}
+                />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2"
-              size="lg"
-            >
-              {loading ? 'Creating Account...' : 'Register Company'}
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </form>
-        )}
+                <Input
+                  label="Phone Number"
+                  placeholder="+91 98765 43210"
+                  error={registerForm.formState.errors.phone?.message}
+                  {...registerForm.register('phone')}
+                />
 
-      </Card>
+                <Input
+                  label="Set Password"
+                  type="password"
+                  placeholder="Create Password"
+                  error={registerForm.formState.errors.password?.message}
+                  {...registerForm.register('password')}
+                />
+              </div>
+
+              <div className="w-full h-px bg-border my-8" />
+
+              <div className="space-y-6">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+                  2. Organization
+                </span>
+                
+                <Input
+                  label="Organization / Firm Name"
+                  placeholder="Singhania Infrastructures Ltd."
+                  error={registerForm.formState.errors.organizationName?.message}
+                  {...registerForm.register('organizationName')}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                isLoading={loading}
+                className="w-full mt-8"
+                size="lg"
+              >
+                Create Account
+              </Button>
+            </form>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };

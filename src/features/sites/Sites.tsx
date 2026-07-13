@@ -18,9 +18,14 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { useSites, useUsers, useAddSite, useRemoveSite } from '../../api/queries';
 
 export const Sites = () => {
-  const { sites, addSite, removeSite, currentLanguage, users } = useAppStore();
+  const { currentLanguage } = useAppStore();
+  const { data: sites = [] } = useSites();
+  const { data: users = [] } = useUsers();
+  const { mutate: addSite } = useAddSite();
+  const { mutate: removeSite } = useRemoveSite();
   const { t } = useTranslation(currentLanguage);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -100,13 +105,13 @@ export const Sites = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('sites')} Logs</h1>
-          <p className="text-sm text-muted-foreground mt-1">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('sites')} Logs</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
         </div>
         
         <Button
@@ -132,57 +137,56 @@ export const Sites = () => {
           const supervisorName = getSupervisorName(site.supervisorId);
           
           return (
-            <Card key={site.id} glass className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group">
+            <Card key={site.id} className="overflow-hidden border border-border flex flex-col group transition-all duration-300">
               {/* Image banner mock */}
-              <div className="h-36 bg-accent/50 relative flex items-center justify-center border-b border-border overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/20" />
-                <Map className="w-16 h-16 text-muted-foreground opacity-30 transform group-hover:scale-110 transition-transform duration-500" />
-                <span className={`absolute top-4 right-4 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
-                  site.status === 'active' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                  site.status === 'on-hold' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                  'bg-muted-foreground/10 text-muted-foreground border border-muted-foreground/20'
+              <div className="h-40 bg-muted relative flex items-center justify-center border-b border-border overflow-hidden">
+                <Map className="w-20 h-20 text-muted-foreground/30 transform group-hover:scale-110 transition-transform duration-500" />
+                <span className={`absolute top-6 right-6 text-[10px] font-medium px-4 py-1.5 rounded-full uppercase tracking-[0.1em] ${
+                  site.status === 'active' ? 'bg-foreground text-background' :
+                  site.status === 'on-hold' ? 'bg-primary/20 text-foreground' :
+                  'bg-muted-foreground text-background'
                 }`}>
                   {site.status}
                 </span>
-                <span className="absolute bottom-4 left-4 text-[10px] font-bold bg-background/80 backdrop-blur-md text-foreground px-2.5 py-1 rounded-md border border-border">
+                <span className="absolute bottom-6 left-6 text-[10px] font-medium uppercase tracking-[0.1em] bg-background text-foreground px-4 py-1.5 rounded-[28px] border border-border">
                   ID: {site.id}
                 </span>
               </div>
 
               {/* Site Details */}
-              <CardContent className="p-6 sm:p-8 space-y-5 flex-1 flex flex-col justify-between">
+              <CardContent className="p-8 space-y-6 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground truncate" title={site.name}>
+                  <h3 className="text-[20px] font-medium text-foreground truncate" title={site.name}>
                     {site.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1.5 flex items-start gap-1.5">
-                    <MapPin className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                  <p className="text-[14px] text-muted-foreground font-medium mt-2 flex items-start gap-2">
+                    <MapPin className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                     <span className="line-clamp-2">{site.address}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-4 border-y border-border text-sm">
+                <div className="grid grid-cols-2 gap-4 py-6 border-y border-border text-[14px]">
                   {/* Supervisor */}
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Supervisor</span>
-                    <span className="font-semibold text-foreground truncate block">{supervisorName}</span>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest block">Supervisor</span>
+                    <span className="font-medium text-foreground truncate block">{supervisorName}</span>
                   </div>
 
                   {/* Workers count */}
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Workers Active</span>
-                    <span className="font-extrabold text-foreground flex items-center gap-1.5 text-lg">
-                      <Users className="w-5 h-5 text-brand-500" />
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest block">Workers Active</span>
+                    <span className="font-medium text-foreground flex items-center gap-2 text-[16px]">
+                      <Users className="w-5 h-5 text-muted-foreground" />
                       {site.workersCount}
                     </span>
                   </div>
                 </div>
 
                 {/* GPS and Navigation details */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-semibold">
-                    <Navigation className="w-5 h-5 text-brand-500" />
-                    <span className="truncate max-w-[100px]" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2 text-[12px] text-muted-foreground font-medium">
+                    <Navigation className="w-5 h-5 text-muted-foreground" />
+                    <span className="truncate max-w-[120px]" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
                   </div>
 
                   <div className="flex items-center gap-1">

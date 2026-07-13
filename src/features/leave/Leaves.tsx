@@ -17,9 +17,13 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { useWorkers, useLeaves, useAddLeave } from '../../api/queries';
 
 export const Leaves = () => {
-  const { workers, selectedRole, currentLanguage, saveLeave, leaves } = useAppStore();
+  const { selectedRole, currentLanguage } = useAppStore();
+  const { data: workers = [] } = useWorkers();
+  const { data: leaves = [] } = useLeaves();
+  const { mutate: saveLeave } = useAddLeave();
   const { t } = useTranslation(currentLanguage);
 
   const localLeaves = leaves;
@@ -80,13 +84,13 @@ export const Leaves = () => {
   const processedLeaves = localLeaves.filter(l => l.status !== 'Pending');
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('leaves')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Submit and review leave approvals. Approved leaves auto-populate the attendance sheet.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('leaves')}</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Submit and review leave approvals. Approved leaves auto-populate the attendance sheet.</p>
         </div>
         
         <Button
@@ -106,34 +110,34 @@ export const Leaves = () => {
         
         {/* Pending approvals (For Owners / Admins / Supervisors) */}
         <motion.div variants={slideUp} className="space-y-4">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-widest">
-            <Clock className="w-5 h-5 text-amber-500" />
+          <h3 className="text-[12px] font-medium text-foreground flex items-center gap-2 uppercase tracking-[0.1em]">
+            <Clock className="w-5 h-5 text-muted-foreground" />
             Pending Action ({pendingLeaves.length})
           </h3>
 
           {pendingLeaves.length === 0 ? (
-            <Card glass className="border-dashed">
-              <CardContent className="p-6 sm:p-8 text-center text-sm font-medium text-muted-foreground">
+            <Card className="border border-border border-dashed">
+              <CardContent className="p-8 sm:p-10 text-center text-[14px] font-medium text-muted-foreground">
                 All leave requests processed. No pending items.
               </CardContent>
             </Card>
           ) : (
             pendingLeaves.map((leave: LeaveRequest) => (
-              <Card key={leave.id} glass className="overflow-hidden group hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6 sm:p-8 space-y-4">
+              <Card key={leave.id} className="overflow-hidden border border-border transition-all duration-300">
+                <CardContent className="p-8 sm:p-10 space-y-6">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="text-base font-bold text-foreground">{leave.workerName}</h4>
-                      <p className="text-xs font-semibold text-muted-foreground mt-0.5 uppercase tracking-widest">ID: {leave.workerId} • Req: {new Date(leave.createdAt).toLocaleDateString()}</p>
+                      <h4 className="text-[16px] font-medium text-foreground">{leave.workerName}</h4>
+                      <p className="text-[12px] font-medium text-muted-foreground mt-1 uppercase tracking-[0.1em]">ID: {leave.workerId} • Req: {new Date(leave.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                    <span className="bg-primary/20 text-foreground border border-primary/20 text-[10px] font-medium px-4 py-1.5 rounded-full uppercase tracking-[0.1em]">
                       {leave.leaveType}
                     </span>
                   </div>
 
-                  <div className="text-sm text-muted-foreground bg-accent/40 p-4 rounded-xl border border-border">
-                    <p><strong className="text-foreground font-semibold">Dates:</strong> {leave.startDate} to {leave.endDate}</p>
-                    <p className="mt-1.5 leading-relaxed"><strong className="text-foreground font-semibold">Reason:</strong> "{leave.reason}"</p>
+                  <div className="text-[14px] text-muted-foreground bg-background p-6 rounded-[28px] border border-border">
+                    <p><strong className="text-foreground font-medium">Dates:</strong> {leave.startDate} to {leave.endDate}</p>
+                    <p className="mt-2 leading-relaxed"><strong className="text-foreground font-medium">Reason:</strong> "{leave.reason}"</p>
                   </div>
 
                   {/* Supervisor/Admin Actions */}
@@ -171,12 +175,12 @@ export const Leaves = () => {
 
         {/* Leave Logs History */}
         <motion.div variants={slideUp} className="space-y-4">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-widest">
-            <CalendarDays className="w-5 h-5 text-brand-500" />
+          <h3 className="text-[12px] font-medium text-foreground flex items-center gap-2 uppercase tracking-[0.1em]">
+            <CalendarDays className="w-5 h-5 text-muted-foreground" />
             Processed Log & Approval Timeline
           </h3>
 
-          <Card glass className="overflow-hidden">
+          <Card className="overflow-hidden border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -189,7 +193,7 @@ export const Leaves = () => {
               <TableBody>
                 {processedLeaves.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground font-medium">
+                    <TableCell colSpan={4} className="h-32 text-center text-[14px] text-muted-foreground font-medium">
                       No previous logs recorded yet.
                     </TableCell>
                   </TableRow>
@@ -197,28 +201,27 @@ export const Leaves = () => {
                   processedLeaves.map((leave: LeaveRequest) => (
                     <TableRow key={leave.id}>
                       <TableCell>
-                        <p className="font-bold text-foreground leading-tight">{leave.workerName}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-widest font-semibold">{leave.workerId}</p>
+                        <p className="font-medium text-[14px] text-foreground leading-tight">{leave.workerName}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-[0.1em] font-medium">{leave.workerId}</p>
                       </TableCell>
-                      <TableCell className="font-semibold text-muted-foreground whitespace-nowrap">
-                        <div className="flex flex-col text-xs leading-normal">
+                      <TableCell className="font-medium text-[12px] text-muted-foreground whitespace-nowrap">
+                        <div className="flex flex-col leading-normal">
                           <span>{leave.startDate}</span>
-                          <span className="text-[9px] text-brand-500 uppercase font-black">to</span>
+                          <span className="text-[10px] text-foreground uppercase tracking-[0.1em] font-medium">to</span>
                           <span>{leave.endDate}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="font-semibold">{leave.leaveType}</TableCell>
+                      <TableCell className="font-medium text-[12px]">{leave.leaveType}</TableCell>
                       <TableCell>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1.5 border ${
+                        <span className={`px-4 py-2 rounded-[28px] text-[10px] font-medium uppercase tracking-[0.1em] inline-flex items-center gap-2 border ${
                           leave.status === 'Approved' 
-                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                            : 'bg-red-500/10 text-red-500 border-red-500/20'
+                            ? 'bg-foreground text-background border-foreground' 
+                            : 'bg-muted text-muted-foreground border-border'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${leave.status === 'Approved' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           {leave.status}
                         </span>
                         {leave.comment && (
-                          <p className="text-[10px] text-muted-foreground italic mt-2 truncate max-w-[140px]" title={leave.comment}>
+                          <p className="text-[10px] text-muted-foreground italic mt-3 truncate max-w-[140px]" title={leave.comment}>
                             "{leave.comment}"
                           </p>
                         )}

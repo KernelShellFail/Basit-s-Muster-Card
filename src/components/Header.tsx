@@ -14,6 +14,7 @@ import {
   WifiOff 
 } from 'lucide-react';
 import { scaleUp } from '../utils/animations';
+import { useSites, useNotifications, useClearNotifications } from '../api/queries';
 
 export const Header = () => {
   const { 
@@ -22,11 +23,12 @@ export const Header = () => {
     activeSiteId, 
     setActiveSite, 
     currentLanguage, 
-    setLanguage, 
-    notifications,
-    clearNotifications,
-    sites
+    setLanguage
   } = useAppStore();
+
+  const { data: sites = [] } = useSites();
+  const { data: notifications = [] } = useNotifications();
+  const { mutate: clearNotifications } = useClearNotifications();
 
   const { t } = useTranslation(currentLanguage);
   
@@ -72,17 +74,17 @@ export const Header = () => {
   ];
 
   return (
-    <header className="h-16 border-b border-border bg-background/60 backdrop-blur-xl px-6 flex items-center justify-between shrink-0 z-40 relative">
+    <header className="h-20 bg-background px-8 flex items-center justify-between shrink-0 z-40 relative">
       
       {/* Left: Site Selector (for Owner/Admin) */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-6">
         {(selectedRole === 'owner' || selectedRole === 'admin') ? (
-          <div className="flex items-center gap-2 group cursor-pointer p-1.5 rounded-lg hover:bg-muted/50 transition-colors">
-            <Map className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <Map className="w-5 h-5 text-foreground" />
             <select
               value={activeSiteId}
               onChange={(e) => setActiveSite(e.target.value)}
-              className="bg-transparent text-sm font-semibold text-foreground border-none focus:ring-0 focus:outline-none cursor-pointer appearance-none"
+              className="bg-transparent text-[16px] font-medium text-foreground border-none focus:ring-0 focus:outline-none cursor-pointer appearance-none"
             >
               {sites.map(s => (
                 <option key={s.id} value={s.id} className="text-foreground bg-background">
@@ -92,9 +94,9 @@ export const Header = () => {
             </select>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-2">
-            <Map className="w-5 h-5 text-brand-500" />
-            <span className="text-sm font-semibold text-foreground">
+          <div className="flex items-center gap-2">
+            <Map className="w-5 h-5 text-foreground" />
+            <span className="text-[16px] font-medium text-foreground">
               {sites.find(s => s.id === activeSiteId)?.name || 'All Sites'}
             </span>
           </div>
@@ -102,17 +104,17 @@ export const Header = () => {
       </div>
 
       {/* Right: Tools & Utilities */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-4">
         
         {/* Real-time Status Dot */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-[11px] font-medium text-muted-foreground">
-          <span className={cn("w-2 h-2 rounded-full pulse-dot", isOnline ? "bg-emerald-500" : "bg-amber-500")} />
-          {isOnline ? 'Live Sync' : 'Offline Mode'}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium text-muted-foreground uppercase tracking-widest">
+          <span className={cn("w-2 h-2 rounded-full pulse-dot", isOnline ? "bg-primary" : "bg-muted-foreground")} />
+          {isOnline ? 'Live' : 'Offline'}
         </div>
 
         {/* Network Icon */}
         <div className="hidden md:block">
-          {isOnline ? <Wifi className="w-5 h-5 text-brand-500" /> : <WifiOff className="w-5 h-5 text-destructive" />}
+          {isOnline ? <Wifi className="w-5 h-5 text-foreground" /> : <WifiOff className="w-5 h-5 text-muted-foreground" />}
         </div>
 
         {/* Language Selection */}
@@ -120,10 +122,10 @@ export const Header = () => {
           <button
             onClick={() => setShowLangMenu(!showLangMenu)}
             aria-label="Select language"
-            className="p-1.5 px-3 rounded-full border border-border bg-card text-foreground flex items-center gap-2 transition-all hover:bg-muted"
+            className="px-3 py-2 text-[14px] font-medium text-foreground flex items-center gap-2 transition-all hover:text-muted-foreground bg-transparent"
           >
-            <Globe className="w-5 h-5 text-brand-500" />
-            <span className="text-xs font-semibold">
+            <Globe className="w-5 h-5" />
+            <span>
               {languages.find(l => l.code === currentLanguage)?.name || 'EN'}
             </span>
           </button>
@@ -135,7 +137,7 @@ export const Header = () => {
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                className="absolute right-0 mt-2 w-40 rounded-xl border border-border bg-card/90 backdrop-blur-xl shadow-premium overflow-hidden py-1 origin-top-right z-50"
+                className="absolute right-0 mt-2 w-40 rounded-[28px] border-none bg-card shadow-none py-2 origin-top-right z-50 p-2"
               >
                 {languages.map(lang => (
                   <button
@@ -144,10 +146,10 @@ export const Header = () => {
                       setLanguage(lang.code as any);
                       setShowLangMenu(false);
                     }}
-                    className="w-full flex items-center justify-between px-4 py-2 text-xs text-left font-medium hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2 text-[14px] text-left font-medium hover:bg-background rounded-full transition-colors text-foreground"
                   >
                     <span>{lang.name}</span>
-                    {currentLanguage === lang.code && <Check className="w-5 h-5 text-brand-500" />}
+                    {currentLanguage === lang.code && <Check className="w-5 h-5 text-foreground" />}
                   </button>
                 ))}
               </motion.div>
@@ -160,11 +162,11 @@ export const Header = () => {
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-            className="p-2 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground relative transition-all duration-300"
+            className="p-2 text-foreground hover:text-muted-foreground relative transition-all duration-300 bg-transparent"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-background animate-pulse" />
             )}
           </button>
 
@@ -175,26 +177,23 @@ export const Header = () => {
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                className="absolute right-0 mt-2 w-80 rounded-xl border border-border bg-card/90 backdrop-blur-xl shadow-premium overflow-hidden py-1 z-50 origin-top-right"
+                className="absolute right-0 mt-2 w-80 rounded-[28px] border-none bg-card shadow-none p-4 z-50 origin-top-right"
               >
-                <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/20">
-                  <span className="text-xs font-semibold">Notifications</span>
+                <div className="px-2 py-2 border-b border-border flex items-center justify-between">
+                  <span className="text-[12px] uppercase tracking-widest font-medium text-foreground">Alerts</span>
                   {unreadCount > 0 && (
                     <button 
-                      onClick={clearNotifications}
-                      className="text-[10px] font-semibold text-brand-500 hover:text-brand-400"
+                      onClick={() => clearNotifications()}
+                      className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground hover:text-foreground"
                     >
-                      Mark all read
+                      Clear
                     </button>
                   )}
                 </div>
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                <div className="max-h-[300px] overflow-y-auto custom-scrollbar mt-2 space-y-2">
                   {notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center flex flex-col items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <Bell className="w-5 h-5 text-muted-foreground/50" />
-                      </div>
-                      <span className="text-xs text-muted-foreground">No new alerts</span>
+                    <div className="py-8 text-center flex flex-col items-center gap-2">
+                      <span className="text-[14px] text-muted-foreground font-medium">No new alerts</span>
                     </div>
                   ) : (
                     notifications.map((notif, i) => (
@@ -204,16 +203,12 @@ export const Header = () => {
                         transition={{ delay: i * 0.05 }}
                         key={notif.id} 
                         className={cn(
-                          "px-4 py-3 border-b border-border/50 hover:bg-accent/30 transition-all cursor-pointer relative",
-                          !notif.read && "bg-brand-500/5"
+                          "p-4 rounded-[18px] bg-background hover:bg-white transition-all cursor-pointer",
+                          !notif.read && "border border-primary"
                         )}
                       >
-                        {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-brand-500" />}
-                        <p className="text-xs font-semibold">{notif.title}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{notif.message}</p>
-                        <p className="text-[9px] text-muted-foreground/60 mt-2 font-medium">
-                          {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                        <p className="text-[16px] font-medium text-foreground leading-[1.2]">{notif.title}</p>
+                        <p className="text-[14px] text-muted-foreground mt-2 leading-[1.5]">{notif.message}</p>
                       </motion.div>
                     ))
                   )}
@@ -224,17 +219,17 @@ export const Header = () => {
         </div>
 
         {/* User Card */}
-        <div className="flex items-center gap-3 border-l border-border pl-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-400 to-brand-600 text-black flex items-center justify-center font-bold text-xs shadow-sm">
-            {currentUser?.name.substring(0, 2).toUpperCase() || 'MM'}
-          </div>
-          <div className="hidden lg:flex flex-col text-left">
-            <span className="text-sm font-semibold truncate max-w-[120px] leading-tight">
+        <div className="flex items-center gap-3 border-l border-border pl-6 ml-2">
+          <div className="hidden lg:flex flex-col text-right">
+            <span className="text-[16px] font-medium text-foreground truncate max-w-[120px]">
               {currentUser?.name || 'User'}
             </span>
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground leading-tight">
+            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground mt-0.5">
               {selectedRole}
             </span>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium text-[16px]">
+            {currentUser?.name.substring(0, 2).toUpperCase() || 'MM'}
           </div>
         </div>
 

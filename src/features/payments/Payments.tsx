@@ -19,9 +19,15 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { useWorkers, useAttendance, usePayments, useAddPayment, useRemovePayment } from '../../api/queries';
 
 export const Payments = () => {
-  const { workers, activeSiteId, processPayment, removePayment, currentLanguage, attendance, payments } = useAppStore();
+  const { activeSiteId, currentLanguage } = useAppStore();
+  const { data: workers = [] } = useWorkers();
+  const { data: attendance = [] } = useAttendance();
+  const { data: payments = [] } = usePayments();
+  const { mutate: processPayment } = useAddPayment();
+  const { mutate: removePayment } = useRemovePayment();
   const { t } = useTranslation(currentLanguage);
 
   const localAttendance = attendance;
@@ -195,19 +201,19 @@ export const Payments = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <motion.div variants={slideUp}>
-        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('payments')}</h1>
-        <p className="text-sm text-muted-foreground mt-1">Review live July 2026 payroll sheets, release partial/full wages, and collect digital receipts.</p>
+        <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('payments')}</h1>
+        <p className="text-[16px] text-muted-foreground font-medium mt-4">Review live July 2026 payroll sheets, release partial/full wages, and collect digital receipts.</p>
       </motion.div>
 
       {/* Wages Ledger Card */}
       <motion.div variants={slideUp}>
-        <Card glass className="overflow-hidden">
-          <div className="p-4 border-b border-border bg-accent/30">
-            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Wages Tally Sheet (July 2026)</h3>
+        <Card className="overflow-hidden border border-border">
+          <div className="p-6 border-b border-border bg-background">
+            <h3 className="text-[14px] font-medium text-muted-foreground uppercase tracking-widest">Wages Tally Sheet (July 2026)</h3>
           </div>
           
           <Table>
@@ -254,15 +260,15 @@ export const Payments = () => {
                         {financials.totalOTHours} hrs
                       </TableCell>
 
-                      <TableCell className="font-bold text-foreground">
+                      <TableCell className="font-medium text-foreground">
                         ₹{financials.grossWages}
                       </TableCell>
 
-                      <TableCell className="font-bold text-emerald-500">
+                      <TableCell className="font-medium text-foreground">
                         ₹{financials.totalPaid}
                       </TableCell>
 
-                      <TableCell className="font-extrabold text-amber-500">
+                      <TableCell className="font-medium text-foreground">
                         ₹{financials.balanceDue}
                       </TableCell>
 
@@ -309,11 +315,11 @@ export const Payments = () => {
             onClose={() => setPayingWorker(null)}
             title="Process Wage Payment Log"
           >
-            <div className="space-y-6">
-              <div className="text-sm p-4 rounded-xl bg-accent/30 border border-border text-foreground space-y-1">
-                <p><span className="font-semibold text-muted-foreground">Worker:</span> {payingWorker.name} ({payingWorker.id})</p>
-                <p><span className="font-semibold text-muted-foreground">Assigned Trade:</span> {payingWorker.trade} ({payingWorker.skillLevel})</p>
-                <p><span className="font-semibold text-muted-foreground">Bank Target:</span> {payingWorker.bankName} - A/C: {payingWorker.accountNumber}</p>
+            <div className="space-y-8">
+              <div className="p-6 rounded-[28px] bg-background border border-border text-foreground space-y-2">
+                <p><span className="font-medium text-muted-foreground">Worker:</span> {payingWorker.name} ({payingWorker.id})</p>
+                <p><span className="font-medium text-muted-foreground">Assigned Trade:</span> {payingWorker.trade} ({payingWorker.skillLevel})</p>
+                <p><span className="font-medium text-muted-foreground">Bank Target:</span> {payingWorker.bankName} - A/C: {payingWorker.accountNumber}</p>
               </div>
 
               <div>
@@ -444,15 +450,15 @@ export const Payments = () => {
               </div>
 
               {/* Right Side: Receipt Detail Viewer */}
-              <div className="w-full md:w-2/3 p-6 sm:p-8 overflow-y-auto bg-accent/20 flex flex-col justify-between">
+              <div className="w-full md:w-2/3 p-6 sm:p-10 overflow-y-auto bg-background border-l border-border flex flex-col justify-between">
                 {selectedReceipt ? (
                   <div className="space-y-8">
                     {/* Receipt Sheet */}
-                    <Card glass id="salary-slip" className="bg-background">
-                      <CardContent className="p-6 sm:p-8 space-y-6">
-                        <div className="text-center pb-6 border-b border-border">
-                          <h4 className="text-lg font-black text-foreground">MusterMate Buildcon</h4>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Wage Payment Receipt</p>
+                    <Card id="salary-slip" className="bg-background border border-border">
+                      <CardContent className="p-8 sm:p-10 space-y-8">
+                        <div className="text-center pb-8 border-b border-border">
+                          <h4 className="text-[24px] font-medium text-foreground tracking-[-0.72px]">MusterMate Buildcon</h4>
+                          <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-widest mt-2">Wage Payment Receipt</p>
                         </div>
                         
                         <div className="text-sm text-muted-foreground space-y-3 font-medium">

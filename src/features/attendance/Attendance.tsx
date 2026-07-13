@@ -17,9 +17,13 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { useWorkers, useSites, useUpdateAttendance } from '../../api/queries';
 
 export const Attendance = () => {
-  const { workers, sites, activeSiteId, saveAttendance, currentLanguage } = useAppStore();
+  const { activeSiteId, currentLanguage } = useAppStore();
+  const { data: workers = [] } = useWorkers();
+  const { data: sites = [] } = useSites();
+  const { mutate: saveAttendance } = useUpdateAttendance();
   const { t } = useTranslation(currentLanguage);
 
   const [selectedDate, setSelectedDate] = useState('2026-07-04');
@@ -137,13 +141,13 @@ export const Attendance = () => {
   );
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('attendance')} Logs</h1>
-          <p className="text-sm text-muted-foreground mt-1">Supervisors: Mark daily presence, shift statuses, and attach geolocated photo proofs.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('attendance')} Logs</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Supervisors: Mark daily presence, shift statuses, and attach geolocated photo proofs.</p>
         </div>
         
         {/* Date Selector */}
@@ -160,8 +164,8 @@ export const Attendance = () => {
 
       {/* Grid Settings Bar */}
       <motion.div variants={slideUp}>
-        <Card glass>
-          <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-4">
+        <Card className="border border-border">
+          <CardContent className="p-10 flex flex-col sm:flex-row items-center gap-6">
             <div className="relative flex-1 w-full">
               <Input
                 type="text"
@@ -172,7 +176,7 @@ export const Attendance = () => {
               />
             </div>
 
-            <div className="text-sm font-bold text-muted-foreground shrink-0 bg-accent/50 px-4 py-2 rounded-xl border border-border">
+            <div className="text-[14px] font-medium text-muted-foreground uppercase tracking-widest shrink-0 bg-background px-6 py-3 rounded-[28px] border border-border">
               Workers count: <span className="text-foreground">{filteredSiteWorkers.length}</span> active
             </div>
           </CardContent>
@@ -180,9 +184,9 @@ export const Attendance = () => {
       </motion.div>
 
       {/* Workers Attendance List */}
-      <motion.div variants={slideUp} className="space-y-3">
+      <motion.div variants={slideUp} className="flex flex-col gap-4">
         {filteredSiteWorkers.length === 0 ? (
-          <div className="p-12 text-center text-sm font-medium text-muted-foreground border-2 border-dashed border-border rounded-2xl bg-accent/30">
+          <div className="p-12 text-center text-[16px] font-medium text-muted-foreground border-2 border-dashed border-border rounded-[28px] bg-background">
             No active workers found assigned to this site. Assign workers in Workers Directory.
           </div>
         ) : (
@@ -196,14 +200,14 @@ export const Attendance = () => {
             const remarks = sheetRecord.remarks || '';
 
             return (
-              <Card key={worker.id} glass className="overflow-visible hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              <Card key={worker.id} className="overflow-visible border border-border transition-all duration-300">
+                <CardContent className="p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   {/* Worker basic profile */}
                   <div className="flex items-center gap-4 shrink-0 lg:w-[220px]">
-                    <img src={worker.photo} alt={worker.name} className="w-12 h-12 rounded-full object-cover border border-border" />
+                    <img src={worker.photo} alt={worker.name} className="w-14 h-14 rounded-full object-cover border border-border" />
                     <div>
-                      <h4 className="text-sm font-bold text-foreground leading-tight">{worker.name}</h4>
-                      <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{worker.id} • {worker.trade}</p>
+                      <h4 className="text-[16px] font-medium text-foreground leading-tight">{worker.name}</h4>
+                      <p className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium mt-1">{worker.id} • {worker.trade}</p>
                     </div>
                   </div>
 
@@ -211,20 +215,16 @@ export const Attendance = () => {
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
                     {(['Present', 'Half-Day', 'Absent', 'Paid-Leave', 'Weekly-Off'] as AttendanceStatus[]).map(st => {
                       const isActive = status === st;
-                      let baseClass = "text-[11px] font-bold border px-3 py-1.5 rounded-xl transition-all ";
+                      let baseClass = "text-[12px] font-medium uppercase tracking-widest border px-4 py-2 rounded-[28px] transition-all ";
                       
                       if (isActive) {
-                        if (st === 'Present') baseClass += "bg-emerald-500 text-white border-emerald-500 shadow-sm";
-                        else if (st === 'Half-Day') baseClass += "bg-amber-400 text-amber-950 border-amber-400 shadow-sm";
-                        else if (st === 'Absent') baseClass += "bg-destructive text-white border-destructive shadow-sm";
-                        else if (st === 'Paid-Leave') baseClass += "bg-blue-500 text-white border-blue-500 shadow-sm";
-                        else if (st === 'Weekly-Off') baseClass += "bg-muted-foreground text-background border-muted-foreground shadow-sm";
+                        if (st === 'Present') baseClass += "bg-foreground text-background border-foreground";
+                        else if (st === 'Half-Day') baseClass += "bg-primary/20 text-foreground border-primary/20";
+                        else if (st === 'Absent') baseClass += "bg-muted text-muted-foreground border-muted";
+                        else if (st === 'Paid-Leave') baseClass += "bg-background text-foreground border-foreground";
+                        else if (st === 'Weekly-Off') baseClass += "bg-background text-muted-foreground border-border";
                       } else {
-                        if (st === 'Present') baseClass += "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10";
-                        else if (st === 'Half-Day') baseClass += "border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10";
-                        else if (st === 'Absent') baseClass += "border-destructive/30 text-destructive hover:bg-destructive/10";
-                        else if (st === 'Paid-Leave') baseClass += "border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10";
-                        else if (st === 'Weekly-Off') baseClass += "border-border text-muted-foreground hover:bg-accent";
+                        baseClass += "border-border text-muted-foreground hover:bg-muted/50";
                       }
                       
                       if (st === 'Unpaid-Leave' || st === 'Holiday') return null;
@@ -245,22 +245,22 @@ export const Attendance = () => {
                   </div>
 
                   {/* Overtime & Night Shift Panel */}
-                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <div className="flex flex-wrap items-center gap-4 shrink-0">
                     <button
                       onClick={() => handleToggleNightShift(worker.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-[28px] border text-[12px] font-medium uppercase tracking-widest transition-all ${
                         isNightShift 
-                          ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm' 
-                          : 'border-border text-muted-foreground hover:bg-accent'
+                          ? 'bg-foreground text-background border-foreground' 
+                          : 'border-border text-muted-foreground hover:bg-muted/50'
                       }`}
                     >
                       <Moon className="w-5 h-5" />
                       Night
                     </button>
 
-                    <div className="flex items-center gap-2 bg-accent/50 px-3 py-1.5 rounded-xl border border-border">
+                    <div className="flex items-center gap-3 bg-background px-4 py-2 rounded-[28px] border border-border">
                       <Clock className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-[11px] font-bold text-foreground">OT:</span>
+                      <span className="text-[12px] font-medium uppercase tracking-widest text-foreground">OT:</span>
                       <select
                         value={overtimeHours}
                         onChange={(e) => handleOTChange(worker.id, Number(e.target.value))}
@@ -287,10 +287,10 @@ export const Attendance = () => {
                     
                     <button
                       onClick={() => triggerGpsCheckin(worker.id)}
-                      className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
+                      className={`p-3 rounded-full border shrink-0 transition-colors ${
                         hasGps 
-                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' 
-                          : 'border-border text-muted-foreground hover:bg-accent'
+                          ? 'bg-primary/20 text-foreground border-primary/20' 
+                          : 'border-border text-muted-foreground hover:bg-muted/50'
                       }`}
                       title="Simulate Site GPS Scan"
                     >
@@ -299,10 +299,10 @@ export const Attendance = () => {
 
                     <button
                       onClick={() => triggerPhotoUpload(worker.id)}
-                      className={`p-1.5 rounded-lg border shrink-0 transition-colors ${
+                      className={`p-3 rounded-full border shrink-0 transition-colors ${
                         hasPhoto 
-                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' 
-                          : 'border-border text-muted-foreground hover:bg-accent'
+                          ? 'bg-primary/20 text-foreground border-primary/20' 
+                          : 'border-border text-muted-foreground hover:bg-muted/50'
                       }`}
                       title="Attach Camera Check-in Photo"
                     >

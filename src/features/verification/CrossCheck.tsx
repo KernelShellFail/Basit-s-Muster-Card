@@ -19,15 +19,24 @@ import { AttendanceRecord, LabourSubmission, Worker } from '../../services/db';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 
+import { 
+  useWorkers, 
+  useSites, 
+  useAttendance, 
+  useLabourSubmissions, 
+  useUpdateAttendance 
+} from '../../api/queries';
+
 export const CrossCheck = () => {
   const { 
-    workers, 
-    sites, 
-    attendance, 
-    labourSubmissions, 
-    saveAttendance, 
     currentLanguage 
   } = useAppStore();
+  
+  const { data: workers = [] } = useWorkers();
+  const { data: sites = [] } = useSites();
+  const { data: attendance = [] } = useAttendance();
+  const { data: labourSubmissions = [] } = useLabourSubmissions();
+  const { mutateAsync: saveAttendance } = useUpdateAttendance();
   
   const { t } = useTranslation(currentLanguage);
 
@@ -105,36 +114,36 @@ export const CrossCheck = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-construction-850 dark:text-white">Muster Cross-Check</h1>
-          <p className="text-xs text-construction-500 mt-1">Cross-examine official supervisor logs against self-submitted work claims from labours.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">Muster Cross-Check</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Cross-examine official supervisor logs against self-submitted work claims from labours.</p>
         </div>
       </div>
 
       {/* Date & Site Filter Controls */}
-      <div className="p-4.5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-850 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+      <div className="p-8 rounded-[28px] bg-background border border-border flex flex-col md:flex-row gap-6 items-center">
         {/* Date Selector */}
-        <div className="w-full md:w-auto flex items-center gap-2">
-          <Calendar className="w-4.5 h-4.5 text-construction-450 shrink-0" />
+        <div className="w-full md:w-auto flex items-center gap-4">
+          <Calendar className="w-5 h-5 text-muted-foreground shrink-0" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="text-xs px-3 py-2 rounded-xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-800 dark:text-white focus:outline-none"
+            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
           />
         </div>
 
         {/* Site Selector */}
-        <div className="w-full md:w-auto flex items-center gap-2">
-          <MapPin className="w-4.5 h-4.5 text-safety-500 shrink-0" />
+        <div className="w-full md:w-auto flex items-center gap-4">
+          <MapPin className="w-5 h-5 text-foreground shrink-0" />
           <select
             value={selectedSiteId}
             onChange={(e) => setSelectedSiteId(e.target.value)}
-            className="text-xs px-3 py-2 rounded-xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-800 dark:text-white focus:outline-none"
+            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
           >
             {sites.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
@@ -143,12 +152,12 @@ export const CrossCheck = () => {
         </div>
 
         {/* Verification Status Filter */}
-        <div className="w-full md:w-auto flex items-center gap-2">
-          <span className="text-[10px] font-bold text-construction-400 uppercase">Verification Filter</span>
+        <div className="w-full md:w-auto flex items-center gap-4">
+          <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Verification Filter</span>
           <select
             value={statusFilter}
             onChange={(e: any) => setStatusFilter(e.target.value)}
-            className="text-xs px-3 py-2 rounded-xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-950 text-construction-800 dark:text-white focus:outline-none"
+            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
           >
             <option value="All">All Entries ({comparisonList.length})</option>
             <option value="match">Verified Matches ({matchesCount})</option>
@@ -159,105 +168,105 @@ export const CrossCheck = () => {
       </div>
 
       {/* Metrics breakdown */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl border border-emerald-100 dark:border-emerald-950/25 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
-          <CheckCircle2 className="w-8 h-8 text-emerald-500 shrink-0" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-8 rounded-[28px] border border-border bg-background text-foreground flex items-center gap-4">
+          <CheckCircle2 className="w-8 h-8 shrink-0" />
           <div>
-            <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-500 block">Verified Matches</span>
-            <span className="text-sm font-black">{matchesCount} Workers</span>
+            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Verified Matches</span>
+            <span className="text-[28px] font-medium">{matchesCount} Workers</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-red-100 dark:border-red-950/25 bg-red-500/5 text-red-700 dark:text-red-400 flex items-center gap-3">
-          <AlertCircle className="w-8 h-8 text-red-500 shrink-0" />
+        <div className="p-8 rounded-[28px] border border-border bg-muted text-foreground flex items-center gap-4">
+          <AlertCircle className="w-8 h-8 shrink-0" />
           <div>
-            <span className="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 block">Mismatched Discrepancies</span>
-            <span className="text-sm font-black">{mismatchCount} Alerts</span>
+            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Mismatched Discrepancies</span>
+            <span className="text-[28px] font-medium">{mismatchCount} Alerts</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 text-construction-650 dark:text-construction-350 flex items-center gap-3">
-          <HelpCircle className="w-8 h-8 text-construction-400 shrink-0" />
+        <div className="p-8 rounded-[28px] border border-border bg-background text-foreground flex items-center gap-4">
+          <HelpCircle className="w-8 h-8 shrink-0 text-muted-foreground" />
           <div>
-            <span className="text-[10px] uppercase font-bold block">Pending Self-Submit</span>
-            <span className="text-sm font-black">{pendingCount} Workers</span>
+            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Pending Self-Submit</span>
+            <span className="text-[28px] font-medium">{pendingCount} Workers</span>
           </div>
         </div>
       </div>
 
       {/* Comparison Grid Table */}
-      <div className="rounded-2xl border border-construction-200 dark:border-construction-800 bg-white dark:bg-construction-900 shadow-sm overflow-hidden">
+      <div className="rounded-[28px] border border-border bg-background shadow-none overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-construction-50 dark:bg-construction-850/40 text-construction-500 font-extrabold uppercase border-b border-construction-150 dark:border-construction-800">
-                <th className="p-4">Worker Profile</th>
-                <th className="p-4">Roster (Supervisor Log)</th>
-                <th className="p-4">Self-Claim (Labour Log)</th>
-                <th className="p-4">Status & Action</th>
+              <tr className="bg-transparent text-[12px] text-muted-foreground font-medium uppercase tracking-[0.1em] border-b border-border">
+                <th className="p-6">Worker Profile</th>
+                <th className="p-6">Roster (Supervisor Log)</th>
+                <th className="p-6">Self-Claim (Labour Log)</th>
+                <th className="p-6">Status & Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-construction-100 dark:divide-construction-800/40">
+            <tbody className="divide-y divide-border">
               {filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-construction-450 font-medium">
+                  <td colSpan={4} className="p-8 text-center text-[14px] text-muted-foreground font-medium">
                     No matching records found for the selected filter date and criteria.
                   </td>
                 </tr>
               ) : (
                 filteredList.map(item => (
-                  <tr key={item.worker.id} className="hover:bg-construction-50/50 dark:hover:bg-construction-800/20 transition-colors">
+                  <tr key={item.worker.id} className="hover:bg-muted/50 transition-colors">
                     {/* Worker Details */}
-                    <td className="p-4 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-construction-100 dark:bg-construction-800 text-construction-800 dark:text-white flex items-center justify-center font-bold text-[10px]">
+                    <td className="p-6 flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full border border-border bg-muted text-foreground flex items-center justify-center font-bold text-[14px]">
                         {item.worker.name.slice(0, 2)}
                       </div>
                       <div>
-                        <p className="font-bold text-construction-850 dark:text-white leading-tight">{item.worker.name}</p>
-                        <p className="text-[10px] text-construction-500 font-semibold mt-0.5">{item.worker.id} • {item.worker.trade}</p>
+                        <p className="font-medium text-[16px] text-foreground leading-tight">{item.worker.name}</p>
+                        <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-medium mt-1">{item.worker.id} • {item.worker.trade}</p>
                       </div>
                     </td>
 
                     {/* Supervisor Entry */}
-                    <td className="p-4">
+                    <td className="p-6">
                       {item.roster ? (
                         <div className="space-y-1">
-                          <p className="font-bold text-construction-800 dark:text-white">{item.roster.status}</p>
-                          <p className="text-[10px] text-construction-500 font-semibold">
+                          <p className="font-medium text-[14px] text-foreground">{item.roster.status}</p>
+                          <p className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium">
                             {item.roster.overtimeHours}h OT • {item.roster.isNightShift ? 'Night Shift' : 'Day Shift'}
                           </p>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-construction-400 font-medium italic">Not Marked</span>
+                        <span className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium italic">Not Marked</span>
                       )}
                     </td>
 
                     {/* Labour self claim */}
-                    <td className="p-4">
+                    <td className="p-6">
                       {item.claim ? (
                         <div className="space-y-1">
-                          <p className="font-bold text-construction-800 dark:text-white">{item.claim.status}</p>
-                          <p className="text-[10px] text-construction-500 font-semibold">
+                          <p className="font-medium text-[14px] text-foreground">{item.claim.status}</p>
+                          <p className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium">
                             {item.claim.overtimeHours}h OT • {item.claim.isNightShift ? 'Night Shift' : 'Day Shift'}
                           </p>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-construction-400 font-medium italic">Pending Self-Submit</span>
+                        <span className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium italic">Pending Self-Submit</span>
                       )}
                     </td>
 
                     {/* Status badges & Resolution Actions */}
-                    <td className="p-4">
+                    <td className="p-6">
                       {item.status === 'match' && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600">
-                          <CheckCircle className="w-5 h-5" />
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-foreground text-background">
+                          <CheckCircle className="w-4 h-4" />
                           Verified Match
                         </span>
                       )}
                       
                       {item.status === 'pending' && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                          <HelpCircle className="w-5 h-5" />
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-muted text-muted-foreground border border-border">
+                          <HelpCircle className="w-4 h-4" />
                           Awaiting Claim
                         </span>
                       )}
@@ -269,9 +278,9 @@ export const CrossCheck = () => {
                             claim: item.claim!,
                             worker: item.worker
                           })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-red-500 hover:bg-red-600 text-white shadow-sm transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-background text-foreground border border-foreground hover:bg-muted/50 transition-colors"
                         >
-                          <AlertTriangle className="w-5 h-5 animate-pulse" />
+                          <AlertTriangle className="w-4 h-4" />
                           Resolve Discrepancy
                         </button>
                       )}
@@ -298,18 +307,18 @@ export const CrossCheck = () => {
               {/* Option A: Supervisor */}
               <button
                 onClick={() => handleResolve('roster')}
-                className="p-4 text-left border border-construction-250 dark:border-construction-800 hover:border-safety-500 dark:hover:border-safety-500 bg-construction-50/50 dark:bg-construction-950/40 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all group"
+                className="p-6 text-left border border-border hover:border-foreground bg-background rounded-[28px] flex flex-col justify-between transition-all group"
               >
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-construction-400 block mb-1">Entry A</span>
-                  <h4 className="text-xs font-black text-construction-800 dark:text-white">Supervisor Roster</h4>
+                  <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block mb-2">Entry A</span>
+                  <h4 className="text-[16px] font-medium text-foreground">Supervisor Roster</h4>
                 </div>
-                <div className="mt-4 text-[11px] space-y-1 text-construction-650 dark:text-construction-350">
-                  <p><strong>Status:</strong> {resolvingDiscrepancy.roster.status}</p>
-                  <p><strong>Overtime:</strong> {resolvingDiscrepancy.roster.overtimeHours} hours</p>
-                  <p><strong>Shift:</strong> {resolvingDiscrepancy.roster.isNightShift ? 'Night' : 'Day'}</p>
+                <div className="mt-6 text-[14px] space-y-2 text-foreground font-medium">
+                  <p><strong className="text-muted-foreground font-normal">Status:</strong> {resolvingDiscrepancy.roster.status}</p>
+                  <p><strong className="text-muted-foreground font-normal">Overtime:</strong> {resolvingDiscrepancy.roster.overtimeHours} hours</p>
+                  <p><strong className="text-muted-foreground font-normal">Shift:</strong> {resolvingDiscrepancy.roster.isNightShift ? 'Night' : 'Day'}</p>
                 </div>
-                <span className="mt-4 w-full py-1.5 rounded-lg bg-white dark:bg-construction-900 text-[10px] font-bold text-center border border-construction-200 dark:border-construction-800 text-construction-700 dark:text-construction-300 group-hover:bg-safety-500 group-hover:text-construction-950 group-hover:border-safety-500 transition-colors">
+                <span className="mt-6 w-full py-3 rounded-full bg-background text-[12px] uppercase tracking-widest font-medium text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                   Accept Entry A
                 </span>
               </button>
@@ -317,18 +326,18 @@ export const CrossCheck = () => {
               {/* Option B: Labour */}
               <button
                 onClick={() => handleResolve('claim')}
-                className="p-4 text-left border border-construction-250 dark:border-construction-800 hover:border-safety-500 dark:hover:border-safety-500 bg-construction-50/50 dark:bg-construction-950/40 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all group"
+                className="p-6 text-left border border-border hover:border-foreground bg-background rounded-[28px] flex flex-col justify-between transition-all group"
               >
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-construction-400 block mb-1">Entry B</span>
-                  <h4 className="text-xs font-black text-construction-800 dark:text-white">Labour Claim</h4>
+                  <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block mb-2">Entry B</span>
+                  <h4 className="text-[16px] font-medium text-foreground">Labour Claim</h4>
                 </div>
-                <div className="mt-4 text-[11px] space-y-1 text-construction-650 dark:text-construction-350">
-                  <p><strong>Status:</strong> {resolvingDiscrepancy.claim.status}</p>
-                  <p><strong>Overtime:</strong> {resolvingDiscrepancy.claim.overtimeHours} hours</p>
-                  <p><strong>Shift:</strong> {resolvingDiscrepancy.claim.isNightShift ? 'Night' : 'Day'}</p>
+                <div className="mt-6 text-[14px] space-y-2 text-foreground font-medium">
+                  <p><strong className="text-muted-foreground font-normal">Status:</strong> {resolvingDiscrepancy.claim.status}</p>
+                  <p><strong className="text-muted-foreground font-normal">Overtime:</strong> {resolvingDiscrepancy.claim.overtimeHours} hours</p>
+                  <p><strong className="text-muted-foreground font-normal">Shift:</strong> {resolvingDiscrepancy.claim.isNightShift ? 'Night' : 'Day'}</p>
                 </div>
-                <span className="mt-4 w-full py-1.5 rounded-lg bg-white dark:bg-construction-900 text-[10px] font-bold text-center border border-construction-200 dark:border-construction-800 text-construction-700 dark:text-construction-300 group-hover:bg-safety-500 group-hover:text-construction-950 group-hover:border-safety-500 transition-colors">
+                <span className="mt-6 w-full py-3 rounded-full bg-background text-[12px] uppercase tracking-widest font-medium text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                   Accept Entry B
                 </span>
               </button>

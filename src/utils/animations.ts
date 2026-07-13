@@ -6,18 +6,18 @@ export const fadeIn: Variants = {
 };
 
 export const slideUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } },
 };
 
 export const slideInRight: Variants = {
-  hidden: { opacity: 0, x: 20 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, x: 30 },
+  visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } },
 };
 
 export const scaleUp: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 25 } },
 };
 
 export const staggerContainer: Variants = {
@@ -32,7 +32,7 @@ export const staggerContainer: Variants = {
 };
 
 export const pageTransition: Variants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
-  exit: { opacity: 0, y: -15, transition: { duration: 0.3, ease: 'easeIn' } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2, ease: 'easeIn' } },
 };

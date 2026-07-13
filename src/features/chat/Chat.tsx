@@ -13,21 +13,26 @@ import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { slideUp } from '../../utils/animations';
 
+import { useSites, useChat, useSendChatMessage } from '../../api/queries';
+import { ChatMessage } from '../../services/db';
+
 export const Chat = () => {
   const { 
-    chatMessages, 
-    sendChatMessage, 
     currentUser, 
     selectedRole, 
     activeSiteId, 
-    sites, 
     currentLanguage 
   } = useAppStore();
+  const { data: sites = [] } = useSites();
 
   const { t } = useTranslation(currentLanguage);
   
   const [text, setText] = useState('');
   const [activeChannel, setActiveChannel] = useState<'global' | 'site'>('global');
+  
+  const chatSiteId = activeChannel === 'global' ? 'global' : activeSiteId;
+  const { data: chatMessages = [] } = useChat(chatSiteId);
+  const { mutate: sendChatMessage } = useSendChatMessage();
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +48,17 @@ export const Chat = () => {
     e.preventDefault();
     if (!text.trim()) return;
 
-    sendChatMessage(text);
+    const message: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      siteId: selectedRole === 'labour' || selectedRole === 'supervisor' ? activeSiteId : (activeChannel === 'global' ? 'global' : activeSiteId),
+      senderId: currentUser?.uid || 'usr-anon',
+      senderName: currentUser?.name || 'Anonymous User',
+      senderRole: selectedRole,
+      text,
+      createdAt: new Date().toISOString()
+    };
+
+    sendChatMessage(message);
     setText('');
 
     setTimeout(() => {
@@ -70,13 +85,12 @@ export const Chat = () => {
           createdAt: new Date().toISOString()
         };
 
+        // Temporary hack for bot reply
         const currentChat = localStorage.getItem('mm_chat') 
           ? JSON.parse(localStorage.getItem('mm_chat') || '[]') 
           : [];
         currentChat.push(botMessage);
         localStorage.setItem('mm_chat', JSON.stringify(currentChat));
-
-        useAppStore.getState().refreshData();
       }, 1200);
 
     }, 800);
@@ -110,10 +124,6 @@ export const Chat = () => {
               <button
                 onClick={() => {
                   setActiveChannel('global');
-                  const globalChat = localStorage.getItem('mm_chat') 
-                    ? JSON.parse(localStorage.getItem('mm_chat') || '[]') 
-                    : [];
-                  useAppStore.setState({ chatMessages: globalChat.filter((c: any) => c.siteId === 'global') });
                 }}
                 className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all ${
                   activeChannel === 'global'
@@ -127,10 +137,6 @@ export const Chat = () => {
               <button
                 onClick={() => {
                   setActiveChannel('site');
-                  const siteChat = localStorage.getItem('mm_chat') 
-                    ? JSON.parse(localStorage.getItem('mm_chat') || '[]') 
-                    : [];
-                  useAppStore.setState({ chatMessages: siteChat.filter((c: any) => c.siteId === activeSiteId) });
                 }}
                 className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all truncate ${
                   activeChannel === 'site'
@@ -163,10 +169,6 @@ export const Chat = () => {
                   type="button"
                   onClick={() => {
                     setActiveChannel('global');
-                    const globalChat = localStorage.getItem('mm_chat') 
-                      ? JSON.parse(localStorage.getItem('mm_chat') || '[]') 
-                      : [];
-                    useAppStore.setState({ chatMessages: globalChat.filter((c: any) => c.siteId === 'global') });
                   }}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
                     activeChannel === 'global'
@@ -180,10 +182,6 @@ export const Chat = () => {
                   type="button"
                   onClick={() => {
                     setActiveChannel('site');
-                    const siteChat = localStorage.getItem('mm_chat') 
-                      ? JSON.parse(localStorage.getItem('mm_chat') || '[]') 
-                      : [];
-                    useAppStore.setState({ chatMessages: siteChat.filter((c: any) => c.siteId === activeSiteId) });
                   }}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
                     activeChannel === 'site'

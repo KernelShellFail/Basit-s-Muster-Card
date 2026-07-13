@@ -23,9 +23,23 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { 
+  useWorkers, useSites, useAttendance, usePayments, useUsers, 
+  useAddWorker, useDeleteWorker, useAddUser, useRemoveUser 
+} from '../../api/queries';
 
 export const Workers = () => {
-  const { workers, sites, activeSiteId, addWorker, deleteWorker, currentLanguage, attendance, payments, users, addUser, removeUser } = useAppStore();
+  const { activeSiteId, currentLanguage } = useAppStore();
+  const { data: workers = [] } = useWorkers();
+  const { data: sites = [] } = useSites();
+  const { data: attendance = [] } = useAttendance();
+  const { data: payments = [] } = usePayments();
+  const { data: users = [] } = useUsers();
+  
+  const { mutate: addWorker } = useAddWorker();
+  const { mutate: deleteWorker } = useDeleteWorker();
+  const { mutate: addUser } = useAddUser();
+  const { mutate: removeUser } = useRemoveUser();
   const { t } = useTranslation(currentLanguage);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -232,13 +246,13 @@ export const Workers = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Page Title & Actions */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">{t('workers')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage profiles, documents, bank credentials, and digital muster sheets.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('workers')}</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Manage profiles, documents, bank credentials, and digital muster sheets.</p>
         </div>
         
         <div className="flex flex-wrap gap-3">
@@ -254,8 +268,8 @@ export const Workers = () => {
 
       {/* Search & Filters */}
       <motion.div variants={slideUp}>
-        <Card glass>
-          <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center gap-4">
+        <Card className="border border-border">
+          <CardContent className="p-10 flex flex-col md:flex-row md:items-center gap-6">
             <div className="relative flex-1">
               <Input
                 type="text"
@@ -302,7 +316,7 @@ export const Workers = () => {
 
       {/* Workers Table */}
       <motion.div variants={slideUp}>
-        <Card glass className="overflow-hidden">
+        <Card className="overflow-hidden border border-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -374,11 +388,11 @@ export const Workers = () => {
                       <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{w.department}</p>
                     </TableCell>
                     <TableCell>
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                        w.skillLevel === 'Highly-Skilled' ? 'bg-purple-500/10 text-purple-500' :
-                        w.skillLevel === 'Skilled' ? 'bg-blue-500/10 text-blue-500' :
-                        w.skillLevel === 'Semi-Skilled' ? 'bg-amber-500/10 text-amber-500' :
-                        'bg-muted text-muted-foreground'
+                      <span className={`px-3 py-1.5 rounded-[28px] text-[10px] font-medium uppercase tracking-[0.1em] ${
+                        w.skillLevel === 'Highly-Skilled' ? 'bg-foreground text-background' :
+                        w.skillLevel === 'Skilled' ? 'bg-muted text-foreground' :
+                        w.skillLevel === 'Semi-Skilled' ? 'bg-background border border-border text-foreground' :
+                        'bg-background border border-border text-muted-foreground'
                       }`}>
                         {w.skillLevel}
                       </span>
@@ -390,10 +404,9 @@ export const Workers = () => {
                       {sites.find(s => s.id === w.currentSiteId)?.name || 'Unassigned'}
                     </TableCell>
                     <TableCell>
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 ${
-                        w.status === 'Active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+                      <span className={`px-3 py-1.5 rounded-[28px] text-[10px] font-medium uppercase tracking-[0.1em] inline-flex items-center gap-1.5 ${
+                        w.status === 'Active' ? 'bg-primary/20 text-foreground' : 'bg-muted text-muted-foreground'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${w.status === 'Active' ? 'bg-emerald-500' : 'bg-destructive'}`} />
                         {w.status}
                       </span>
                     </TableCell>
@@ -435,18 +448,18 @@ export const Workers = () => {
           >
             <div className="space-y-6">
               {/* Profile Card Summary */}
-              <div className="p-6 rounded-2xl bg-accent/30 border border-border flex flex-col sm:flex-row items-center gap-5">
-                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-24 h-24 rounded-full object-cover shrink-0 border-4 border-brand-500 shadow-sm" />
-                <div className="flex-1 text-center sm:text-left space-y-1">
-                  <h4 className="text-xl font-bold text-foreground">{viewingWorker.name}</h4>
-                  <p className="text-sm text-muted-foreground font-semibold">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
-                  <p className="text-xs text-muted-foreground font-semibold mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
+              <div className="p-10 rounded-[28px] bg-background border border-border flex flex-col sm:flex-row items-center gap-8">
+                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-32 h-32 rounded-full object-cover shrink-0 border-4 border-foreground" />
+                <div className="flex-1 text-center sm:text-left space-y-2">
+                  <h4 className="text-[28px] font-medium text-foreground tracking-tight">{viewingWorker.name}</h4>
+                  <p className="text-[14px] text-muted-foreground font-medium uppercase tracking-wide">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
+                  <p className="text-[12px] text-muted-foreground font-medium uppercase tracking-widest mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
                 </div>
-                <div className="shrink-0 flex sm:flex-col gap-2">
-                  <span className="bg-emerald-500/10 text-emerald-500 text-xs font-bold px-4 py-1.5 rounded-full border border-emerald-500/20">
+                <div className="shrink-0 flex sm:flex-col gap-3">
+                  <span className="bg-primary/20 text-foreground text-[12px] font-medium uppercase tracking-[0.1em] px-5 py-2 rounded-full">
                     Wage: ₹{viewingWorker.dailyWage}/day
                   </span>
-                  <span className="bg-purple-500/10 text-purple-500 text-xs font-bold px-4 py-1.5 rounded-full border border-purple-500/20">
+                  <span className="bg-muted text-foreground text-[12px] font-medium uppercase tracking-[0.1em] px-5 py-2 rounded-full">
                     OT: ₹{viewingWorker.overtimeRate}/hr
                   </span>
                 </div>
@@ -498,8 +511,8 @@ export const Workers = () => {
                 {/* Digital Muster Card (Monthly Calendar Sheet) */}
                 <div className="md:col-span-2 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-brand-500" />
+                    <h5 className="text-[14px] font-medium uppercase tracking-[0.1em] text-foreground flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-foreground" />
                       {t('musterCard')} • July 2026
                     </h5>
                     
@@ -509,7 +522,7 @@ export const Workers = () => {
                   </div>
 
                   {/* Calendar Sheet Grid (31 Days) */}
-                  <div className="grid grid-cols-7 gap-1.5 border border-border p-4 rounded-2xl bg-accent/20 text-center">
+                  <div className="grid grid-cols-7 gap-2 border border-border p-6 rounded-[28px] bg-background text-center">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
                       <div key={idx} className="text-[11px] font-extrabold text-muted-foreground py-1">{day}</div>
                     ))}
@@ -524,14 +537,14 @@ export const Workers = () => {
                       const status = attendanceRecord ? attendanceRecord.status : 'Unmarked';
                       
                       const statusColorMap: Record<string, string> = {
-                        'Present': 'bg-emerald-500 text-white shadow-sm ring-1 ring-emerald-600/20',
-                        'Half-Day': 'bg-amber-400 text-amber-950 shadow-sm ring-1 ring-amber-500/20',
-                        'Absent': 'bg-destructive text-white shadow-sm ring-1 ring-destructive/20',
-                        'Paid-Leave': 'bg-blue-500 text-white shadow-sm',
-                        'Unpaid-Leave': 'bg-muted text-muted-foreground',
-                        'Weekly-Off': 'bg-accent text-foreground',
-                        'Holiday': 'bg-amber-500/20 text-amber-500',
-                        'Unmarked': 'bg-transparent text-muted-foreground hover:bg-accent/50 transition-colors'
+                        'Present': 'bg-foreground text-background',
+                        'Half-Day': 'bg-primary/20 text-foreground',
+                        'Absent': 'bg-muted text-muted-foreground',
+                        'Paid-Leave': 'bg-background border border-foreground text-foreground',
+                        'Unpaid-Leave': 'bg-background border border-border text-muted-foreground',
+                        'Weekly-Off': 'bg-background text-foreground',
+                        'Holiday': 'bg-muted text-foreground',
+                        'Unmarked': 'bg-transparent text-muted-foreground hover:bg-muted/50 transition-colors'
                       };
 
                       return (
@@ -579,54 +592,54 @@ export const Workers = () => {
                     return (
                       <div className="space-y-6">
                         {/* Attendance Counter Grid */}
-                        <div className="grid grid-cols-4 gap-3 text-center text-xs font-bold">
-                          <div className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10">
-                            <p className="text-emerald-500">Presents</p>
-                            <h4 className="text-base font-extrabold text-foreground mt-1">{stats.presents}</h4>
+                        <div className="grid grid-cols-4 gap-4 text-center text-[10px] uppercase tracking-widest font-medium">
+                          <div className="p-4 rounded-[28px] border border-border bg-foreground text-background">
+                            <p className="opacity-70">Presents</p>
+                            <h4 className="text-[28px] font-medium mt-2">{stats.presents}</h4>
                           </div>
-                          <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/10">
-                            <p className="text-amber-500">Half-Days</p>
-                            <h4 className="text-base font-extrabold text-foreground mt-1">{stats.halfDays}</h4>
+                          <div className="p-4 rounded-[28px] border border-border bg-primary/20 text-foreground">
+                            <p className="text-muted-foreground">Half-Days</p>
+                            <h4 className="text-[28px] font-medium mt-2">{stats.halfDays}</h4>
                           </div>
-                          <div className="p-3 rounded-xl border border-destructive/20 bg-destructive/10">
-                            <p className="text-destructive">Absents</p>
-                            <h4 className="text-base font-extrabold text-foreground mt-1">{stats.absents}</h4>
+                          <div className="p-4 rounded-[28px] border border-border bg-muted text-foreground">
+                            <p className="text-muted-foreground">Absents</p>
+                            <h4 className="text-[28px] font-medium mt-2">{stats.absents}</h4>
                           </div>
-                          <div className="p-3 rounded-xl border border-border bg-accent/50">
+                          <div className="p-4 rounded-[28px] border border-border bg-background text-foreground">
                             <p className="text-muted-foreground">OT Hours</p>
-                            <h4 className="text-base font-extrabold text-foreground mt-1">{stats.totalOTHours}h</h4>
+                            <h4 className="text-[28px] font-medium mt-2">{stats.totalOTHours}h</h4>
                           </div>
                         </div>
 
                         {/* Wage Breakdown Box */}
-                        <div className="p-5 rounded-2xl border border-border bg-accent/30 space-y-3">
-                          <h6 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-4">July Earnings Statement</h6>
+                        <div className="p-6 rounded-[28px] border border-border bg-background space-y-4">
+                          <h6 className="text-[12px] font-medium text-muted-foreground uppercase tracking-[0.1em] mb-4">July Earnings Statement</h6>
                           
-                          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
                             <span>Base Wage Earned:</span>
-                            <span className="font-bold text-foreground">₹{grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * 150)}</span>
+                            <span className="font-medium text-foreground">₹{grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * 150)}</span>
                           </div>
-                          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
                             <span>Overtime Earned ({stats.totalOTHours} hrs):</span>
-                            <span className="font-bold text-foreground">₹{stats.totalOTHours * viewingWorker.overtimeRate}</span>
+                            <span className="font-medium text-foreground">₹{stats.totalOTHours * viewingWorker.overtimeRate}</span>
                           </div>
-                          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
                             <span>Night Shift Allowance:</span>
-                            <span className="font-bold text-foreground">₹{stats.nightShiftsCount * 150}</span>
+                            <span className="font-medium text-foreground">₹{stats.nightShiftsCount * 150}</span>
                           </div>
                           
-                          <div className="border-t border-border/50 pt-3 flex items-center justify-between text-sm font-bold text-foreground">
+                          <div className="border-t border-border pt-4 flex items-center justify-between text-[14px] font-medium text-foreground">
                             <span>Gross Monthly Wages:</span>
                             <span>₹{grossWages}</span>
                           </div>
-                          <div className="flex items-center justify-between text-sm font-semibold text-emerald-500">
+                          <div className="flex items-center justify-between text-[14px] font-medium text-foreground bg-primary/10 p-3 rounded-xl mt-2">
                             <span>Total Wage Released (Paid):</span>
-                            <span className="font-bold">₹{totalPaid}</span>
+                            <span className="font-medium">₹{totalPaid}</span>
                           </div>
                           
-                          <div className="border-t-2 border-dashed border-border pt-4 mt-2 flex items-center justify-between text-lg font-extrabold text-foreground">
+                          <div className="border-t border-border pt-6 mt-4 flex items-center justify-between text-[20px] font-medium text-foreground">
                             <span>Net Balance Due:</span>
-                            <span className="text-amber-500">₹{pendingBalance}</span>
+                            <span className="text-foreground">₹{pendingBalance}</span>
                           </div>
                         </div>
                       </div>
@@ -772,16 +785,16 @@ export const Workers = () => {
           </div>
 
           {/* Labour Portal Self-Login Setup */}
-          <div className="space-y-4 pt-6 border-t border-border p-5 rounded-2xl bg-brand-500/5 border-brand-500/10">
-            <div className="flex items-center gap-3">
+          <div className="space-y-4 pt-8 border-t border-border mt-8 p-6 rounded-[28px] bg-background border">
+            <div className="flex items-center gap-4">
               <input
                 type="checkbox"
                 id="selfLoginEnabled"
                 checked={selfLoginEnabled}
                 onChange={(e) => setSelfLoginEnabled(e.target.checked)}
-                className="w-5 h-5 rounded text-brand-500 focus:ring-brand-500 border-input bg-background"
+                className="w-5 h-5 rounded text-foreground focus:ring-foreground border-input bg-background"
               />
-              <label htmlFor="selfLoginEnabled" className="text-sm font-bold text-foreground select-none">
+              <label htmlFor="selfLoginEnabled" className="text-[14px] font-medium text-foreground select-none">
                 Enable Labour Self-Login (मजदूर लॉगिन सक्षम करें)
               </label>
             </div>

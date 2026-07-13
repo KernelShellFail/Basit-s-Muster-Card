@@ -19,16 +19,25 @@ import { AttendanceStatus } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 
+import { 
+  useWorkers, 
+  useAttendance, 
+  usePayments, 
+  useLabourSubmissions, 
+  useSubmitLabourAttendance 
+} from '../../api/queries';
+
 export const LabourDashboard = () => {
   const { 
     currentUser, 
-    workers, 
-    attendance, 
-    payments, 
-    labourSubmissions, 
-    submitLabourAttendance, 
     currentLanguage 
   } = useAppStore();
+  
+  const { data: workers = [] } = useWorkers();
+  const { data: attendance = [] } = useAttendance();
+  const { data: payments = [] } = usePayments();
+  const { data: labourSubmissions = [] } = useLabourSubmissions();
+  const { mutateAsync: submitLabourAttendance } = useSubmitLabourAttendance();
   
   const { t } = useTranslation(currentLanguage);
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { useTranslation } from '../utils/i18n';
 import { cn } from '../utils/cn';
@@ -20,15 +21,14 @@ import {
   LogOut
 } from 'lucide-react';
 
-interface SidebarProps {
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
-}
-
-export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
+export const Sidebar = () => {
   const { selectedRole, currentLanguage, currentUser, logoutUser } = useAppStore();
   const { t } = useTranslation(currentLanguage);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentTab = location.pathname.split('/')[1] || 'dashboard';
 
   const getNavItems = () => {
     switch (selectedRole) {
@@ -80,20 +80,20 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
       initial={false}
       animate={{ width: isCollapsed ? 80 : 256 }}
       transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-      className="h-screen border-r border-border bg-card/80 backdrop-blur-xl flex flex-col justify-between relative z-20 shrink-0"
+      className="h-screen border-r border-border bg-background flex flex-col justify-between relative z-20 shrink-0"
     >
       <div className="flex-1 overflow-hidden flex flex-col">
         {/* Brand header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border shrink-0">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-border shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-black flex items-center justify-center font-bold shrink-0 shadow-glow">
+            <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
               <HardHat className="w-5 h-5" />
             </div>
             {!isCollapsed && (
               <motion.span 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="font-extrabold text-lg tracking-tight truncate"
+                className="font-medium text-[22px] tracking-[-0.03em] truncate text-foreground"
               >
                 MusterMate
               </motion.span>
@@ -102,7 +102,7 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
           
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-card text-foreground flex items-center justify-center border shadow-sm hover:bg-accent transition-colors z-50"
+            className="absolute -right-4 top-6 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center border border-border hover:bg-muted transition-colors z-50"
           >
             {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
@@ -116,17 +116,17 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setCurrentTab(item.id)}
+                  onClick={() => navigate(`/${item.id}`)}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                    isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    "relative w-full flex items-center gap-3 px-4 py-3 rounded-full text-[14px] font-medium transition-colors",
+                    isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-primary rounded-xl"
+                      className="absolute inset-0 bg-primary rounded-full"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -142,15 +142,15 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
       </div>
 
       {/* Session User Profile & Logout */}
-      <div className="p-4 border-t border-border bg-muted/30 shrink-0">
+      <div className="p-6 border-t border-border bg-background shrink-0">
         {currentUser && !isCollapsed && (
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-brand-500 text-black flex items-center justify-center font-bold text-xs uppercase shrink-0">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium text-[16px] uppercase shrink-0">
               {currentUser.name.slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold truncate leading-tight">{currentUser.name}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold truncate">
+              <p className="text-[14px] font-medium truncate leading-tight">{currentUser.name}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium truncate mt-0.5">
                 {currentUser.role}
               </p>
             </div>
@@ -160,8 +160,8 @@ export const Sidebar = ({ currentTab, setCurrentTab }: SidebarProps) => {
         <button
           onClick={() => logoutUser()}
           className={cn(
-            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-colors border",
-            "border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            "w-full flex items-center justify-center gap-2 py-3 rounded-[28px] text-[14px] font-medium transition-colors border",
+            "border-foreground text-foreground hover:bg-foreground hover:text-background"
           )}
         >
           <LogOut className="w-5 h-5" />

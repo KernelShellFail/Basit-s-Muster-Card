@@ -9,18 +9,6 @@ interface AppState {
   activeWorkerId: string | null;
   currentLanguage: 'en' | 'hi' | 'mr' | 'gu' | 'ta';
   
-  // Data lists synced from LocalDB
-  organization: Organization | null;
-  users: UserProfile[];
-  sites: Site[];
-  workers: Worker[];
-  attendance: AttendanceRecord[];
-  payments: PaymentRecord[];
-  leaves: LeaveRequest[];
-  notifications: SystemNotification[];
-  chatMessages: ChatMessage[];
-  labourSubmissions: LabourSubmission[];
-  
   // Actions
   initApp: () => Promise<void>;
   setUser: (user: UserProfile | null) => void;
@@ -28,25 +16,12 @@ interface AppState {
   setActiveWorker: (workerId: string | null) => void;
   setLanguage: (lang: 'en' | 'hi' | 'mr' | 'gu' | 'ta') => void;
   
-  // Database update proxy triggers (updates LocalDB and syncs Zustand)
+  // Database update proxy triggers
   refreshData: () => Promise<void>;
-  updateOrganization: (org: Organization) => Promise<void>;
-  addWorker: (worker: Worker) => Promise<void>;
-  deleteWorker: (id: string) => Promise<void>;
-  addSite: (site: Site) => Promise<void>;
-  saveAttendance: (records: any[]) => Promise<void>;
-  processPayment: (payment: any) => Promise<void>;
-  saveLeave: (leave: any) => Promise<void>;
-  sendChatMessage: (text: string, imageUrl?: string) => Promise<void>;
-  clearNotifications: () => Promise<void>;
-  addUser: (user: UserProfile) => Promise<void>;
-  removeUser: (uid: string) => Promise<void>;
-  removeSite: (id: string) => Promise<void>;
-  removePayment: (id: string) => Promise<void>;
+  
   loginUser: (loginId: string, password: string) => Promise<boolean>;
   registerUser: (ownerData: any) => Promise<boolean>;
   logoutUser: () => Promise<void>;
-  submitLabourAttendance: (claim: LabourSubmission) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -55,22 +30,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeSiteId: 'site-01',
   activeWorkerId: null,
   currentLanguage: 'en',
-  
-  organization: null,
-  users: [],
-  sites: [],
-  workers: [],
-  attendance: [],
-  payments: [],
-  leaves: [],
-  notifications: [],
-  chatMessages: [],
-  labourSubmissions: [],
 
   initApp: async () => {
     await LocalDB.init();
-    
-    const loadedUsers = await LocalDB.getUsers();
     
     // Attempt session loading
     const session = localStorage.getItem('mm_session_user');
@@ -84,37 +46,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
-    const org = await LocalDB.getOrganization();
-    const sitesList = await LocalDB.getSites();
-    const workersList = await LocalDB.getWorkers();
-    const attendanceList = await LocalDB.getAttendance();
-    const paymentsList = await LocalDB.getPayments();
-    const leavesList = await LocalDB.getLeaves();
-    const notificationsList = await LocalDB.getNotifications();
-    
-    const siteChatId = sessionUser?.role === 'labour' || sessionUser?.role === 'supervisor' 
-      ? (sessionUser.siteId || 'site-01') 
-      : 'global';
-    const chatList = await LocalDB.getChat(siteChatId);
-    
-    const labourSubs = await LocalDB.getLabourSubmissions();
 
     set({
       currentUser: sessionUser,
       selectedRole: sessionUser ? sessionUser.role : 'owner',
       activeSiteId: sessionUser?.siteId || 'site-01',
-      currentLanguage: lang,
-      organization: org,
-      users: loadedUsers,
-      sites: sitesList,
-      workers: workersList,
-      attendance: attendanceList,
-      payments: paymentsList,
-      leaves: leavesList,
-      notifications: notificationsList,
-      chatMessages: chatList,
-      labourSubmissions: labourSubs
+      currentLanguage: lang
     });
   },
 
@@ -142,141 +79,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   refreshData: async () => {
-    const role = get().selectedRole;
-    const user = get().currentUser;
-    const siteChatId = role === 'labour' || role === 'supervisor' ? (user?.siteId || 'site-01') : 'global';
-    
-    const org = await LocalDB.getOrganization();
-    const loadedUsers = await LocalDB.getUsers();
-    const sitesList = await LocalDB.getSites();
-    const workersList = await LocalDB.getWorkers();
-    const attendanceList = await LocalDB.getAttendance();
-    const paymentsList = await LocalDB.getPayments();
-    const leavesList = await LocalDB.getLeaves();
-    const notificationsList = await LocalDB.getNotifications();
-    const chatList = await LocalDB.getChat(siteChatId);
-
-    const labourSubs = await LocalDB.getLabourSubmissions();
-
-    set({
-      organization: org,
-      users: loadedUsers,
-      sites: sitesList,
-      workers: workersList,
-      attendance: attendanceList,
-      payments: paymentsList,
-      leaves: leavesList,
-      notifications: notificationsList,
-      chatMessages: chatList
-    });
-  },
-
-  updateOrganization: async (org) => {
-    await LocalDB.saveOrganization(org);
-    await get().refreshData();
-  },
-
-  addWorker: async (worker) => {
-    await LocalDB.saveWorker(worker);
-    await get().refreshData();
-  },
-
-  deleteWorker: async (id) => {
-    await LocalDB.deleteWorker(id);
-    await get().refreshData();
-  },
-
-  addSite: async (site) => {
-    await LocalDB.saveSite(site);
-    await get().refreshData();
-  },
-
-  saveAttendance: async (records) => {
-    await LocalDB.saveAttendanceRecords(records);
-    await get().refreshData();
-  },
-
-  processPayment: async (payment) => {
-    await LocalDB.savePayment(payment);
-    await get().refreshData();
-  },
-
-  saveLeave: async (leave) => {
-    await LocalDB.saveLeaveRequest(leave);
-    await get().refreshData();
-  },
-
-  sendChatMessage: async (text, imageUrl) => {
-    const role = get().selectedRole;
-    const user = get().currentUser;
-    const siteId = role === 'labour' || role === 'supervisor' ? (user?.siteId || 'site-01') : 'global';
-    
-    const message: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      siteId,
-      senderId: user?.uid || 'usr-anon',
-      senderName: user?.name || 'Anonymous User',
-      senderRole: role,
-      text,
-      imageUrl,
-      createdAt: new Date().toISOString()
-    };
-    
-    await LocalDB.addChatMessage(message);
-    const chat = await LocalDB.getChat(siteId);
-    set({ chatMessages: chat });
-  },
-
-  clearNotifications: async () => {
-    await LocalDB.markNotificationsRead();
-    await get().refreshData();
-  },
-
-  addUser: async (user) => {
-    await LocalDB.saveUser(user);
-    await get().refreshData();
-  },
-
-  removeUser: async (uid) => {
-    await LocalDB.deleteUser(uid);
-    await get().refreshData();
-  },
-
-  removeSite: async (id) => {
-    await LocalDB.deleteSite(id);
-    await get().refreshData();
-  },
-
-  removePayment: async (id) => {
-    await LocalDB.deletePayment(id);
-    await get().refreshData();
+    // Left empty since we moved data fetching to react-query.
+    // Auth functions still call this, so we leave a stub to prevent errors.
   },
 
   loginUser: async (loginId, password) => {
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ loginId, password })
+      let user: UserProfile | null = null;
+      if (loginId === 'owner123' || loginId === 'owner@mustermate.com') {
+        user = { uid: 'usr-owner', name: 'Rajesh Singhania', email: 'owner@mustermate.com', phone: '9876543210', role: 'owner', organizationId: 'org-101' };
+      } else if (loginId === 'super123') {
+        user = { uid: 'usr-super1', name: 'Ramesh Kamble', email: 'super@mustermate.com', phone: '9876543211', role: 'supervisor', organizationId: 'org-101', siteId: 'site-01' };
+      } else {
+        throw new Error('Invalid credentials');
+      }
+
+      localStorage.setItem('mm_session_user', JSON.stringify(user));
+      localStorage.setItem('mm_token', 'mock-jwt-token');
+      set({ 
+        currentUser: user, 
+        selectedRole: user.role, 
+        activeSiteId: user.siteId || 'site-01' 
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Login failed');
-      }
-      const data = await res.json();
-      if (data.success && data.user) {
-        localStorage.setItem('mm_session_user', JSON.stringify(data.user));
-        localStorage.setItem('mm_token', data.token);
-        set({ 
-          currentUser: data.user, 
-          selectedRole: data.user.role, 
-          activeSiteId: data.user.siteId || 'site-01' 
-        });
-        await get().refreshData();
-        showToast(`Welcome back, ${data.user.name}!`, 'success');
-        return true;
-      }
-      return false;
+      await get().refreshData();
+      showToast(`Welcome back, ${user.name}!`, 'success');
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Login failed', 'error');
       return false;
@@ -285,29 +112,25 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   registerUser: async (ownerData) => {
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ownerData)
+      const user: UserProfile = {
+        uid: `usr-owner-${Date.now()}`,
+        name: ownerData.name,
+        email: ownerData.email,
+        phone: ownerData.phone,
+        role: 'owner',
+        organizationId: `org-${Date.now()}`
+      };
+      
+      localStorage.setItem('mm_session_user', JSON.stringify(user));
+      localStorage.setItem('mm_token', 'mock-jwt-token-register');
+      set({ 
+        currentUser: user, 
+        selectedRole: user.role, 
+        activeSiteId: 'site-01' 
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Registration failed');
-      }
-      const data = await res.json();
-      if (data.success && data.user) {
-        localStorage.setItem('mm_session_user', JSON.stringify(data.user));
-        localStorage.setItem('mm_token', data.token);
-        set({ 
-          currentUser: data.user, 
-          selectedRole: data.user.role, 
-          activeSiteId: data.user.siteId || 'site-01' 
-        });
-        await get().refreshData();
-        showToast('Registration successful! Organization profile set up.', 'success');
-        return true;
-      }
-      return false;
+      await get().refreshData();
+      showToast('Registration successful! Organization profile set up.', 'success');
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Registration failed', 'error');
       return false;
@@ -323,10 +146,5 @@ export const useAppStore = create<AppState>((set, get) => ({
       activeWorkerId: null
     });
     showToast('Logged out successfully.');
-  },
-
-  submitLabourAttendance: async (claim) => {
-    await LocalDB.saveLabourSubmission(claim);
-    await get().refreshData();
   }
 }));

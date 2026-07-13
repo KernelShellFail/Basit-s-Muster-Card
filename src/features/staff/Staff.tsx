@@ -21,9 +21,14 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { slideUp, staggerContainer } from '../../utils/animations';
+import { useSites, useUsers, useAddUser, useRemoveUser } from '../../api/queries';
 
 export const Staff = () => {
-  const { users, sites, addUser, removeUser, currentLanguage } = useAppStore();
+  const { currentLanguage } = useAppStore();
+  const { data: users = [] } = useUsers();
+  const { data: sites = [] } = useSites();
+  const { mutate: addUser } = useAddUser();
+  const { mutate: removeUser } = useRemoveUser();
   const { t } = useTranslation(currentLanguage);
 
   // Search & Filter state
@@ -115,13 +120,13 @@ export const Staff = () => {
   });
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
       
       {/* Title */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Staff Directory</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage project administrators, field supervisors, and assign their job sites.</p>
+          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">Staff Directory</h1>
+          <p className="text-[16px] text-muted-foreground font-medium mt-4">Manage project administrators, field supervisors, and assign their job sites.</p>
         </div>
         
         <Button
@@ -135,27 +140,27 @@ export const Staff = () => {
 
       {/* Search and Filters */}
       <motion.div variants={slideUp}>
-        <Card glass>
-          <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row gap-4">
+        <Card className="border border-border">
+          <CardContent className="p-8 sm:p-10 flex flex-col md:flex-row gap-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by name, phone, email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full"
+                className="pl-12 w-full text-[16px]"
               />
             </div>
 
-            <div className="flex flex-wrap sm:flex-nowrap gap-3">
+            <div className="flex flex-wrap sm:flex-nowrap gap-4">
               {/* Role Filter */}
-              <div className="flex items-center gap-2 px-3 py-1.5 border border-input rounded-xl bg-background/50 focus-within:ring-1 focus-within:ring-ring">
-                <ShieldAlert className="w-5 h-5 text-brand-500 shrink-0" />
+              <div className="flex items-center gap-3 px-4 py-2 border border-border rounded-full bg-background focus-within:ring-1 focus-within:ring-ring">
+                <ShieldAlert className="w-5 h-5 text-foreground shrink-0" />
                 <select
                   value={roleFilter}
                   onChange={(e: any) => setRoleFilter(e.target.value)}
-                  className="text-sm bg-transparent text-foreground outline-none border-none cursor-pointer w-full"
+                  className="text-[14px] font-medium bg-transparent text-foreground outline-none border-none cursor-pointer w-full"
                 >
                   <option value="All">All Roles</option>
                   <option value="admin">Administrators</option>
@@ -164,12 +169,12 @@ export const Staff = () => {
               </div>
 
               {/* Site Filter */}
-              <div className="flex items-center gap-2 px-3 py-1.5 border border-input rounded-xl bg-background/50 focus-within:ring-1 focus-within:ring-ring">
-                <MapPin className="w-5 h-5 text-brand-500 shrink-0" />
+              <div className="flex items-center gap-3 px-4 py-2 border border-border rounded-full bg-background focus-within:ring-1 focus-within:ring-ring">
+                <MapPin className="w-5 h-5 text-foreground shrink-0" />
                 <select
                   value={siteFilter}
                   onChange={(e) => setSiteFilter(e.target.value)}
-                  className="text-sm bg-transparent text-foreground outline-none border-none cursor-pointer w-full sm:w-[150px] truncate"
+                  className="text-[14px] font-medium bg-transparent text-foreground outline-none border-none cursor-pointer w-full sm:w-[150px] truncate"
                 >
                   <option value="All">All Sites</option>
                   {sites.map(site => (
@@ -185,8 +190,8 @@ export const Staff = () => {
       {/* Grid List */}
       <motion.div variants={slideUp}>
         {filteredStaff.length === 0 ? (
-          <Card glass className="border-dashed">
-            <CardContent className="p-12 text-center text-sm text-muted-foreground font-medium">
+          <Card className="border border-border border-dashed">
+            <CardContent className="p-12 text-center text-[16px] text-muted-foreground font-medium">
               No staff members match the selected filter criteria.
             </CardContent>
           </Card>
@@ -194,22 +199,22 @@ export const Staff = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStaff.map((staff, idx) => (
               <motion.div key={staff.uid} variants={slideUp} custom={idx}>
-                <Card glass className="h-full hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
-                  <CardContent className="p-6 sm:p-8">
+                <Card className="h-full border border-border transition-all duration-300 group flex flex-col justify-between">
+                  <CardContent className="p-8 space-y-6">
                     {/* Header Profile */}
-                    <div className="flex items-start justify-between gap-3 mb-6">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-accent text-foreground font-black flex items-center justify-center border border-border shadow-inner text-lg">
+                        <div className="w-14 h-14 rounded-full bg-muted text-foreground font-bold flex items-center justify-center border border-border shadow-none text-[16px]">
                           {staff.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-foreground">
+                          <h3 className="text-[16px] font-medium text-foreground leading-tight">
                             {staff.name}
                           </h3>
-                          <span className={`mt-1.5 inline-flex text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest border ${
+                          <span className={`mt-2 inline-flex text-[10px] font-medium px-4 py-1.5 rounded-full uppercase tracking-[0.1em] border ${
                             staff.role === 'admin' 
-                              ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' 
-                              : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                              ? 'bg-foreground text-background border-foreground' 
+                              : 'bg-primary/20 text-foreground border-primary/20'
                           }`}>
                             {staff.role === 'admin' ? 'Administrator' : 'Supervisor'}
                           </span>
@@ -223,7 +228,7 @@ export const Staff = () => {
                           size="icon"
                           onClick={() => handleEditClick(staff)}
                           title="Edit Staff"
-                          className="h-8 w-8 text-muted-foreground"
+                          className="h-10 w-10 text-muted-foreground hover:bg-muted/50 rounded-full"
                         >
                           <Edit3 className="w-5 h-5" />
                         </Button>
@@ -232,7 +237,7 @@ export const Staff = () => {
                           size="icon"
                           onClick={() => handleDeleteStaff(staff.uid, staff.name)}
                           title="Delete Staff"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          className="h-10 w-10 text-muted-foreground hover:bg-muted/50 rounded-full"
                         >
                           <Trash2 className="w-5 h-5" />
                         </Button>
@@ -240,19 +245,19 @@ export const Staff = () => {
                     </div>
 
                     {/* Details list */}
-                    <div className="space-y-3 pt-4 border-t border-border text-sm font-semibold text-muted-foreground">
+                    <div className="space-y-4 pt-6 border-t border-border text-[12px] font-medium text-muted-foreground uppercase tracking-widest">
                       <div className="flex items-center gap-3">
-                        <Phone className="w-5 h-5 text-brand-500 shrink-0" />
+                        <Phone className="w-5 h-5 text-muted-foreground shrink-0" />
                         <span>{staff.phone}</span>
                       </div>
                       {staff.email && (
                         <div className="flex items-center gap-3">
-                          <Mail className="w-5 h-5 text-brand-500 shrink-0" />
+                          <Mail className="w-5 h-5 text-muted-foreground shrink-0" />
                           <span className="truncate">{staff.email}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-3">
-                        <MapPin className="w-5 h-5 text-brand-500 shrink-0" />
+                        <MapPin className="w-5 h-5 text-muted-foreground shrink-0" />
                         <span className="truncate text-foreground">{getSiteName(staff.siteId)}</span>
                       </div>
                     </div>
@@ -331,10 +336,10 @@ export const Staff = () => {
                   <button
                     type="button"
                     onClick={() => setRole('supervisor')}
-                    className={`p-3 text-sm font-bold rounded-xl border flex items-center justify-center gap-2 transition-all ${
+                    className={`p-4 text-[12px] uppercase tracking-widest font-medium rounded-[28px] border flex items-center justify-center gap-2 transition-all ${
                       role === 'supervisor'
-                        ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm'
-                        : 'border-border text-muted-foreground hover:bg-accent/50'
+                        ? 'bg-foreground border-foreground text-background shadow-none'
+                        : 'bg-background border-border text-muted-foreground hover:bg-muted/50'
                     }`}
                   >
                     <HardHat className="w-5 h-5" />
@@ -343,10 +348,10 @@ export const Staff = () => {
                   <button
                     type="button"
                     onClick={() => setRole('admin')}
-                    className={`p-3 text-sm font-bold rounded-xl border flex items-center justify-center gap-2 transition-all ${
+                    className={`p-4 text-[12px] uppercase tracking-widest font-medium rounded-[28px] border flex items-center justify-center gap-2 transition-all ${
                       role === 'admin'
-                        ? 'bg-purple-500/10 border-purple-500 text-purple-500 shadow-sm'
-                        : 'border-border text-muted-foreground hover:bg-accent/50'
+                        ? 'bg-foreground border-foreground text-background shadow-none'
+                        : 'bg-background border-border text-muted-foreground hover:bg-muted/50'
                     }`}
                   >
                     <ShieldAlert className="w-5 h-5" />

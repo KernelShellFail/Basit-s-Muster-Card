@@ -31,21 +31,21 @@ Card.displayName = "Card";
 
 export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
+    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-10", className)} {...props} />
   )
 );
 CardHeader.displayName = "CardHeader";
 
 export const CardTitle = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-2xl font-semibold leading-none tracking-tight", className)} {...props} />
+    <h3 ref={ref} className={cn("text-[28px] font-medium leading-[1.14] tracking-[-0.56px] text-foreground", className)} {...props} />
   )
 );
 CardTitle.displayName = "CardTitle";
 
 export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+    <div ref={ref} className={cn("p-10 pt-0", className)} {...props} />
   )
 );
 CardContent.displayName = "CardContent";

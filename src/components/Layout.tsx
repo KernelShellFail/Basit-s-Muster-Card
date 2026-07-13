@@ -3,15 +3,17 @@ import Lenis from 'lenis';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ToastContainer } from './Toast';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import { pageTransition } from '../utils/animations';
 
 interface LayoutProps {
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
   children: ReactNode;
 }
 
-export const Layout = ({ currentTab, setCurrentTab, children }: LayoutProps) => {
+export const Layout = ({ children }: LayoutProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   useEffect(() => {
     // Initialize Lenis for smooth scrolling
@@ -43,25 +45,38 @@ export const Layout = ({ currentTab, setCurrentTab, children }: LayoutProps) => 
 
   return (
     <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden font-sans selection:bg-brand-500 selection:text-black">
+      {/* Skip to main content for accessibility */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:font-bold">
+        Skip to main content
+      </a>
+
       {/* Dynamic Navigation Sidebar */}
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Decorative Background Blob */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-500/10 dark:bg-brand-500/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background">
         {/* Top Header Utilities */}
         <Header />
 
         {/* Scrollable Page Screen */}
         <main 
+          id="main-content"
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 md:p-8 focus:outline-none relative z-10 custom-scrollbar"
         >
           <div className="mx-auto max-w-7xl">
-            {children}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={pageTransition}
+                className="h-full w-full"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>
