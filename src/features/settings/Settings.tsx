@@ -151,11 +151,11 @@ export const Settings = () => {
               {/* Language Selector */}
               <div className="space-y-3">
                 <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.1em] block">Select System Language (भाषा)</label>
-                <select
-                  value={currentLanguage}
-                  onChange={(e) => setLanguage(e.target.value as any)}
-                  className="flex h-14 w-full rounded-[28px] border border-border bg-background px-6 py-3 text-[16px] text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
+                  <select
+                    value={currentLanguage}
+                    onChange={(e) => setLanguage(e.target.value as any)}
+                    className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2 text-[14px] font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-all"
+                  >
                   <option value="en">English</option>
                   <option value="hi">हिन्दी (Hindi)</option>
                   <option value="mr">मराठी (Marathi)</option>
@@ -186,7 +186,7 @@ export const Settings = () => {
                   Backup Database
                 </Button>
 
-                <label className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-[28px] border border-dashed border-border text-[14px] font-medium text-foreground bg-muted hover:bg-muted/50 cursor-pointer transition-colors">
+                <label className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-xl border border-dashed border-border text-[14px] font-medium text-foreground bg-muted hover:bg-muted/50 cursor-pointer transition-colors">
                   <Upload className="w-5 h-5 text-foreground" />
                   <span>Restore Database</span>
                   <input 
@@ -262,7 +262,7 @@ export const Settings = () => {
                     required
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="flex w-full rounded-xl border border-input bg-background/50 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full rounded-xl border border-border bg-background px-4 py-3 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
 

@@ -176,8 +176,8 @@ export const Attendance = () => {
               />
             </div>
 
-            <div className="text-[14px] font-medium text-muted-foreground uppercase tracking-widest shrink-0 bg-background px-6 py-3 rounded-[28px] border border-border">
-              Workers count: <span className="text-foreground">{filteredSiteWorkers.length}</span> active
+            <div className="text-[14px] font-medium text-muted-foreground uppercase tracking-widest shrink-0 bg-background px-6 h-12 flex items-center rounded-xl border border-border">
+              Workers count: <span className="text-foreground ml-1">{filteredSiteWorkers.length}</span> <span className="ml-1">active</span>
             </div>
           </CardContent>
         </Card>
@@ -264,7 +264,7 @@ export const Attendance = () => {
                       <select
                         value={overtimeHours}
                         onChange={(e) => handleOTChange(worker.id, Number(e.target.value))}
-                        className="text-[11px] font-bold bg-transparent border-none p-0 text-foreground focus:ring-0 cursor-pointer"
+                        className="text-[12px] font-bold bg-transparent border-none p-0 text-foreground focus:ring-0 cursor-pointer"
                       >
                         <option value={0}>0 hrs</option>
                         <option value={1}>1 hr</option>
@@ -282,7 +282,7 @@ export const Attendance = () => {
                       placeholder="Remarks / notes..."
                       value={remarks}
                       onChange={(e) => handleRemarksChange(worker.id, e.target.value)}
-                      className="h-8 text-xs px-3"
+                      className="h-10 text-[12px] px-4 rounded-xl"
                     />
                     
                     <button

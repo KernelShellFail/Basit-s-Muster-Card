@@ -125,7 +125,7 @@ export const CrossCheck = () => {
       </div>
 
       {/* Date & Site Filter Controls */}
-      <div className="p-8 rounded-[28px] bg-background border border-border flex flex-col md:flex-row gap-6 items-center">
+      <div className="p-8 rounded-xl bg-background border border-border flex flex-col md:flex-row gap-6 items-center">
         {/* Date Selector */}
         <div className="w-full md:w-auto flex items-center gap-4">
           <Calendar className="w-5 h-5 text-muted-foreground shrink-0" />
@@ -133,7 +133,7 @@ export const CrossCheck = () => {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
+            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
           />
         </div>
 
@@ -143,7 +143,7 @@ export const CrossCheck = () => {
           <select
             value={selectedSiteId}
             onChange={(e) => setSelectedSiteId(e.target.value)}
-            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
+            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
           >
             {sites.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
@@ -157,7 +157,7 @@ export const CrossCheck = () => {
           <select
             value={statusFilter}
             onChange={(e: any) => setStatusFilter(e.target.value)}
-            className="text-[14px] font-medium px-4 py-3 rounded-full border border-border bg-background text-foreground focus:outline-none"
+            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
           >
             <option value="All">All Entries ({comparisonList.length})</option>
             <option value="match">Verified Matches ({matchesCount})</option>
@@ -169,27 +169,27 @@ export const CrossCheck = () => {
 
       {/* Metrics breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-8 rounded-[28px] border border-border bg-background text-foreground flex items-center gap-4">
-          <CheckCircle2 className="w-8 h-8 shrink-0" />
+        <div className="p-6 rounded-xl border border-border bg-background text-foreground flex items-center gap-4">
+          <CheckCircle2 className="w-8 h-8 shrink-0 text-primary" />
           <div>
-            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Verified Matches</span>
-            <span className="text-[28px] font-medium">{matchesCount} Workers</span>
+            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Verified Matches</span>
+            <span className="text-[28px] font-medium leading-none mt-1 block">{matchesCount} Workers</span>
           </div>
         </div>
 
-        <div className="p-8 rounded-[28px] border border-border bg-muted text-foreground flex items-center gap-4">
-          <AlertCircle className="w-8 h-8 shrink-0" />
+        <div className="p-6 rounded-xl border border-destructive/20 bg-destructive/5 text-foreground flex items-center gap-4">
+          <AlertCircle className="w-8 h-8 shrink-0 text-destructive" />
           <div>
-            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Mismatched Discrepancies</span>
-            <span className="text-[28px] font-medium">{mismatchCount} Alerts</span>
+            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Mismatched Discrepancies</span>
+            <span className="text-[28px] font-medium leading-none mt-1 block">{mismatchCount} Alerts</span>
           </div>
         </div>
 
-        <div className="p-8 rounded-[28px] border border-border bg-background text-foreground flex items-center gap-4">
+        <div className="p-6 rounded-xl border border-border bg-background text-foreground flex items-center gap-4">
           <HelpCircle className="w-8 h-8 shrink-0 text-muted-foreground" />
           <div>
-            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block">Pending Self-Submit</span>
-            <span className="text-[28px] font-medium">{pendingCount} Workers</span>
+            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Pending Self-Submit</span>
+            <span className="text-[28px] font-medium leading-none mt-1 block">{pendingCount} Workers</span>
           </div>
         </div>
       </div>
@@ -217,13 +217,15 @@ export const CrossCheck = () => {
                 filteredList.map(item => (
                   <tr key={item.worker.id} className="hover:bg-muted/50 transition-colors">
                     {/* Worker Details */}
-                    <td className="p-6 flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full border border-border bg-muted text-foreground flex items-center justify-center font-bold text-[14px]">
-                        {item.worker.name.slice(0, 2)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-[16px] text-foreground leading-tight">{item.worker.name}</p>
-                        <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-medium mt-1">{item.worker.id} • {item.worker.trade}</p>
+                    <td className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full border border-border bg-muted text-foreground flex items-center justify-center font-bold text-[14px]">
+                          {item.worker.name.slice(0, 2)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-[16px] text-foreground leading-tight">{item.worker.name}</p>
+                          <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-medium mt-1">{item.worker.id} • {item.worker.trade}</p>
+                        </div>
                       </div>
                     </td>
 

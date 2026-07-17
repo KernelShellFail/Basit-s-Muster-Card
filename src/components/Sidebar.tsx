@@ -102,7 +102,7 @@ export const Sidebar = () => {
           
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-4 top-6 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center border border-border hover:bg-muted transition-colors z-50"
+            className="absolute -right-4 top-6 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center border border-border shadow-sm hover:bg-muted transition-colors z-50"
           >
             {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>

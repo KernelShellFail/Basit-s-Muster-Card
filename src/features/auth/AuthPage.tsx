@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAppStore } from '../../store/useAppStore';
 import { 
@@ -35,9 +36,16 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const AuthPage = () => {
-  const { loginUser, registerUser } = useAppStore();
+  const { loginUser, registerUser, currentUser } = useAppStore();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -73,7 +81,7 @@ export const AuthPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       {/* Navbar / Logo area for the page */}
-      <div className="w-full max-w-[1200px] absolute top-8 left-0 right-0 px-8 flex justify-between items-center">
+      <div className="w-full max-w-[1200px] absolute top-8 left-0 right-0 mx-auto px-6 md:px-8 flex justify-between items-center">
         <h1 className="text-2xl font-medium tracking-tight text-foreground">Perk / MusterMate</h1>
       </div>
 
@@ -88,7 +96,7 @@ export const AuthPage = () => {
         </div>
 
         {/* Parallax Card Container */}
-        <Card className="w-full p-[48px] bg-background border border-border rounded-[28px] shadow-none space-y-10">
+        <Card className="w-full p-8 sm:p-12 bg-background border border-border rounded-xl shadow-none space-y-10">
           
           {/* Tab Selector - Underline Link Style */}
           <div className="flex gap-6 border-b border-border">

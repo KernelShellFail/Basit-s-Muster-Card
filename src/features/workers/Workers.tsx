@@ -284,7 +284,7 @@ export const Workers = () => {
               <select
                 value={selectedSite}
                 onChange={(e) => setSelectedSite(e.target.value)}
-                className="text-sm bg-background border border-input rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
+                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
               >
                 <option value="All">All Sites</option>
                 {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -293,7 +293,7 @@ export const Workers = () => {
               <select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="text-sm bg-background border border-input rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
+                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
               >
                 {trades.map(t => <option key={t} value={t}>{t === 'All' ? 'All Trades' : t}</option>)}
               </select>
@@ -301,7 +301,7 @@ export const Workers = () => {
               <select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value)}
-                className="text-sm bg-background border border-input rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow col-span-2 sm:col-span-1"
+                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow col-span-2 sm:col-span-1"
               >
                 <option value="All">All Skills</option>
                 <option value="Helper">Helper</option>
@@ -397,7 +397,7 @@ export const Workers = () => {
                         {w.skillLevel}
                       </span>
                     </TableCell>
-                    <TableCell className="font-bold text-foreground">
+                    <TableCell className="font-bold text-foreground whitespace-nowrap">
                       ₹{w.dailyWage} / day
                     </TableCell>
                     <TableCell className="font-medium text-muted-foreground">
@@ -411,20 +411,20 @@ export const Workers = () => {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => setViewingWorker(w)} title="View Profile">
-                          <Eye className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" className="px-2" onClick={() => setViewingWorker(w)} title="View Profile">
+                          <Eye className="w-4 h-4 text-muted-foreground mr-1" /> View
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleEditWorker(w)} title="Edit Worker">
-                          <Edit3 className="w-5 h-5 text-muted-foreground" />
+                        <Button variant="ghost" className="px-2" onClick={() => handleEditWorker(w)} title="Edit Worker">
+                          <Edit3 className="w-4 h-4 text-muted-foreground mr-1" /> Edit
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
+                        <Button variant="ghost" className="px-2 hover:bg-destructive/10 hover:text-destructive" onClick={() => {
                           if (confirm(`Are you sure you want to delete worker ${w.name}?`)) {
                             deleteWorker(w.id);
                             showToast(`Worker ${w.name} removed successfully.`);
                           }
                         }} title="Delete Worker">
-                          <Trash2 className="w-5 h-5 text-destructive" />
+                          <Trash2 className="w-4 h-4 text-destructive mr-1" /> Delete
                         </Button>
                       </div>
                     </TableCell>

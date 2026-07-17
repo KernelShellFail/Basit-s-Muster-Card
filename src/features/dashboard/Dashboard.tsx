@@ -87,9 +87,9 @@ export const Dashboard = () => {
 
   const getGreeting = () => {
     const hrs = new Date().getHours();
-    if (hrs < 12) return 'Good Morning (शुभ प्रभात)';
-    if (hrs < 17) return 'Good Afternoon (शुभ दोपहर)';
-    return 'Good Evening (शुभ संध्या)';
+    if (hrs < 12) return 'Good Morning';
+    if (hrs < 17) return 'Good Afternoon';
+    return 'Good Evening';
   };
 
   if (selectedRole === 'labour') {
@@ -144,7 +144,7 @@ export const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <h3 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{stat.value}</h3>
-                  <p className="text-[14px] font-medium mt-4 text-muted-foreground">{stat.sub}</p>
+                  <p className="text-[14px] font-medium mt-4 text-muted-foreground min-h-[40px]">{stat.sub}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -244,7 +244,7 @@ export const Dashboard = () => {
                     {stat.value}
                     {stat.max !== undefined && <span className="text-[28px] font-medium text-muted-foreground ml-1">/ {stat.max}</span>}
                   </h3>
-                  <p className="text-[14px] font-medium text-muted-foreground mt-4">{stat.sub}</p>
+                  <p className="text-[14px] font-medium text-muted-foreground mt-4 min-h-[40px]">{stat.sub}</p>
                 </div>
                 <div className={`w-12 h-12 rounded-[28px] ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>
                   <stat.icon className="w-5 h-5" />
@@ -325,7 +325,7 @@ export const Dashboard = () => {
                   <button 
                     key={action.id}
                     onClick={() => navigate(`/${action.id}`)}
-                    className="group w-full flex items-center justify-between p-5 rounded-[28px] border border-border bg-background hover:bg-muted/50 text-left transition-all duration-300"
+                    className="group w-full flex items-center justify-between p-5 rounded-xl border border-border bg-background hover:bg-muted/50 text-left transition-all duration-300"
                   >
                     <div className="flex items-center gap-4">
                       <span className="w-12 h-12 rounded-full bg-muted text-foreground flex items-center justify-center shrink-0">
@@ -340,7 +340,7 @@ export const Dashboard = () => {
                   </button>
                 ))}
               </div>
-              <div className="mt-8 pt-6 border-t border-border/50 text-[12px] uppercase tracking-widest text-muted-foreground text-center font-medium">
+              <div className="mt-8 p-4 rounded-xl border border-border/50 bg-muted/20 text-[12px] uppercase tracking-widest text-muted-foreground text-center font-medium">
                 July billing cycle ends in <span className="font-bold text-foreground">27 days</span>
               </div>
             </CardContent>
@@ -403,7 +403,7 @@ export const Dashboard = () => {
             <CardContent>
               <div className="space-y-4 mt-6">
                 {sites.map(site => (
-                  <div key={site.id} className="group flex items-center justify-between p-5 rounded-[28px] border border-border bg-background hover:bg-muted/50 transition-colors">
+                  <div key={site.id} className="group flex items-center justify-between p-5 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors">
                     <div>
                       <h4 className="text-[16px] font-medium text-foreground truncate max-w-[150px]">{site.name}</h4>
                       <p className="text-[14px] text-muted-foreground truncate max-w-[150px] mt-1">{site.address}</p>

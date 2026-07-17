@@ -248,27 +248,27 @@ export const Payments = () => {
                         <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{w.id} • {w.trade}</p>
                       </TableCell>
 
-                      <TableCell className="font-semibold text-foreground">
+                      <TableCell className="font-semibold text-foreground whitespace-nowrap">
                         ₹{w.dailyWage}
                       </TableCell>
 
-                      <TableCell className="text-center font-bold text-muted-foreground">
+                      <TableCell className="text-center font-bold text-muted-foreground whitespace-nowrap">
                         {financials.presents} P / {financials.halfDays} H
                       </TableCell>
 
-                      <TableCell className="text-center font-bold text-muted-foreground">
+                      <TableCell className="text-center font-bold text-muted-foreground whitespace-nowrap">
                         {financials.totalOTHours} hrs
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="font-medium text-foreground whitespace-nowrap">
                         ₹{financials.grossWages}
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="font-medium text-foreground whitespace-nowrap">
                         ₹{financials.totalPaid}
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="font-medium text-foreground whitespace-nowrap">
                         ₹{financials.balanceDue}
                       </TableCell>
 
@@ -276,9 +276,10 @@ export const Payments = () => {
                         <div className="flex items-center justify-center gap-2">
                           <Button
                             size="sm"
+                            className="px-4"
                             disabled={financials.balanceDue <= 0}
                             onClick={() => handleOpenPayout(w, financials.balanceDue)}
-                            leftIcon={<IndianRupee className="w-5 h-5" />}
+                            leftIcon={<IndianRupee className="w-4 h-4" />}
                           >
                             Pay Wage
                           </Button>
@@ -338,7 +339,7 @@ export const Payments = () => {
                   <select
                     value={paymentType}
                     onChange={(e) => setPaymentType(e.target.value as any)}
-                    className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="Cash">Cash</option>
                     <option value="Bank Transfer">Bank Transfer</option>

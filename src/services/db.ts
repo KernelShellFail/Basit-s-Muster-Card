@@ -166,7 +166,18 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}): Promi
     ...options.headers,
     ...getAuthHeaders(),
   };
-  return fetch(url, { ...options, headers });
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    let errorMessage = `HTTP error! status: ${res.status}`;
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch (e) {
+      // ignore JSON parse error
+    }
+    throw new Error(errorMessage);
+  }
+  return res;
 };
 
 const checkServer = async (): Promise<boolean> => {

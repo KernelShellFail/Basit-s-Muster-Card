@@ -141,14 +141,14 @@ export const Sites = () => {
               {/* Image banner mock */}
               <div className="h-40 bg-muted relative flex items-center justify-center border-b border-border overflow-hidden">
                 <Map className="w-20 h-20 text-muted-foreground/30 transform group-hover:scale-110 transition-transform duration-500" />
-                <span className={`absolute top-6 right-6 text-[10px] font-medium px-4 py-1.5 rounded-full uppercase tracking-[0.1em] ${
-                  site.status === 'active' ? 'bg-foreground text-background' :
-                  site.status === 'on-hold' ? 'bg-primary/20 text-foreground' :
-                  'bg-muted-foreground text-background'
+                <span className={`absolute top-6 right-6 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.1em] ${
+                  site.status === 'active' ? 'bg-emerald-500/20 text-emerald-600' :
+                  site.status === 'on-hold' ? 'bg-amber-500/20 text-amber-600' :
+                  'bg-muted text-muted-foreground'
                 }`}>
                   {site.status}
                 </span>
-                <span className="absolute bottom-6 left-6 text-[10px] font-medium uppercase tracking-[0.1em] bg-background text-foreground px-4 py-1.5 rounded-[28px] border border-border">
+                <span className="absolute bottom-6 left-6 text-[10px] font-bold uppercase tracking-[0.1em] bg-background/90 backdrop-blur text-foreground px-4 py-1.5 rounded-full border border-border">
                   ID: {site.id}
                 </span>
               </div>
@@ -189,31 +189,33 @@ export const Sites = () => {
                     <span className="truncate max-w-[120px]" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 bg-muted/50 rounded-full border border-border p-1">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => window.open(`https://maps.google.com/?q=${site.gpsCoordinates}`, '_blank')}
                       title="View Map"
+                      className="w-8 h-8 rounded-full"
                     >
-                      <MapPin className="w-5 h-5 text-muted-foreground" />
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEditSiteClick(site)}
                       title="Edit Site"
+                      className="w-8 h-8 rounded-full"
                     >
-                      <Edit2 className="w-5 h-5 text-muted-foreground" />
+                      <Edit2 className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteSiteClick(site.id, site.name)}
                       title="Delete Site"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="w-8 h-8 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -274,7 +276,7 @@ export const Sites = () => {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
@@ -288,7 +290,7 @@ export const Sites = () => {
                   <select
                     value={supervisorId}
                     onChange={(e) => setSupervisorId(e.target.value)}
-                    className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="">Select Supervisor</option>
                     {supervisorsList.map(s => <option key={s.uid} value={s.uid}>{s.name}</option>)}

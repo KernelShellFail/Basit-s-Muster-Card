@@ -107,8 +107,8 @@ export const Header = () => {
       <div className="flex items-center gap-4">
         
         {/* Real-time Status Dot */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium text-muted-foreground uppercase tracking-widest">
-          <span className={cn("w-2 h-2 rounded-full pulse-dot", isOnline ? "bg-primary" : "bg-muted-foreground")} />
+        <div className={cn("hidden sm:flex items-center gap-2 px-3 py-1.5 text-[12px] font-bold uppercase tracking-widest rounded-full", isOnline ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+          <span className={cn("w-2 h-2 rounded-full", isOnline ? "bg-primary pulse-dot" : "bg-muted-foreground")} />
           {isOnline ? 'Live' : 'Offline'}
         </div>
 
@@ -218,20 +218,7 @@ export const Header = () => {
           </AnimatePresence>
         </div>
 
-        {/* User Card */}
-        <div className="flex items-center gap-3 border-l border-border pl-6 ml-2">
-          <div className="hidden lg:flex flex-col text-right">
-            <span className="text-[16px] font-medium text-foreground truncate max-w-[120px]">
-              {currentUser?.name || 'User'}
-            </span>
-            <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground mt-0.5">
-              {selectedRole}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium text-[16px]">
-            {currentUser?.name.substring(0, 2).toUpperCase() || 'MM'}
-          </div>
-        </div>
+
 
       </div>
     </header>

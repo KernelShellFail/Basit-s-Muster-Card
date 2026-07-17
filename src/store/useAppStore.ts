@@ -85,22 +85,27 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loginUser: async (loginId, password) => {
     try {
-      let user: UserProfile | null = null;
-      if (loginId === 'owner123' || loginId === 'owner@mustermate.com') {
-        user = { uid: 'usr-owner', name: 'Rajesh Singhania', email: 'owner@mustermate.com', phone: '9876543210', role: 'owner', organizationId: 'org-101' };
-      } else if (loginId === 'super123') {
-        user = { uid: 'usr-super1', name: 'Ramesh Kamble', email: 'super@mustermate.com', phone: '9876543211', role: 'supervisor', organizationId: 'org-101', siteId: 'site-01' };
-      } else {
-        throw new Error('Invalid credentials');
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId, password })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed');
       }
 
+      const { user, token } = data;
       localStorage.setItem('mm_session_user', JSON.stringify(user));
-      localStorage.setItem('mm_token', 'mock-jwt-token');
+      localStorage.setItem('mm_token', token);
+      
       set({ 
         currentUser: user, 
         selectedRole: user.role, 
         activeSiteId: user.siteId || 'site-01' 
       });
+      
       await get().refreshData();
       showToast(`Welcome back, ${user.name}!`, 'success');
       return true;
@@ -112,22 +117,27 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   registerUser: async (ownerData) => {
     try {
-      const user: UserProfile = {
-        uid: `usr-owner-${Date.now()}`,
-        name: ownerData.name,
-        email: ownerData.email,
-        phone: ownerData.phone,
-        role: 'owner',
-        organizationId: `org-${Date.now()}`
-      };
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ownerData)
+      });
       
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      const { user, token } = data;
       localStorage.setItem('mm_session_user', JSON.stringify(user));
-      localStorage.setItem('mm_token', 'mock-jwt-token-register');
+      localStorage.setItem('mm_token', token);
+      
       set({ 
         currentUser: user, 
         selectedRole: user.role, 
-        activeSiteId: 'site-01' 
+        activeSiteId: user.siteId || 'site-01' 
       });
+      
       await get().refreshData();
       showToast('Registration successful! Organization profile set up.', 'success');
       return true;
