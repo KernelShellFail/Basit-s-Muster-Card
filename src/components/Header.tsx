@@ -11,7 +11,8 @@ import {
   Globe, 
   Check, 
   Wifi, 
-  WifiOff 
+  WifiOff,
+  Menu
 } from 'lucide-react';
 import { scaleUp } from '../utils/animations';
 import { useSites, useNotifications, useClearNotifications } from '../api/queries';
@@ -23,7 +24,8 @@ export const Header = () => {
     activeSiteId, 
     setActiveSite, 
     currentLanguage, 
-    setLanguage
+    setLanguage,
+    setMobileMenuOpen
   } = useAppStore();
 
   const { data: sites = [] } = useSites();
@@ -74,10 +76,17 @@ export const Header = () => {
   ];
 
   return (
-    <header className="h-20 bg-background px-8 flex items-center justify-between shrink-0 z-40 relative">
+    <header className="h-20 bg-background px-4 md:px-8 flex items-center justify-between shrink-0 z-40 relative border-b border-border md:border-none">
       
-      {/* Left: Site Selector (for Owner/Admin) */}
-      <div className="flex items-center gap-6">
+      {/* Left: Hamburger & Site Selector */}
+      <div className="flex items-center gap-4 md:gap-6">
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="p-2 md:hidden text-foreground hover:bg-muted rounded-full transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {(selectedRole === 'owner' || selectedRole === 'admin') ? (
           <div className="flex items-center gap-2 group cursor-pointer">
             <Map className="w-5 h-5 text-foreground" />

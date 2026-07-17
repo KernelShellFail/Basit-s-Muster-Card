@@ -8,6 +8,7 @@ interface AppState {
   activeSiteId: string;
   activeWorkerId: string | null;
   currentLanguage: 'en' | 'hi' | 'mr' | 'gu' | 'ta';
+  isMobileMenuOpen: boolean;
   
   // Actions
   initApp: () => Promise<void>;
@@ -15,6 +16,8 @@ interface AppState {
   setActiveSite: (siteId: string) => void;
   setActiveWorker: (workerId: string | null) => void;
   setLanguage: (lang: 'en' | 'hi' | 'mr' | 'gu' | 'ta') => void;
+  setMobileMenuOpen: (isOpen: boolean) => void;
+
   
   // Database update proxy triggers
   refreshData: () => Promise<void>;
@@ -30,6 +33,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeSiteId: 'site-01',
   activeWorkerId: null,
   currentLanguage: 'en',
+  isMobileMenuOpen: false,
 
   initApp: async () => {
     await LocalDB.init();
@@ -76,6 +80,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setLanguage: (lang) => {
     localStorage.setItem('mm_lang', lang);
     set({ currentLanguage: lang });
+  },
+
+  setMobileMenuOpen: (isOpen) => {
+    set({ isMobileMenuOpen: isOpen });
   },
 
   refreshData: async () => {
