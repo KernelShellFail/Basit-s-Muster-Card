@@ -155,6 +155,7 @@ export interface SystemNotification {
 
 // Check server status
 let isBackendOnline = false;
+let lastHealthCheckAt = 0;
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('mm_token');
@@ -181,31 +182,31 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}): Promi
 };
 
 const checkServer = async (): Promise<boolean> => {
+  const now = Date.now();
+  if (now - (lastHealthCheckAt || 0) < 10_000) {
+    return isBackendOnline;
+  }
   try {
     const res = await fetch('/api/health');
     isBackendOnline = res.ok;
+    lastHealthCheckAt = Date.now();
     return isBackendOnline;
   } catch {
     isBackendOnline = false;
+    lastHealthCheckAt = Date.now();
     return false;
   }
 };
 
-// Seeding Fallback LocalDB Data
-const fallbackSeed = () => {
-  if (!localStorage.getItem('mm_seeded')) {
-    const DEFAULT_ORGANIZATION: Organization = {
-      id: 'org-101',
-      name: 'MusterMate Buildcon Private (Demo)',
-      logo: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=150&q=80',
-      gstNumber: '27AADCM3241F1ZH',
-      address: '402, Metro Plaza, Sector 15, Vashi, Navi Mumbai, MH, 400703',
-      phone: '+91 22 2781 9090',
-      email: 'ops@mmbuildcon.com',
-      ownerId: 'usr-owner'
-    };
-    localStorage.setItem('mm_org', JSON.stringify(DEFAULT_ORGANIZATION));
-    localStorage.setItem('mm_seeded', 'true');
+// Session helpers for offline fallbacks. The backend is the source of truth
+// when online; localStorage is only a read cache when the server is down.
+const getSessionOrgId = (): string => {
+  const session = localStorage.getItem('mm_session_user');
+  if (!session) return '';
+  try {
+    return (JSON.parse(session) as UserProfile).organizationId || '';
+  } catch {
+    return '';
   }
 };
 
@@ -214,7 +215,6 @@ export const LocalDB = {
   async init() {
     await checkServer();
     if (!isBackendOnline) {
-      fallbackSeed();
       console.warn('Backend server offline. Running in Local Storage Demo Mode.');
     } else {
       console.log('Connected to Express + PostgreSQL Backend.');
@@ -232,7 +232,9 @@ export const LocalDB = {
       return res.json();
     }
     const local = localStorage.getItem('mm_org');
-    return local ? JSON.parse(local) : { id: 'org-101', name: 'Demo Client', logo: '', gstNumber: '', address: '', phone: '', email: '', ownerId: 'usr-owner' };
+    if (local) return JSON.parse(local);
+    const orgId = getSessionOrgId();
+    return { id: orgId, name: 'My Organization', logo: '', gstNumber: '', address: '', phone: '', email: '', ownerId: '' };
   },
 
   async saveOrganization(org: Organization): Promise<void> {
@@ -253,14 +255,8 @@ export const LocalDB = {
       const res = await authenticatedFetch('/api/users');
       return res.json();
     }
-    // Static fallback users
-    return [
-      { uid: 'usr-owner', name: 'Rajesh Singhania', email: 'owner@mustermate.com', phone: '+91 9876543210', role: 'owner' },
-      { uid: 'usr-admin', name: 'Amit Sharma', email: 'admin@mustermate.com', phone: '+91 9876543211', role: 'admin' },
-      { uid: 'usr-super1', name: 'Satish Kamble', email: 'satish@mustermate.com', phone: '+91 9876543212', role: 'supervisor', siteId: 'site-01' },
-      { uid: 'usr-super2', name: 'Dinesh Patel', email: 'dinesh@mustermate.com', phone: '+91 9876543213', role: 'supervisor', siteId: 'site-02' },
-      { uid: 'usr-labour', name: 'Ramesh Yadav', email: 'ramesh@mustermate.com', phone: '+91 9876543214', role: 'labour', siteId: 'site-01' },
-    ];
+    const local = localStorage.getItem('mm_users');
+    return local ? JSON.parse(local) : [];
   },
 
   // Workers

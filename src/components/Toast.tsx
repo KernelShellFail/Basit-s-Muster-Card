@@ -12,6 +12,13 @@ export const showToast = (message: string, type: ToastMessage['type'] = 'success
   window.dispatchEvent(event);
 };
 
+const iconStyles: Record<ToastMessage['type'], { icon: React.ReactNode; cls: string }> = {
+  success: { icon: <CheckCircle2 className="w-5 h-5 shrink-0" />, cls: 'text-fn-success' },
+  error: { icon: <XCircle className="w-5 h-5 shrink-0" />, cls: 'text-fn-error' },
+  warning: { icon: <AlertCircle className="w-5 h-5 shrink-0" />, cls: 'text-fn-warning' },
+  info: { icon: <Info className="w-5 h-5 shrink-0" />, cls: 'text-fn-info' },
+};
+
 export const ToastContainer = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -20,7 +27,7 @@ export const ToastContainer = () => {
       const customEvent = e as CustomEvent<{ message: string; type: ToastMessage['type'] }>;
       const { message, type } = customEvent.detail;
       const id = `${Date.now()}-${Math.random()}`;
-      
+
       setToasts(prev => [...prev, { id, message, type }]);
 
       // Auto-remove after 4 seconds
@@ -41,32 +48,25 @@ export const ToastContainer = () => {
 
   return (
     <div className="fixed top-5 right-5 z-[100] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
-      {toasts.map(toast => {
-        const iconMap = {
-          success: <CheckCircle2 className="w-5 h-5 text-foreground shrink-0" />,
-          error: <XCircle className="w-5 h-5 text-foreground shrink-0" />,
-          warning: <AlertCircle className="w-5 h-5 text-foreground shrink-0" />,
-          info: <Info className="w-5 h-5 text-foreground shrink-0" />,
-        };
-
-        return (
-          <div
-            key={toast.id}
-            className="pointer-events-auto flex items-start gap-4 p-5 rounded-[28px] border border-border bg-card transition-all duration-300 transform translate-y-0 animate-fade-in shadow-none"
-          >
-            {iconMap[toast.type]}
-            <div className="flex-1 text-[14px] font-medium text-foreground leading-tight">
-              {toast.message}
-            </div>
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {toasts.map(toast => (
+        <div
+          key={toast.id}
+          className="pointer-events-auto flex items-start gap-4 p-5 rounded-[8px] border border-border bg-off-black transition-all duration-300 transform translate-y-0 animate-fade-in"
+        >
+          <span className={iconStyles[toast.type].cls}>
+            {iconStyles[toast.type].icon}
+          </span>
+          <div className="flex-1 text-[14px] font-medium text-foreground leading-tight">
+            {toast.message}
           </div>
-        );
-      })}
+          <button
+            onClick={() => removeToast(toast.id)}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      ))}
     </div>
   );
 };

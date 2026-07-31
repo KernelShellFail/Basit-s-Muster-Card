@@ -16,8 +16,8 @@ export class OrganizationRepository extends BaseRepository<Organization> {
     super('organizations');
   }
 
-  async findFirst(): Promise<Organization | null> {
-    const result = await this.query(`SELECT * FROM ${this.tableName} LIMIT 1`);
+  async findById(id: string): Promise<Organization | null> {
+    const result = await this.query(`SELECT * FROM ${this.tableName} WHERE id = $1`, [id]);
     return result.rows[0] || null;
   }
 

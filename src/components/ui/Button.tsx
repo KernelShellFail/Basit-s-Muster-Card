@@ -3,19 +3,24 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { tv, type VariantProps } from 'tailwind-variants';
 
 const buttonVariants = tv({
-  base: 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden',
+  base: 'inline-flex items-center justify-center font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden rounded-full',
   variants: {
     variant: {
-      primary: 'bg-primary text-primary-foreground hover:opacity-90 rounded-[28px]',
-      ghost: 'bg-transparent text-foreground hover:text-muted-foreground rounded-full',
-      destructive: 'bg-destructive text-destructive-foreground hover:opacity-90 rounded-[28px]',
-      outline: 'bg-transparent text-foreground border-b border-foreground rounded-none hover:opacity-80 pb-0.5',
+      // Brand action — the single chromatic control (gradient-stroked pill).
+      primary: 'btn-gradient-cta text-surface-cream',
+      // Secondary actions — outlined cream pill.
+      ghost: 'btn-ghost-pill text-surface-cream',
+      // Tertiary / quiet — borderless nav-style.
+      outline: 'bg-transparent text-surface-cream hover:text-surface-50',
+      // Danger — outlined, no fill.
+      destructive: 'bg-transparent text-fn-error border border-fn-error/60 hover:border-fn-error',
+      link: 'bg-transparent text-surface-cream underline-offset-4 hover:underline p-0',
     },
     size: {
-      sm: 'py-2 px-3 text-sm font-medium',
-      md: 'py-4 pl-4 pr-3 text-base font-medium', // 16px top/bottom, 16px left, 12px right
-      lg: 'py-5 pl-6 pr-5 text-lg font-medium',
-      icon: 'h-10 w-10 rounded-full',
+      sm: 'h-11 px-5 text-[14px]',
+      md: 'h-12 px-6 text-[15px]',
+      lg: 'h-14 px-8 text-[16px]',
+      icon: 'h-11 w-11 rounded-full',
       link: 'p-0 text-sm font-medium',
     },
   },
@@ -35,7 +40,7 @@ type MotionButtonProps = Omit<HTMLMotionProps<"button">, keyof ButtonProps> & Bu
 
 export const Button = forwardRef<HTMLButtonElement, MotionButtonProps>(
   ({ className, variant, size, isLoading, children, disabled, leftIcon, rightIcon, ...props }, ref) => {
-    
+
     return (
       <motion.button
         ref={ref}

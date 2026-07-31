@@ -3,10 +3,10 @@ import { cn } from '../../utils/cn';
 
 export const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto rounded-[28px]">
+    <div className="relative w-full overflow-auto rounded-[8px]">
       <table
         ref={ref}
-        className={cn("w-full caption-bottom text-[16px] text-foreground", className)}
+        className={cn("w-full caption-bottom text-[15px] text-foreground", className)}
         {...props}
       />
     </div>
@@ -37,7 +37,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTable
     <tr
       ref={ref}
       className={cn(
-        "border-b border-border transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+        "border-b border-border transition-colors hover:bg-muted data-[state=selected]:bg-muted",
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLT
     <th
       ref={ref}
       className={cn(
-        "h-12 px-4 text-left align-middle text-[12px] font-medium text-muted-foreground uppercase tracking-[0.1em] [&:has([role=checkbox])]:pr-0",
+        "h-12 px-5 text-left align-middle text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.08em] [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLT
   ({ className, ...props }, ref) => (
     <td
       ref={ref}
-      className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+      className={cn("p-4 px-5 align-middle text-[14px] [&:has([role=checkbox])]:pr-0", className)}
       {...props}
     />
   )

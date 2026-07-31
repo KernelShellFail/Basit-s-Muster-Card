@@ -7,7 +7,7 @@ const chatRepo = new ChatRepository();
 export const getChatMessages = async (req: AuthenticatedRequest, res: Response) => {
   const siteId = req.params.siteId as string;
   try {
-    const messages = await chatRepo.findBySiteId(siteId);
+    const messages = await chatRepo.findBySiteId(siteId, req.user?.organizationId);
     const formatted = messages.map(c => ({
       id: c.id,
       siteId: c.site_id,
@@ -36,7 +36,8 @@ export const saveChatMessage = async (req: AuthenticatedRequest, res: Response) 
       sender_role: senderRole,
       text,
       image_url: imageUrl,
-      created_at: createdAt || new Date().toISOString()
+      created_at: createdAt || new Date().toISOString(),
+      organization_id: req.user?.organizationId
     };
     await chatRepo.save(msgData);
     res.json({ success: true });

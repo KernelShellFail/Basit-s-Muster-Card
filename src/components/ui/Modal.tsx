@@ -44,7 +44,7 @@ export const Modal = ({ isOpen, onClose, title, description, children, className
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-just-black/80 backdrop-blur-sm"
             onClick={onClose}
           />
 
@@ -59,31 +59,30 @@ export const Modal = ({ isOpen, onClose, title, description, children, className
               aria-modal="true"
               aria-label={title}
               className={cn(
-                "w-full max-w-lg rounded-[28px] bg-card pointer-events-auto flex flex-col max-h-[90dvh]",
+                "w-full max-w-lg rounded-[8px] border border-border bg-card pointer-events-auto flex flex-col max-h-[90dvh]",
                 className
               )}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-start justify-between p-5 sm:p-8 pb-0 shrink-0">
+              <div className="flex items-start justify-between p-5 sm:p-6 pb-0 shrink-0">
                 <div>
-                  {title && <h2 className="text-2xl sm:text-[28px] font-medium text-foreground tracking-[-0.02em] leading-[1.14]">{title}</h2>}
-                  {description && <p className="text-sm text-muted-foreground mt-1.5">{description}</p>}
+                  {title && <h2 className="text-xl sm:text-[24px] font-semibold text-foreground tracking-[-0.02em] leading-[1.2]">{title}</h2>}
+                  {description && <p className="text-[14px] text-muted-foreground mt-1.5">{description}</p>}
                 </div>
                   {onClose && (
                     <button
                       onClick={onClose}
                       aria-label="Close dialog"
-                      className="rounded-full p-2 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0 ml-4"
+                      className="rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring shrink-0 ml-4"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
-              
-              <div className="relative overflow-y-auto p-5 sm:p-8 pt-4 sm:pt-6 custom-scrollbar">
+
+              <div className="relative overflow-y-auto p-5 sm:p-6 pt-4 sm:pt-6 custom-scrollbar">
                 {children}
-              </div>
-            </motion.div>
+              </div>            </motion.div>
           </div>
         </>
       )}

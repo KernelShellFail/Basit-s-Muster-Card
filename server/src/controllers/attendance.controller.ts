@@ -6,7 +6,20 @@ const attendanceRepo = new AttendanceRepository();
 
 export const getAttendance = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const records = await attendanceRepo.findAll();
+    const user = req.user;
+    if (!user?.organizationId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    let records: AttendanceEntity[];
+    if (user.role === 'labour' && user.workerId) {
+      records = await attendanceRepo.findAllByWorker(user.workerId);
+    } else if (user.role === 'supervisor' && user.siteId) {
+      records = await attendanceRepo.findAllBySite(user.siteId);
+    } else {
+      records = await attendanceRepo.findAllByOrg(user.organizationId);
+    }
+
     const formatted = records.map(a => ({
       id: a.id,
       workerId: a.worker_id,
@@ -45,7 +58,8 @@ export const saveAttendance = async (req: AuthenticatedRequest, res: Response) =
       photo_proof: rec.photoProof,
       supervisor_id: rec.supervisorId,
       site_id: rec.siteId,
-      remarks: rec.remarks
+      remarks: rec.remarks,
+      organization_id: req.user?.organizationId
     }));
 
     await attendanceRepo.saveBatch(entities);

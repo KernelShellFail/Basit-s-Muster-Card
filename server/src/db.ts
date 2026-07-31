@@ -4,24 +4,36 @@ import crypto from 'crypto';
 
 dotenv.config();
 
+const PBKDF2_ITERATIONS = 210000;
+
 export const hashPassword = (password: string): string => {
   if (!password) return '';
   const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-  return `${salt}:${hash}`;
+  const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
+  return `pbkdf2$sha512$${PBKDF2_ITERATIONS}$${salt}$${hash}`;
 };
 
 export const verifyPassword = (password: string, storedHash: string): boolean => {
   if (!password || !storedHash) return false;
-  
-  // Backward compatibility with legacy SHA-256 seeded passwords
-  if (!storedHash.includes(':')) {
+
+  // Backward compatibility with legacy SHA-256 seeded passwords (no separator)
+  if (!storedHash.includes('$') && !storedHash.includes(':')) {
     const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
     return legacyHash === storedHash;
   }
-  
-  const [salt, hash] = storedHash.split(':');
-  const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+
+  // Legacy PBKDF2 format (salt:hash, 1000 iterations)
+  if (!storedHash.includes('$')) {
+    const [salt, hash] = storedHash.split(':');
+    if (!salt || !hash) return false;
+    const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return hash === checkHash;
+  }
+
+  // Current format: pbkdf2$sha512$<iterations>$<salt>$<hash>
+  const [algorithm, digest, iterationsStr, salt, hash] = storedHash.split('$');
+  if (algorithm !== 'pbkdf2' || !salt || !hash) return false;
+  const checkHash = crypto.pbkdf2Sync(password, salt, parseInt(iterationsStr, 10) || PBKDF2_ITERATIONS, 64, digest as any).toString('hex');
   return hash === checkHash;
 };
 

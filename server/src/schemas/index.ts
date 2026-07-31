@@ -1,15 +1,18 @@
 import { z } from 'zod';
 
+// NOTE: Schemas validate the camelCase payloads the frontend sends.
+// `.passthrough()` preserves any unknown keys so controllers receive the full body.
+
 export const OrganizationSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   logo: z.string().optional(),
-  gst_number: z.string().optional(),
+  gstNumber: z.string().optional(),
   address: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional(),
-  owner_id: z.string().optional(),
-});
+  ownerId: z.string().optional(),
+}).passthrough();
 
 export const UserSchema = z.object({
   uid: z.string().optional(),
@@ -17,85 +20,82 @@ export const UserSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional(),
   role: z.enum(['owner', 'admin', 'supervisor', 'labour', 'viewer']),
-  site_id: z.string().optional(),
-  organization_id: z.string().optional(),
+  siteId: z.string().optional(),
+  organizationId: z.string().optional(),
+  workerId: z.string().optional(),
   password: z.string().optional(),
-  worker_id: z.string().optional(),
-});
+}).passthrough();
 
 export const SiteSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   address: z.string().optional(),
-  gps_coordinates: z.string().optional(),
+  gpsCoordinates: z.string().optional(),
   status: z.enum(['active', 'completed', 'on-hold']).default('active'),
-  supervisor_id: z.string().optional(),
-  workers_count: z.number().default(0).optional(),
-});
+  supervisorId: z.string().optional(),
+  workersCount: z.coerce.number().default(0).optional(),
+}).passthrough();
 
 export const WorkerSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Name is required"),
-  father_name: z.string().optional(),
+  fatherName: z.string().optional(),
   gender: z.string().optional(),
   dob: z.string().optional(),
   phone: z.string().optional(),
-  emergency_contact: z.string().optional(),
+  emergencyContact: z.string().optional(),
   address: z.string().optional(),
   village: z.string().optional(),
   district: z.string().optional(),
   state: z.string().optional(),
-  pin_code: z.string().optional(),
+  pinCode: z.string().optional(),
   aadhaar: z.string().optional(),
   pan: z.string().optional(),
-  bank_name: z.string().optional(),
-  account_number: z.string().optional(),
-  ifsc_code: z.string().optional(),
-  uan: z.string().optional(),
-  esic: z.string().optional(),
-  category: z.string().optional(),
-  site_id: z.string().optional(),
-  contractor_id: z.string().optional(),
-  wage_rate: z.number().default(0),
-  overtime_rate: z.number().default(0),
-  shift: z.string().optional(),
-  status: z.enum(['active', 'inactive', 'terminated']).default('active'),
+  bankName: z.string().optional(),
+  accountNumber: z.string().optional(),
+  ifscCode: z.string().optional(),
+  upiId: z.string().optional(),
+  joiningDate: z.string().optional(),
+  trade: z.string().optional(),
+  department: z.string().optional(),
+  skillLevel: z.string().optional(),
+  dailyWage: z.coerce.number().optional(),
+  overtimeRate: z.coerce.number().optional(),
+  currentSiteId: z.string().optional(),
+  status: z.string().optional(),
   photo: z.string().optional(),
-  join_date: z.string().optional(),
-  skill_level: z.string().optional(),
-  pin: z.string().optional(),
-});
+  notes: z.string().optional(),
+}).passthrough();
 
 export const AttendanceSchema = z.object({
   id: z.string().optional(),
-  worker_id: z.string(),
-  site_id: z.string(),
+  workerId: z.string(),
   date: z.string(),
-  status: z.enum(['present', 'absent', 'half-day', 'leave']),
-  time_in: z.string().optional(),
-  time_out: z.string().optional(),
-  overtime_hours: z.number().default(0),
-  supervisor_id: z.string().optional(),
-  gps_location: z.string().optional(),
-  notes: z.string().optional(),
-  verification_method: z.string().optional(),
-});
+  status: z.string().min(1),
+  isNightShift: z.boolean().optional(),
+  overtimeHours: z.coerce.number().optional(),
+  timeIn: z.string().optional(),
+  timeOut: z.string().optional(),
+  gpsCoordinates: z.string().optional(),
+  photoProof: z.string().optional(),
+  supervisorId: z.string().optional(),
+  siteId: z.string(),
+  remarks: z.string().optional(),
+}).passthrough();
 
 export const PaymentSchema = z.object({
   id: z.string().optional(),
-  worker_id: z.string(),
-  amount: z.number(),
+  workerId: z.string(),
+  workerName: z.string().optional(),
   date: z.string(),
-  type: z.enum(['salary', 'advance', 'bonus', 'settlement']),
-  payment_mode: z.string().optional(),
-  reference_no: z.string().optional(),
-  status: z.enum(['pending', 'processing', 'completed', 'failed']).default('completed'),
-  period_start: z.string().optional(),
-  period_end: z.string().optional(),
+  amount: z.coerce.number(),
+  paymentType: z.string().optional(),
+  referenceNumber: z.string().optional(),
+  type: z.string().optional(),
+  workerSignature: z.string().optional(),
+  supervisorSignature: z.string().optional(),
   notes: z.string().optional(),
-  deductions: z.number().default(0).optional(),
-  bonuses: z.number().default(0).optional(),
-});
+}).passthrough();
 
 export const LeaveSchema = z.object({
   id: z.string().optional(),
@@ -108,7 +108,7 @@ export const LeaveSchema = z.object({
   status: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),
   comment: z.string().optional(),
   createdAt: z.string().optional(),
-});
+}).passthrough();
 
 export const ChatMessageSchema = z.object({
   id: z.string().optional(),
@@ -119,7 +119,7 @@ export const ChatMessageSchema = z.object({
   text: z.string().optional(),
   imageUrl: z.string().optional(),
   createdAt: z.string().optional(),
-});
+}).passthrough();
 
 export const LabourSubmissionSchema = z.object({
   id: z.string().optional(),
@@ -127,9 +127,22 @@ export const LabourSubmissionSchema = z.object({
   date: z.string(),
   status: z.string(),
   isNightShift: z.boolean().default(false),
-  overtimeHours: z.number().default(0),
+  overtimeHours: z.coerce.number().default(0),
   timeIn: z.string().optional(),
   timeOut: z.string().optional(),
   remarks: z.string().optional(),
   createdAt: z.string().optional(),
-});
+}).passthrough();
+
+export const RegisterSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().min(6, "Valid phone number is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  organizationName: z.string().min(1, "Organization name is required"),
+}).passthrough();
+
+export const LoginSchema = z.object({
+  loginId: z.string().min(1, "Login identifier is required"),
+  password: z.string().min(1, "Password is required"),
+}).passthrough();

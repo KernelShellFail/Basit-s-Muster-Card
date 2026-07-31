@@ -8,6 +8,7 @@ export interface SiteEntity {
   status: string;
   supervisor_id?: string;
   workers_count?: number;
+  organization_id?: string;
 }
 
 export class SiteRepository extends BaseRepository<SiteEntity> {
@@ -15,17 +16,26 @@ export class SiteRepository extends BaseRepository<SiteEntity> {
     super('sites');
   }
 
+  async findAllByOrg(orgId: string): Promise<SiteEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE organization_id = $1 ORDER BY name ASC`,
+      [orgId]
+    );
+    return result.rows;
+  }
+
   async save(s: SiteEntity): Promise<void> {
     await this.query(`
-      INSERT INTO ${this.tableName} (id, name, address, gps_coordinates, status, supervisor_id, workers_count)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO ${this.tableName} (id, name, address, gps_coordinates, status, supervisor_id, workers_count, organization_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         address = EXCLUDED.address,
         gps_coordinates = EXCLUDED.gps_coordinates,
         status = EXCLUDED.status,
-        supervisor_id = EXCLUDED.supervisor_id;
-    `, [s.id, s.name, s.address, s.gps_coordinates, s.status, s.supervisor_id, s.workers_count || 0]);
+        supervisor_id = EXCLUDED.supervisor_id,
+        organization_id = EXCLUDED.organization_id;
+    `, [s.id, s.name, s.address, s.gps_coordinates, s.status, s.supervisor_id, s.workers_count || 0, s.organization_id]);
   }
 
   async updateWorkersCount(siteId: string, count: number): Promise<void> {

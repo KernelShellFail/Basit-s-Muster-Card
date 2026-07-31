@@ -7,7 +7,8 @@ const userRepo = new UserRepository();
 
 export const getUsers = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const users = await userRepo.findAll();
+    const orgId = req.user?.organizationId;
+    const users = await userRepo.findAllByOrg(orgId || '');
     res.json(users.map(u => ({
       uid: u.uid,
       name: u.name,
@@ -25,7 +26,7 @@ export const getUsers = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 export const saveUser = async (req: AuthenticatedRequest, res: Response) => {
-  const { uid, name, email, phone, role, siteId, organizationId, password, workerId } = req.body;
+  const { uid, name, email, phone, role, siteId, password, workerId } = req.body;
   try {
     const hashedPassword = password ? hashPassword(password) : undefined;
     await userRepo.save({
@@ -35,7 +36,7 @@ export const saveUser = async (req: AuthenticatedRequest, res: Response) => {
       phone,
       role,
       site_id: siteId,
-      organization_id: organizationId || 'org-101',
+      organization_id: req.user?.organizationId,
       password: hashedPassword,
       worker_id: workerId || null
     });

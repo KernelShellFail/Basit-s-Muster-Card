@@ -15,7 +15,21 @@ const syncSiteCount = async (siteId?: string) => {
 
 export const getWorkers = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const workers = await workerRepo.findAll();
+    const user = req.user;
+    if (!user?.organizationId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    let workers: WorkerEntity[];
+    if (user.role === 'labour' && user.workerId) {
+      const own = await workerRepo.findById(user.workerId);
+      workers = own ? [own] : [];
+    } else if (user.role === 'supervisor' && user.siteId) {
+      workers = await workerRepo.findAllBySite(user.siteId);
+    } else {
+      workers = await workerRepo.findAllByOrg(user.organizationId);
+    }
+
     const formatted = workers.map(w => ({
       id: w.id,
       name: w.name,
@@ -90,7 +104,8 @@ export const saveWorker = async (req: AuthenticatedRequest, res: Response) => {
       current_site_id: currentSiteId,
       status,
       photo,
-      notes
+      notes,
+      organization_id: req.user?.organizationId
     };
 
     // Find original site assignment to handle changes

@@ -6,7 +6,14 @@ const leaveRepo = new LeaveRepository();
 
 export const getLeaves = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const leaves = await leaveRepo.findOrderedByCreatedAt();
+    const user = req.user;
+    if (!user?.organizationId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const leaves = user.role === 'labour' && user.workerId
+      ? await leaveRepo.findAllByWorker(user.workerId)
+      : await leaveRepo.findAllByOrg(user.organizationId);
     const formatted = leaves.map(l => ({
       id: l.id,
       workerId: l.worker_id,
@@ -29,9 +36,15 @@ export const getLeaves = async (req: AuthenticatedRequest, res: Response) => {
 export const saveLeaveRequest = async (req: AuthenticatedRequest, res: Response) => {
   const { id, workerId, workerName, leaveType, startDate, endDate, reason, status, comment, createdAt } = req.body;
   try {
+    // Labour users may only request leave for their own worker profile.
+    const effectiveWorkerId = req.user?.role === 'labour' ? req.user.workerId : workerId;
+    if (req.user?.role === 'labour' && !effectiveWorkerId) {
+      return res.status(403).json({ error: 'Labour users must have a linked worker profile' });
+    }
+
     const leaveData: LeaveEntity = {
       id,
-      worker_id: workerId,
+      worker_id: effectiveWorkerId,
       worker_name: workerName,
       leave_type: leaveType,
       start_date: startDate,
@@ -39,7 +52,8 @@ export const saveLeaveRequest = async (req: AuthenticatedRequest, res: Response)
       reason,
       status,
       comment,
-      created_at: createdAt || new Date().toISOString()
+      created_at: createdAt || new Date().toISOString(),
+      organization_id: req.user?.organizationId
     };
     await leaveRepo.save(leaveData);
     res.json({ success: true });

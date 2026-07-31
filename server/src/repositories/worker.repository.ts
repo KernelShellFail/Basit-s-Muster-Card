@@ -29,11 +29,28 @@ export interface WorkerEntity {
   status?: string;
   photo?: string;
   notes?: string;
+  organization_id?: string;
 }
 
 export class WorkerRepository extends BaseRepository<WorkerEntity> {
   constructor() {
     super('workers');
+  }
+
+  async findAllByOrg(orgId: string): Promise<WorkerEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE organization_id = $1 ORDER BY name ASC`,
+      [orgId]
+    );
+    return result.rows;
+  }
+
+  async findAllBySite(siteId: string): Promise<WorkerEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE current_site_id = $1 ORDER BY name ASC`,
+      [siteId]
+    );
+    return result.rows;
   }
 
   async save(w: WorkerEntity): Promise<void> {
@@ -42,10 +59,10 @@ export class WorkerRepository extends BaseRepository<WorkerEntity> {
         id, name, father_name, gender, dob, phone, emergency_contact,
         address, village, district, state, pin_code, aadhaar, pan,
         bank_name, account_number, ifsc_code, upi_id, joining_date, trade, department, skill_level,
-        daily_wage, overtime_rate, current_site_id, status, photo, notes
+        daily_wage, overtime_rate, current_site_id, status, photo, notes, organization_id
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-              COALESCE($19, CURRENT_DATE::text), $20, $21, $22, $23, $24, $25, $26, $27, $28)
+              COALESCE($19, CURRENT_DATE::text), $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         father_name = EXCLUDED.father_name,
@@ -72,12 +89,13 @@ export class WorkerRepository extends BaseRepository<WorkerEntity> {
         current_site_id = EXCLUDED.current_site_id,
         status = EXCLUDED.status,
         photo = EXCLUDED.photo,
-        notes = EXCLUDED.notes;
+        notes = EXCLUDED.notes,
+        organization_id = EXCLUDED.organization_id;
     `, [
       w.id, w.name, w.father_name, w.gender, w.dob, w.phone, w.emergency_contact,
       w.address, w.village, w.district, w.state, w.pin_code, w.aadhaar, w.pan,
       w.bank_name, w.account_number, w.ifsc_code, w.upi_id, w.joining_date, w.trade, w.department, w.skill_level,
-      w.daily_wage, w.overtime_rate, w.current_site_id, w.status, w.photo, w.notes
+      w.daily_wage, w.overtime_rate, w.current_site_id, w.status, w.photo, w.notes, w.organization_id
     ]);
   }
 

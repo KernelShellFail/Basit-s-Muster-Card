@@ -19,17 +19,22 @@ import {
 import type { Worker, AttendanceRecord, PaymentRecord } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Badge } from '../../components/ui/Badge';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
 import { 
   useWorkers, useSites, useAttendance, usePayments, useUsers, 
   useAddWorker, useDeleteWorker, useAddUser, useRemoveUser 
 } from '../../api/queries';
+import { appConfig, makeId, formatCurrency } from '../../config/appConfig';
 
 export const Workers = () => {
-  const { activeSiteId, currentLanguage } = useAppStore();
+  const { activeSiteId, currentLanguage, currentUser } = useAppStore();
   const { data: workers = [] } = useWorkers();
   const { data: sites = [] } = useSites();
   const { data: attendance = [] } = useAttendance();
@@ -82,8 +87,8 @@ export const Workers = () => {
     trade: 'Mason',
     department: 'Civil',
     skillLevel: 'Skilled' as any,
-    dailyWage: 600,
-    overtimeRate: 80,
+    dailyWage: 0,
+    overtimeRate: 0,
     currentSiteId: activeSiteId,
     notes: '',
   });
@@ -119,7 +124,7 @@ export const Workers = () => {
       name: '', fatherName: '', gender: 'Male', dob: '', phone: '', emergencyContact: '',
       address: '', village: '', district: '', state: '', pinCode: '', aadhaar: '', pan: '',
       bankName: '', accountNumber: '', ifscCode: '', upiId: '', trade: 'Mason', department: 'Civil',
-      skillLevel: 'Skilled', dailyWage: 600, overtimeRate: 80, currentSiteId: activeSiteId, notes: ''
+      skillLevel: 'Skilled', dailyWage: 0, overtimeRate: 0, currentSiteId: activeSiteId, notes: ''
     });
   };
 
@@ -150,8 +155,8 @@ export const Workers = () => {
       trade: worker.trade || 'Mason',
       department: worker.department || 'Civil',
       skillLevel: worker.skillLevel || 'Skilled',
-      dailyWage: worker.dailyWage || 600,
-      overtimeRate: worker.overtimeRate || 80,
+      dailyWage: worker.dailyWage || 0,
+      overtimeRate: worker.overtimeRate || 0,
       currentSiteId: worker.currentSiteId || activeSiteId,
       notes: worker.notes || '',
     });
@@ -165,7 +170,7 @@ export const Workers = () => {
       return;
     }
 
-    const workerId = editingWorkerId || `WRK-2026-0${workers.length + 1}`;
+    const workerId = editingWorkerId || makeId('WRK');
 
     if (editingWorkerId) {
       const existing = workers.find(w => w.id === editingWorkerId);
@@ -175,8 +180,8 @@ export const Workers = () => {
         id: editingWorkerId,
         joiningDate: existing?.joiningDate || new Date().toISOString().split('T')[0],
         status: existing?.status || 'Active',
-        photo: existing?.photo || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-        documents: existing?.documents || [{ type: 'Aadhaar Card', url: '#' }],
+        photo: existing?.photo || appConfig.defaultWorkerPhoto,
+        documents: existing?.documents || [],
       };
       addWorker(updatedWorker);
       showToast(`Worker ${formData.name} updated successfully!`);
@@ -186,8 +191,8 @@ export const Workers = () => {
         id: workerId,
         joiningDate: new Date().toISOString().split('T')[0],
         status: 'Active',
-        photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-        documents: [{ type: 'Aadhaar Card', url: '#' }],
+        photo: appConfig.defaultWorkerPhoto,
+        documents: [],
       };
       addWorker(newWorker);
       showToast(`Worker ${formData.name} registered successfully!`);
@@ -202,7 +207,7 @@ export const Workers = () => {
         phone: formData.phone,
         role: 'labour' as const,
         siteId: formData.currentSiteId,
-        organizationId: 'org-101',
+        organizationId: currentUser?.organizationId || '',
         workerId: workerId,
         password: labourPassword || undefined
       };
@@ -225,13 +230,14 @@ export const Workers = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `MusterMate_Workers_${activeSiteId}_July_2026.csv`;
+    a.download = `MusterMate_Workers_${activeSiteId}_${new Date().toISOString().slice(0, 7)}.csv`;
     a.click();
     showToast('Workers export csv generated successfully!');
   };
 
   const getWorkerMusterStats = (workerId: string) => {
-    const workerAtt = attendance.filter(a => a.workerId === workerId && a.date.startsWith('2026-07'));
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const workerAtt = attendance.filter(a => a.workerId === workerId && a.date.startsWith(currentMonth));
     
     const presents = workerAtt.filter(a => a.status === 'Present').length;
     const halfDays = workerAtt.filter(a => a.status === 'Half-Day').length;
@@ -249,66 +255,67 @@ export const Workers = () => {
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Page Title & Actions */}
-      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">{t('workers')}</h1>
-          <p className="text-[16px] text-muted-foreground font-medium mt-4">Manage profiles, documents, bank credentials, and digital muster sheets.</p>
-        </div>
-        
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={handleExportCSV} leftIcon={<FileSpreadsheet className="w-5 h-5 text-emerald-500" />}>
-            Export CSV
-          </Button>
-          
-          <Button onClick={() => { resetForm(); setShowAddModal(true); }} leftIcon={<UserPlus className="w-5 h-5" />}>
-            {t('addWorker')}
-          </Button>
-        </div>
-      </motion.div>
+      <PageHeader
+        eyebrow="workers"
+        eyebrowColor="text-orangey"
+        title={t('workers')}
+        description="Manage profiles, documents, bank credentials, and digital muster sheets."
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <Button variant="ghost" onClick={handleExportCSV} leftIcon={<FileSpreadsheet className="w-5 h-5 text-orangey" />}>
+              Export CSV
+            </Button>
+            
+            <Button onClick={() => { resetForm(); setShowAddModal(true); }} leftIcon={<UserPlus className="w-5 h-5" />}>
+              {t('addWorker')}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Search & Filters */}
       <motion.div variants={slideUp}>
         <Card className="border border-border">
-          <CardContent className="p-10 flex flex-col md:flex-row md:items-center gap-6">
+          <CardContent className="p-6 flex flex-col md:flex-row md:items-end gap-5">
             <div className="relative flex-1">
               <Input
                 type="text"
                 placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                icon={<Search className="w-5 h-5 text-muted-foreground" />}
+                icon={<Search className="w-5 h-5 text-surface-50" />}
               />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0">
-              <select
+              <Select
                 value={selectedSite}
                 onChange={(e) => setSelectedSite(e.target.value)}
-                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
+                className="text-sm"
               >
                 <option value="All">All Sites</option>
                 {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+              </Select>
 
-              <select
+              <Select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
+                className="text-sm"
               >
                 {trades.map(t => <option key={t} value={t}>{t === 'All' ? 'All Trades' : t}</option>)}
-              </select>
+              </Select>
 
-              <select
+              <Select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value)}
-                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer col-span-2 sm:col-span-1"
+                className="text-sm col-span-2 sm:col-span-1"
               >
                 <option value="All">All Skills</option>
                 <option value="Helper">Helper</option>
                 <option value="Semi-Skilled">Semi-Skilled</option>
                 <option value="Skilled">Skilled</option>
                 <option value="Highly-Skilled">Highly-Skilled</option>
-              </select>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -378,53 +385,46 @@ export const Workers = () => {
                       <div className="flex items-center gap-3">
                         <img src={w.photo} alt={w.name} className="w-10 h-10 rounded-full object-cover border border-border" />
                         <div>
-                          <p className="font-bold text-foreground">{w.name}</p>
-                          <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{w.id}</p>
+                          <p className="font-bold text-surface-cream">{w.name}</p>
+                          <p className="text-[11px] text-surface-50 font-semibold mt-0.5">{w.id}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-bold text-foreground">{w.trade}</p>
-                      <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{w.department}</p>
+                      <p className="font-bold text-surface-cream">{w.trade}</p>
+                      <p className="text-[11px] text-surface-50 font-medium mt-0.5">{w.department}</p>
                     </TableCell>
                     <TableCell>
-                      <span className={`px-3 py-1.5 rounded-[28px] text-[10px] font-medium uppercase tracking-[0.1em] ${
-                        w.skillLevel === 'Highly-Skilled' ? 'bg-foreground text-background' :
-                        w.skillLevel === 'Skilled' ? 'bg-muted text-foreground' :
-                        w.skillLevel === 'Semi-Skilled' ? 'bg-background border border-border text-foreground' :
-                        'bg-background border border-border text-muted-foreground'
-                      }`}>
+                      <Badge color={w.skillLevel === 'Highly-Skilled' ? 'cream' : w.skillLevel === 'Skilled' ? 'default' : 'muted'}>
                         {w.skillLevel}
-                      </span>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="font-bold text-foreground whitespace-nowrap">
-                      ₹{w.dailyWage} / day
+                    <TableCell className="font-bold text-surface-cream whitespace-nowrap">
+                      {formatCurrency(w.dailyWage)} / day
                     </TableCell>
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-surface-50">
                       {sites.find(s => s.id === w.currentSiteId)?.name || 'Unassigned'}
                     </TableCell>
                     <TableCell>
-                      <span className={`px-3 py-1.5 rounded-[28px] text-[10px] font-medium uppercase tracking-[0.1em] inline-flex items-center gap-1.5 ${
-                        w.status === 'Active' ? 'bg-primary/20 text-foreground' : 'bg-muted text-muted-foreground'
-                      }`}>
+                      <Badge color={w.status === 'Active' ? 'success' : 'muted'}>
                         {w.status}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" className="px-2" onClick={() => setViewingWorker(w)} title="View Profile">
-                          <Eye className="w-4 h-4 text-muted-foreground mr-1" /> View
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button variant="ghost" size="sm" className="px-3" onClick={() => setViewingWorker(w)} title="View Profile">
+                          <Eye className="w-4 h-4 text-surface-50 mr-1" /> View
                         </Button>
-                        <Button variant="ghost" className="px-2" onClick={() => handleEditWorker(w)} title="Edit Worker">
-                          <Edit3 className="w-4 h-4 text-muted-foreground mr-1" /> Edit
+                        <Button variant="ghost" size="sm" className="px-3" onClick={() => handleEditWorker(w)} title="Edit Worker">
+                          <Edit3 className="w-4 h-4 text-surface-50 mr-1" /> Edit
                         </Button>
-                        <Button variant="ghost" className="px-2 hover:bg-destructive/10 hover:text-destructive" onClick={() => {
+                        <Button variant="ghost" size="sm" className="px-3 hover:bg-fn-error/10 hover:text-fn-error" onClick={() => {
                           if (confirm(`Are you sure you want to delete worker ${w.name}?`)) {
                             deleteWorker(w.id);
                             showToast(`Worker ${w.name} removed successfully.`);
                           }
                         }} title="Delete Worker">
-                          <Trash2 className="w-4 h-4 text-destructive mr-1" /> Delete
+                          <Trash2 className="w-4 h-4 text-fn-error mr-1" /> Delete
                         </Button>
                       </div>
                     </TableCell>
@@ -448,19 +448,19 @@ export const Workers = () => {
           >
             <div className="space-y-6">
               {/* Profile Card Summary */}
-              <div className="p-8 sm:p-10 rounded-[32px] bg-gradient-to-br from-card via-card to-background border border-border/80 flex flex-col sm:flex-row items-center gap-8 shadow-sm">
-                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-28 h-28 rounded-full object-cover shrink-0 border-4 border-card shadow-md" />
+              <div className="p-8 sm:p-10 rounded-[8px] bg-card border border-border flex flex-col sm:flex-row items-center gap-8">
+                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-28 h-28 rounded-full object-cover shrink-0 border-2 border-border" />
                 <div className="flex-1 text-center sm:text-left space-y-2">
-                  <h4 className="text-[26px] font-medium text-foreground tracking-tight">{viewingWorker.name}</h4>
-                  <p className="text-[13px] text-muted-foreground font-semibold uppercase tracking-wider">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
-                  <p className="text-[11px] text-muted-foreground/80 font-bold uppercase tracking-widest mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
+                  <h4 className="text-[26px] font-semibold text-surface-cream tracking-tight">{viewingWorker.name}</h4>
+                  <p className="text-[13px] text-surface-50 font-semibold uppercase tracking-wider">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
+                  <p className="text-[11px] text-surface-50 font-bold uppercase tracking-widest mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
                 </div>
                 <div className="shrink-0 flex sm:flex-col gap-3 font-semibold text-xs tracking-wider">
-                  <span className="bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary px-5 py-2.5 rounded-full text-center">
-                    Wage: ₹{viewingWorker.dailyWage}/day
+                  <span className="bg-background border border-orangey/40 text-orangey px-5 py-2.5 rounded-full text-center">
+                    Wage: {formatCurrency(viewingWorker.dailyWage)}/day
                   </span>
-                  <span className="bg-card border border-border px-5 py-2.5 rounded-full text-center text-foreground">
-                    OT: ₹{viewingWorker.overtimeRate}/hr
+                  <span className="bg-background border border-border px-5 py-2.5 rounded-full text-center text-surface-cream">
+                    OT: {formatCurrency(viewingWorker.overtimeRate)}/hr
                   </span>
                 </div>
               </div>
@@ -470,40 +470,40 @@ export const Workers = () => {
                 {/* Personal & Bank Details */}
                 <div className="space-y-6 md:col-span-1">
                   <div>
-                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
-                      <User className="w-4 h-4 text-foreground" />
+                    <h5 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <User className="w-4 h-4 text-surface-cream" />
                       Personal Bio
                     </h5>
-                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
-                      <li><span className="text-muted-foreground font-normal">Father's Name:</span> {viewingWorker.fatherName}</li>
-                      <li><span className="text-muted-foreground font-normal">Gender / DOB:</span> {viewingWorker.gender} • {viewingWorker.dob}</li>
-                      <li><span className="text-muted-foreground font-normal">Phone:</span> {viewingWorker.phone}</li>
-                      <li><span className="text-muted-foreground font-normal">Emergency:</span> {viewingWorker.emergencyContact}</li>
-                      <li className="leading-relaxed"><span className="text-muted-foreground font-normal">Address:</span> {viewingWorker.address}, {viewingWorker.village}, {viewingWorker.district}, {viewingWorker.state} - {viewingWorker.pinCode}</li>
+                    <ul className="text-[13px] space-y-3 text-surface-cream font-medium">
+                      <li><span className="text-surface-50 font-normal">Father's Name:</span> {viewingWorker.fatherName}</li>
+                      <li><span className="text-surface-50 font-normal">Gender / DOB:</span> {viewingWorker.gender} • {viewingWorker.dob}</li>
+                      <li><span className="text-surface-50 font-normal">Phone:</span> {viewingWorker.phone}</li>
+                      <li><span className="text-surface-50 font-normal">Emergency:</span> {viewingWorker.emergencyContact}</li>
+                      <li className="leading-relaxed"><span className="text-surface-50 font-normal">Address:</span> {viewingWorker.address}, {viewingWorker.village}, {viewingWorker.district}, {viewingWorker.state} - {viewingWorker.pinCode}</li>
                     </ul>
                   </div>
 
-                  <div className="pt-6 border-t border-border/50">
-                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
-                      <FileText className="w-4 h-4 text-foreground" />
+                  <div className="pt-6 border-t border-border">
+                    <h5 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <FileText className="w-4 h-4 text-surface-cream" />
                       Verified Documents
                     </h5>
-                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
-                      <li><span className="text-muted-foreground font-normal">Aadhaar Card:</span> {viewingWorker.aadhaar}</li>
-                      <li><span className="text-muted-foreground font-normal">PAN Card:</span> {viewingWorker.pan || 'N/A'}</li>
+                    <ul className="text-[13px] space-y-3 text-surface-cream font-medium">
+                      <li><span className="text-surface-50 font-normal">Aadhaar Card:</span> {viewingWorker.aadhaar}</li>
+                      <li><span className="text-surface-50 font-normal">PAN Card:</span> {viewingWorker.pan || 'N/A'}</li>
                     </ul>
                   </div>
 
-                  <div className="pt-6 border-t border-border/50">
-                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
-                      <CreditCard className="w-4 h-4 text-foreground" />
+                  <div className="pt-6 border-t border-border">
+                    <h5 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <CreditCard className="w-4 h-4 text-surface-cream" />
                       Bank Account Info
                     </h5>
-                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
-                      <li><span className="text-muted-foreground font-normal">Bank Name:</span> {viewingWorker.bankName}</li>
-                      <li><span className="text-muted-foreground font-normal">Account No:</span> {viewingWorker.accountNumber}</li>
-                      <li><span className="text-muted-foreground font-normal">IFSC Code:</span> {viewingWorker.ifscCode}</li>
-                      <li><span className="text-muted-foreground font-normal">UPI ID:</span> {viewingWorker.upiId || 'N/A'}</li>
+                    <ul className="text-[13px] space-y-3 text-surface-cream font-medium">
+                      <li><span className="text-surface-50 font-normal">Bank Name:</span> {viewingWorker.bankName}</li>
+                      <li><span className="text-surface-50 font-normal">Account No:</span> {viewingWorker.accountNumber}</li>
+                      <li><span className="text-surface-50 font-normal">IFSC Code:</span> {viewingWorker.ifscCode}</li>
+                      <li><span className="text-surface-50 font-normal">UPI ID:</span> {viewingWorker.upiId || 'N/A'}</li>
                     </ul>
                   </div>
                 </div>
@@ -511,52 +511,53 @@ export const Workers = () => {
                 {/* Digital Muster Card (Monthly Calendar Sheet) */}
                 <div className="md:col-span-2 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-[14px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-foreground" />
-                      {t('musterCard')} • July 2026
+                    <h5 className="text-[14px] font-bold uppercase tracking-wider text-surface-cream flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-orangey" />
+                      {t('musterCard')} • {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}
                     </h5>
                     
-                    <Button variant="outline" size="sm" onClick={() => window.print()} leftIcon={<Printer className="w-4 h-4" />}>
+                    <Button variant="ghost" size="sm" onClick={() => window.print()} leftIcon={<Printer className="w-4 h-4" />}>
                       Print Card
                     </Button>
                   </div>
 
                   {/* Calendar Sheet Grid (31 Days) */}
-                  <div className="grid grid-cols-7 gap-2 border border-border/80 p-6 rounded-[28px] bg-card/30 text-center">
+                  <div className="grid grid-cols-7 gap-2 border border-border p-6 rounded-[8px] bg-background text-center">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-                      <div key={idx} className="text-[10px] font-bold text-muted-foreground py-1 uppercase tracking-widest">{day}</div>
+                      <div key={idx} className="text-[11px] font-bold text-surface-50 py-1 uppercase tracking-widest">{day}</div>
                     ))}
                     
-                    {[...Array(3)].map((_, i) => <div key={`pad-${i}`} className="py-2.5" />)}
+                    {[...Array(new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay())].map((_, i) => <div key={`pad-${i}`} className="py-2.5" />)}
 
-                    {[...Array(31)].map((_, i) => {
+                    {[...Array(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate())].map((_, i) => {
                       const dayNumber = i + 1;
-                      const dateStr = `2026-07-${dayNumber.toString().padStart(2, '0')}`;
+                      const musterMonth = new Date().toISOString().slice(0, 7);
+                      const dateStr = `${musterMonth}-${dayNumber.toString().padStart(2, '0')}`;
                       
                       const attendanceRecord = attendance.find(a => a.workerId === viewingWorker.id && a.date === dateStr);
                       const status = attendanceRecord ? attendanceRecord.status : 'Unmarked';
                       
                       const statusColorMap: Record<string, string> = {
-                        'Present': 'bg-foreground text-background font-bold shadow-sm',
-                        'Half-Day': 'bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary font-bold',
-                        'Absent': 'bg-background border border-border/60 text-muted-foreground/60',
-                        'Paid-Leave': 'bg-background border border-border/80 text-foreground font-bold shadow-sm',
-                        'Unpaid-Leave': 'bg-background border border-border/40 text-muted-foreground/50',
-                        'Weekly-Off': 'bg-background border border-border/40 text-foreground/80 font-bold',
-                        'Holiday': 'bg-muted text-foreground/80 font-bold',
-                        'Unmarked': 'bg-transparent text-muted-foreground/30 hover:bg-muted/50 transition-colors'
+                        'Present': 'bg-surface-cream text-just-black font-bold',
+                        'Half-Day': 'bg-fn-warning/10 border border-fn-warning/30 text-fn-warning font-bold',
+                        'Absent': 'bg-background border border-border text-surface-50/60',
+                        'Paid-Leave': 'bg-background border border-border text-surface-cream font-bold',
+                        'Unpaid-Leave': 'bg-background border border-border/40 text-surface-50/50',
+                        'Weekly-Off': 'bg-background border border-border/40 text-surface-cream/80 font-bold',
+                        'Holiday': 'bg-card text-surface-cream/80 font-bold',
+                        'Unmarked': 'bg-transparent text-surface-50/30 hover:bg-muted/50 transition-colors'
                       };
 
                       return (
                         <div 
                           key={dayNumber} 
-                          className={`py-2.5 text-xs rounded-xl flex flex-col items-center justify-center border border-transparent cursor-default transition-all ${
+                          className={`py-2.5 text-xs rounded-[8px] flex flex-col items-center justify-center border border-transparent cursor-default transition-all ${
                             statusColorMap[status] || 'bg-transparent'
                           }`}
                           title={`Date: ${dateStr}\nStatus: ${status}`}
                         >
                           <span className="block font-bold">{dayNumber}</span>
-                          <span className="block text-[8px] font-black opacity-80 mt-0.5 uppercase tracking-wide">
+                          <span className="block text-[11px] font-black opacity-80 mt-0.5 uppercase tracking-wide">
                             {status === 'Present' ? 'P' :
                              status === 'Half-Day' ? 'H' :
                              status === 'Absent' ? 'A' :
@@ -574,17 +575,18 @@ export const Workers = () => {
                   {(() => {
                     const stats = getWorkerMusterStats(viewingWorker.id);
                     let grossWages = 0;
-                    const monthlyWages = attendance.filter(a => a.workerId === viewingWorker.id && a.date.startsWith('2026-07'));
+                    const musterMonth = new Date().toISOString().slice(0, 7);
+                    const monthlyWages = attendance.filter(a => a.workerId === viewingWorker.id && a.date.startsWith(musterMonth));
                       
                     monthlyWages.forEach((rec: AttendanceRecord) => {
                       if (rec.status === 'Present') grossWages += viewingWorker.dailyWage;
                       else if (rec.status === 'Half-Day') grossWages += viewingWorker.dailyWage * 0.5;
                       if (rec.overtimeHours > 0) grossWages += rec.overtimeHours * viewingWorker.overtimeRate;
-                      if (rec.isNightShift) grossWages += 150; 
+                      if (rec.isNightShift) grossWages += appConfig.nightShiftAllowance;
                     });
 
                     const totalPaid = payments
-                      .filter(p => p.workerId === viewingWorker.id && p.date.startsWith('2026-07'))
+                      .filter(p => p.workerId === viewingWorker.id && p.date.startsWith(musterMonth))
                       .reduce((sum: number, p: PaymentRecord) => sum + p.amount, 0);
 
                     const pendingBalance = Math.max(0, grossWages - totalPaid);
@@ -592,54 +594,54 @@ export const Workers = () => {
                     return (
                       <div className="space-y-6">
                         {/* Attendance Counter Grid */}
-                        <div className="grid grid-cols-4 gap-4 text-center text-[10px] uppercase tracking-widest font-bold">
-                          <div className="p-4 rounded-2xl border border-border bg-foreground text-background shadow-sm">
+                        <div className="grid grid-cols-4 gap-4 text-center text-[11px] uppercase tracking-widest font-bold">
+                          <div className="p-4 rounded-[8px] border border-border bg-surface-cream text-just-black">
                             <p className="opacity-70">Presents</p>
-                            <h4 className="text-[24px] font-medium mt-2">{stats.presents}</h4>
+                            <h4 className="text-[24px] font-semibold mt-2">{stats.presents}</h4>
                           </div>
-                          <div className="p-4 rounded-2xl border border-border/80 bg-primary/10 text-primary-foreground dark:text-primary">
+                          <div className="p-4 rounded-[8px] border border-border bg-background text-fn-warning">
                             <p className="opacity-80">Half-Days</p>
-                            <h4 className="text-[24px] font-medium mt-2">{stats.halfDays}</h4>
+                            <h4 className="text-[24px] font-semibold mt-2">{stats.halfDays}</h4>
                           </div>
-                          <div className="p-4 rounded-2xl border border-border bg-card text-foreground">
-                            <p className="text-muted-foreground">Absents</p>
-                            <h4 className="text-[24px] font-medium mt-2">{stats.absents}</h4>
+                          <div className="p-4 rounded-[8px] border border-border bg-card text-surface-cream">
+                            <p className="text-surface-50">Absents</p>
+                            <h4 className="text-[24px] font-semibold mt-2">{stats.absents}</h4>
                           </div>
-                          <div className="p-4 rounded-2xl border border-border bg-background text-foreground">
-                            <p className="text-muted-foreground">OT Hours</p>
-                            <h4 className="text-[24px] font-medium mt-2">{stats.totalOTHours}h</h4>
+                          <div className="p-4 rounded-[8px] border border-border bg-background text-surface-cream">
+                            <p className="text-surface-50">OT Hours</p>
+                            <h4 className="text-[24px] font-semibold mt-2">{stats.totalOTHours}h</h4>
                           </div>
                         </div>
 
                         {/* Wage Breakdown Box */}
-                        <div className="p-8 rounded-[28px] border border-border/80 bg-card/40 space-y-4">
-                          <h6 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.12em] mb-4">July Earnings Statement</h6>
+                        <div className="p-8 rounded-[8px] border border-border bg-card space-y-4">
+                          <h6 className="text-[11px] font-bold text-surface-50 uppercase tracking-[0.12em] mb-4">{new Date().toLocaleString('en-US', { month: 'long' })} Earnings Statement</h6>
                           
-                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-surface-50">
                             <span>Base Wage Earned:</span>
-                            <span className="font-semibold text-foreground">₹{grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * 150)}</span>
+                            <span className="font-semibold text-surface-cream">{formatCurrency(grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * appConfig.nightShiftAllowance))}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-surface-50">
                             <span>Overtime Earned ({stats.totalOTHours} hrs):</span>
-                            <span className="font-semibold text-foreground">₹{stats.totalOTHours * viewingWorker.overtimeRate}</span>
+                            <span className="font-semibold text-surface-cream">{formatCurrency(stats.totalOTHours * viewingWorker.overtimeRate)}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-surface-50">
                             <span>Night Shift Allowance:</span>
-                            <span className="font-semibold text-foreground">₹{stats.nightShiftsCount * 150}</span>
+                            <span className="font-semibold text-surface-cream">{formatCurrency(stats.nightShiftsCount * appConfig.nightShiftAllowance)}</span>
                           </div>
                           
-                          <div className="border-t border-border/50 pt-4 flex items-center justify-between text-[14px] font-semibold text-foreground">
+                          <div className="border-t border-border pt-4 flex items-center justify-between text-[14px] font-semibold text-surface-cream">
                             <span>Gross Monthly Wages:</span>
-                            <span>₹{grossWages}</span>
+                            <span>{formatCurrency(grossWages)}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[14px] font-semibold text-foreground bg-primary/5 border border-primary/10 p-3.5 rounded-xl mt-2">
+                          <div className="flex items-center justify-between text-[14px] font-semibold text-surface-cream bg-background border border-border p-3.5 rounded-[8px] mt-2">
                             <span>Total Wage Released (Paid):</span>
-                            <span className="font-semibold">₹{totalPaid}</span>
+                            <span className="font-semibold">{formatCurrency(totalPaid)}</span>
                           </div>
                           
-                          <div className="border-t border-border/50 pt-6 mt-4 flex items-center justify-between text-[18px] font-bold text-foreground">
+                          <div className="border-t border-border pt-6 mt-4 flex items-center justify-between text-[18px] font-bold text-surface-cream">
                             <span>Net Balance Due:</span>
-                            <span className="text-foreground">₹{pendingBalance}</span>
+                            <span className="text-shockingly-green">{formatCurrency(pendingBalance)}</span>
                           </div>
                         </div>
                       </div>
@@ -661,32 +663,24 @@ export const Workers = () => {
         <form onSubmit={handleRegisterWorker} className="space-y-8">
           
           <div className="space-y-4">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">1. Basic Details</h4>
+            <h4 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-2">1. Basic Details</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Full Name *" name="name" required value={formData.name} onChange={handleInputChange} />
               <Input label="Father's Name" name="fatherName" value={formData.fatherName} onChange={handleInputChange} />
               <Input label="Phone Number *" name="phone" required value={formData.phone} onChange={handleInputChange} />
               <Input label="DOB (YYYY-MM-DD)" type="date" name="dob" value={formData.dob} onChange={handleInputChange} />
               
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+              <Select label="Gender" name="gender" value={formData.gender} onChange={handleInputChange}>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </Select>
               <Input label="Emergency Contact No" name="emergencyContact" value={formData.emergencyContact} onChange={handleInputChange} />
             </div>
           </div>
 
           <div className="space-y-4 border-t border-border pt-6">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">2. Address details</h4>
+            <h4 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-2">2. Address details</h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
                 <Input label="Local Address" name="address" value={formData.address} onChange={handleInputChange} />
@@ -699,7 +693,7 @@ export const Workers = () => {
           </div>
 
           <div className="space-y-4 border-t border-border pt-6">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">3. KYC Identity & Bank Transfer Data</h4>
+            <h4 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-2">3. KYC Identity & Bank Transfer Data</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Aadhaar Card No *" name="aadhaar" required placeholder="xxxx-xxxx-xxxx" value={formData.aadhaar} onChange={handleInputChange} />
               <Input label="PAN Card No" name="pan" placeholder="ABCDE1234F" value={formData.pan} onChange={handleInputChange} />
@@ -711,90 +705,49 @@ export const Workers = () => {
           </div>
 
           <div className="space-y-4 border-t border-border pt-6">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">4. Professional & Wage Parameters</h4>
+            <h4 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-2">4. Professional & Wage Parameters</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">Trade Designation</label>
-                <select
-                  name="trade"
-                  value={formData.trade}
-                  onChange={handleInputChange}
-                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="Mason">Mason (मिस्त्री)</option>
-                  <option value="Carpenter">Carpenter (बढ़ई)</option>
-                  <option value="Welder">Welder (वेल्डर)</option>
-                  <option value="Helper">Helper (मज़दूर)</option>
-                  <option value="Electrician">Electrician (बिजली मिस्त्री)</option>
-                  <option value="Plumber">Plumber (प्लंबर)</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">Department</label>
-                <select
-                  name="department"
-                  value={formData.department}
-                  onChange={handleInputChange}
-                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="Civil">Civil</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Finishing">Finishing</option>
-                  <option value="Plumbing">Plumbing</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">Skill Level</label>
-                <select
-                  name="skillLevel"
-                  value={formData.skillLevel}
-                  onChange={handleInputChange}
-                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="Helper">Helper</option>
-                  <option value="Semi-Skilled">Semi-Skilled</option>
-                  <option value="Skilled">Skilled</option>
-                  <option value="Highly-Skilled">Highly-Skilled</option>
-                </select>
-              </div>
-              <Input label="Daily Base Wage (₹)" type="number" name="dailyWage" value={formData.dailyWage.toString()} onChange={handleInputChange} />
-              <Input label="Overtime Hourly Rate (₹)" type="number" name="overtimeRate" value={formData.overtimeRate.toString()} onChange={handleInputChange} />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">Assign Construction Site</label>
-                <select
-                  name="currentSiteId"
-                  value={formData.currentSiteId}
-                  onChange={handleInputChange}
-                  className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
+              <Select label="Trade Designation" name="trade" value={formData.trade} onChange={handleInputChange}>
+                <option value="Mason">Mason (मिस्त्री)</option>
+                <option value="Carpenter">Carpenter (बढ़ई)</option>
+                <option value="Welder">Welder (वेल्डर)</option>
+                <option value="Helper">Helper (मज़दूर)</option>
+                <option value="Electrician">Electrician (बिजली मिस्त्री)</option>
+                <option value="Plumber">Plumber (प्लंबर)</option>
+              </Select>
+              <Select label="Department" name="department" value={formData.department} onChange={handleInputChange}>
+                <option value="Civil">Civil</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Finishing">Finishing</option>
+                <option value="Plumbing">Plumbing</option>
+              </Select>
+              <Select label="Skill Level" name="skillLevel" value={formData.skillLevel} onChange={handleInputChange}>
+                <option value="Helper">Helper</option>
+                <option value="Semi-Skilled">Semi-Skilled</option>
+                <option value="Skilled">Skilled</option>
+                <option value="Highly-Skilled">Highly-Skilled</option>
+              </Select>
+              <Input label={`Daily Base Wage (${appConfig.currency})`} type="number" name="dailyWage" value={formData.dailyWage.toString()} onChange={handleInputChange} />
+              <Input label={`Overtime Hourly Rate (${appConfig.currency})`} type="number" name="overtimeRate" value={formData.overtimeRate.toString()} onChange={handleInputChange} />
+              <Select label="Assign Construction Site" name="currentSiteId" value={formData.currentSiteId} onChange={handleInputChange}>
+                {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </Select>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground">Supervisor Notes / Remarks</label>
-            <textarea
-              name="notes"
-              rows={3}
-              value={formData.notes}
-              onChange={handleInputChange}
-              className="flex w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
+            <Textarea label="Supervisor Notes / Remarks" name="notes" rows={3} value={formData.notes} onChange={handleInputChange} />
 
           {/* Labour Portal Self-Login Setup */}
-          <div className="space-y-4 pt-8 border-t border-border mt-8 p-6 rounded-[28px] bg-background border">
+          <div className="space-y-4 pt-8 border-t border-border mt-8 p-6 rounded-[8px] bg-background border">
             <div className="flex items-center gap-4">
               <input
                 type="checkbox"
                 id="selfLoginEnabled"
                 checked={selfLoginEnabled}
                 onChange={(e) => setSelfLoginEnabled(e.target.checked)}
-                className="w-5 h-5 rounded text-foreground focus:ring-foreground border-input bg-background"
+                className="w-5 h-5 rounded text-surface-cream focus:ring-surface-cream border-border bg-background"
               />
-              <label htmlFor="selfLoginEnabled" className="text-[14px] font-medium text-foreground select-none">
+              <label htmlFor="selfLoginEnabled" className="text-[14px] font-medium text-surface-cream select-none">
                 Enable Labour Self-Login (मजदूर लॉगिन सक्षम करें)
               </label>
             </div>
@@ -802,8 +755,8 @@ export const Workers = () => {
             {selfLoginEnabled && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest">LOGIN IDENTIFIER ID</p>
-                  <p className="text-sm font-bold text-foreground mt-1.5 select-all bg-background p-2.5 rounded-xl border border-border">
+                  <p className="text-[11px] text-surface-50 font-bold uppercase tracking-widest">LOGIN IDENTIFIER ID</p>
+                  <p className="text-sm font-bold text-surface-cream mt-1.5 select-all bg-background p-2.5 rounded-[8px] border border-border">
                     {editingWorkerId || 'Will generate on registration'}
                   </p>
                 </div>

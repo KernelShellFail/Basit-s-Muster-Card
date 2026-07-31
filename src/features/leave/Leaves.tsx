@@ -13,8 +13,12 @@ import {
 import type { LeaveRequest } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { Badge } from '../../components/ui/Badge';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
 import { useWorkers, useLeaves, useAddLeave } from '../../api/queries';
@@ -87,55 +91,54 @@ export const Leaves = () => {
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Title */}
-      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">{t('leaves')}</h1>
-          <p className="text-[16px] text-muted-foreground font-medium mt-4">Submit and review leave approvals. Approved leaves auto-populate the attendance sheet.</p>
-        </div>
-        
-        <Button
-          onClick={() => {
-            setTargetWorkerId(workers[0]?.id || '');
-            setShowApplyModal(true);
-          }}
-          leftIcon={<CalendarRange className="w-5 h-5" />}
-          className="shrink-0"
-        >
-          Request Leave (रजा मांगें)
-        </Button>
-      </motion.div>
+      <PageHeader
+        eyebrow="leaves"
+        eyebrowColor="text-lilac"
+        title={t('leaves')}
+        description="Submit and review leave approvals. Approved leaves auto-populate the attendance sheet."
+        actions={
+          <Button
+            onClick={() => {
+              setTargetWorkerId(workers[0]?.id || '');
+              setShowApplyModal(true);
+            }}
+            leftIcon={<CalendarRange className="w-5 h-5" />}
+            className="shrink-0"
+          >
+            Request Leave (रजा मांगें)
+          </Button>
+        }
+      />
 
       {/* Grid: Pending vs Processed logs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
         
         {/* Pending approvals (For Owners / Admins / Supervisors) */}
         <motion.div variants={slideUp} className="space-y-6">
-          <h3 className="text-[11px] font-bold text-foreground flex items-center gap-2 uppercase tracking-[0.12em]">
-            <Clock className="w-5 h-5 text-muted-foreground" />
+          <h3 className="text-[11px] font-bold text-surface-cream flex items-center gap-2 uppercase tracking-[0.12em]">
+            <Clock className="w-5 h-5 text-lilac" />
             Pending Action ({pendingLeaves.length})
           </h3>
 
           {pendingLeaves.length === 0 ? (
-            <div className="p-12 text-center text-[15px] font-medium text-muted-foreground border border-dashed border-border/80 rounded-[32px] bg-card/40">
+            <div className="p-12 text-center text-[15px] font-medium text-surface-50 border border-dashed border-border rounded-[8px] bg-card/40">
               All leave requests processed. No pending items.
             </div>
           ) : (
             pendingLeaves.map((leave: LeaveRequest) => (
-              <Card key={leave.id} className="overflow-hidden border border-border/80 rounded-[22px] bg-card/60 hover:bg-card hover:border-foreground/20 transition-all duration-300 shadow-sm">
+              <Card key={leave.id} className="overflow-hidden border border-border rounded-[8px] bg-card">
                 <CardContent className="p-8 sm:p-10 space-y-6">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="text-[16px] font-bold text-foreground">{leave.workerName}</h4>
-                      <p className="text-[11px] font-semibold text-muted-foreground mt-1 uppercase tracking-wider">ID: {leave.workerId} • Req: {new Date(leave.createdAt).toLocaleDateString()}</p>
+                      <h4 className="text-[16px] font-bold text-surface-cream">{leave.workerName}</h4>
+                      <p className="text-[11px] font-semibold text-surface-50 mt-1 uppercase tracking-wider">ID: {leave.workerId} • Req: {new Date(leave.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className="bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary text-[9px] font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider">
-                      {leave.leaveType}
-                    </span>
+                    <Badge color="lilac">{leave.leaveType}</Badge>
                   </div>
 
-                  <div className="text-[13px] text-muted-foreground bg-background p-6 rounded-[22px] border border-border/80">
-                    <p><strong className="text-foreground font-semibold">Dates:</strong> {leave.startDate} to {leave.endDate}</p>
-                    <p className="mt-2 leading-relaxed"><strong className="text-foreground font-semibold">Reason:</strong> "{leave.reason}"</p>
+                  <div className="text-[13px] text-surface-50 bg-background p-6 rounded-[8px] border border-border">
+                    <p><strong className="text-surface-cream font-semibold">Dates:</strong> {leave.startDate} to {leave.endDate}</p>
+                    <p className="mt-2 leading-relaxed"><strong className="text-surface-cream font-semibold">Reason:</strong> "{leave.reason}"</p>
                   </div>
 
                   {/* Supervisor/Admin Actions */}
@@ -153,7 +156,7 @@ export const Leaves = () => {
                           variant="outline"
                           onClick={() => handleAction(leave, 'Rejected')}
                           leftIcon={<ThumbsDown className="w-4 h-4" />}
-                          className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                          className="text-fn-error border-fn-error/20 hover:bg-fn-error/10 hover:text-fn-error hover:border-fn-error/30"
                         >
                           Reject
                         </Button>
@@ -174,25 +177,25 @@ export const Leaves = () => {
 
         {/* Leave Logs History */}
         <motion.div variants={slideUp} className="space-y-6">
-          <h3 className="text-[11px] font-bold text-foreground flex items-center gap-2 uppercase tracking-[0.12em]">
-            <CalendarDays className="w-5 h-5 text-muted-foreground" />
+          <h3 className="text-[11px] font-bold text-surface-cream flex items-center gap-2 uppercase tracking-[0.12em]">
+            <CalendarDays className="w-5 h-5 text-lilac" />
             Processed Log & Approval Timeline
           </h3>
 
-          <Card className="rounded-[32px] border border-border/80 bg-card overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <Card className="rounded-[8px] border border-border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.1em] border-b border-border/50">
+                <TableRow className="bg-muted/20 text-[12px] text-surface-50 font-semibold uppercase tracking-[0.08em] border-b border-border">
                   <TableHead className="py-4 px-6">Worker</TableHead>
                   <TableHead className="py-4 px-6">Dates</TableHead>
                   <TableHead className="py-4 px-6">Type</TableHead>
                   <TableHead className="py-4 px-6">Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-border/30">
+              <TableBody className="divide-y divide-border">
                 {processedLeaves.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-32 text-center text-sm text-muted-foreground font-semibold">
+                    <TableCell colSpan={4} className="h-32 text-center text-sm text-surface-50 font-semibold">
                       No previous logs recorded yet.
                     </TableCell>
                   </TableRow>
@@ -200,27 +203,23 @@ export const Leaves = () => {
                   processedLeaves.map((leave: LeaveRequest) => (
                     <TableRow key={leave.id} className="hover:bg-muted/20 transition-colors">
                       <TableCell className="py-4 px-6">
-                        <p className="font-bold text-[14px] text-foreground leading-tight">{leave.workerName}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-semibold">{leave.workerId}</p>
+                        <p className="font-bold text-[14px] text-surface-cream leading-tight">{leave.workerName}</p>
+                        <p className="text-[11px] text-surface-50 mt-1 uppercase tracking-wider font-semibold">{leave.workerId}</p>
                       </TableCell>
-                      <TableCell className="py-4 px-6 font-semibold text-[11px] text-muted-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 font-semibold text-[11px] text-surface-50 whitespace-nowrap">
                         <div className="flex flex-col leading-normal">
                           <span>{leave.startDate}</span>
-                          <span className="text-[8px] text-foreground uppercase tracking-widest font-bold">to</span>
+                          <span className="text-[11px] text-surface-cream uppercase tracking-widest font-bold">to</span>
                           <span>{leave.endDate}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-6 font-semibold text-xs text-foreground">{leave.leaveType}</TableCell>
+                      <TableCell className="py-4 px-6 font-semibold text-xs text-surface-cream">{leave.leaveType}</TableCell>
                       <TableCell className="py-4 px-6">
-                        <span className={`px-3.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                          leave.status === 'Approved' 
-                            ? 'bg-foreground text-background border-foreground shadow-sm' 
-                            : 'bg-background border border-border text-muted-foreground/60'
-                        }`}>
+                        <Badge color={leave.status === 'Approved' ? 'success' : 'error'}>
                           {leave.status}
-                        </span>
+                        </Badge>
                         {leave.comment && (
-                          <p className="text-[10px] text-muted-foreground italic mt-2.5 truncate max-w-[100px] xs:max-w-[150px] sm:max-w-[200px]" title={leave.comment}>
+                          <p className="text-[11px] text-surface-50 italic mt-2.5 truncate max-w-[100px] xs:max-w-[150px] sm:max-w-[200px]" title={leave.comment}>
                             "{leave.comment}"
                           </p>
                         )}
@@ -245,37 +244,33 @@ export const Leaves = () => {
           >
             <form onSubmit={handleApplyLeave} className="space-y-5">
               {/* Select worker */}
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Select Worker (मज़दूर चुनें)</label>
-                <select
-                  value={targetWorkerId}
-                  onChange={(e) => setTargetWorkerId(e.target.value)}
-                  className="flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
-                >
-                  {workers.map(w => <option key={w.id} value={w.id}>{w.name} ({w.id})</option>)}
-                </select>
-              </div>
+              <Select
+                label="Select Worker (मज़दूर चुनें)"
+                value={targetWorkerId}
+                onChange={(e) => setTargetWorkerId(e.target.value)}
+                className="text-surface-cream"
+              >
+                {workers.map(w => <option key={w.id} value={w.id}>{w.name} ({w.id})</option>)}
+              </Select>
 
               {/* Leave Type */}
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Leave Type (पेशा प्रकार)</label>
-                <select
-                  value={leaveType}
-                  onChange={(e) => setLeaveType(e.target.value as any)}
-                  className="flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
-                >
-                  <option value="Personal">Personal Leave</option>
-                  <option value="Medical">Medical Leave</option>
-                  <option value="Emergency">Emergency Leave</option>
-                  <option value="Paid">Paid Leave (सवैतनिक)</option>
-                  <option value="Unpaid">Unpaid Leave (अवैतनिक)</option>
-                </select>
-              </div>
+              <Select
+                label="Leave Type (पेशा प्रकार)"
+                value={leaveType}
+                onChange={(e) => setLeaveType(e.target.value as any)}
+                className="text-surface-cream"
+              >
+                <option value="Personal">Personal Leave</option>
+                <option value="Medical">Medical Leave</option>
+                <option value="Emergency">Emergency Leave</option>
+                <option value="Paid">Paid Leave (सवैतनिक)</option>
+                <option value="Unpaid">Unpaid Leave (अवैतनिक)</option>
+              </Select>
 
               {/* Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Start Date *</label>
+                  <label className="text-[11px] font-bold text-surface-50 uppercase tracking-widest block mb-2">Start Date *</label>
                   <Input
                     type="date"
                     required
@@ -284,7 +279,7 @@ export const Leaves = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">End Date *</label>
+                  <label className="text-[11px] font-bold text-surface-50 uppercase tracking-widest block mb-2">End Date *</label>
                   <Input
                     type="date"
                     required
@@ -295,17 +290,14 @@ export const Leaves = () => {
               </div>
 
               {/* Reason */}
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Reason Description *</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="State the reason clearly..."
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  className="flex w-full rounded-xl border border-border bg-background px-4 py-3.5 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                />
-              </div>
+              <Textarea
+                label="Reason Description *"
+                rows={3}
+                required
+                placeholder="State the reason clearly..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
 
               {/* Actions */}
               <div className="pt-4 border-t border-border flex justify-end gap-3 mt-6">

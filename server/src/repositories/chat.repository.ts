@@ -9,6 +9,7 @@ export interface ChatMessageEntity {
   text?: string;
   image_url?: string;
   created_at: string;
+  organization_id?: string;
 }
 
 export class ChatRepository extends BaseRepository<ChatMessageEntity> {
@@ -18,18 +19,18 @@ export class ChatRepository extends BaseRepository<ChatMessageEntity> {
 
   async save(c: ChatMessageEntity): Promise<void> {
     await this.query(`
-      INSERT INTO ${this.tableName} (id, site_id, sender_id, sender_name, sender_role, text, image_url, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO ${this.tableName} (id, site_id, sender_id, sender_name, sender_role, text, image_url, created_at, organization_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       ON CONFLICT (id) DO NOTHING;
-    `, [c.id, c.site_id, c.sender_id, c.sender_name, c.sender_role, c.text, c.image_url, c.created_at]);
+    `, [c.id, c.site_id, c.sender_id, c.sender_name, c.sender_role, c.text, c.image_url, c.created_at, c.organization_id]);
   }
 
-  async findBySiteId(siteId: string): Promise<ChatMessageEntity[]> {
+  async findBySiteId(siteId: string, orgId?: string): Promise<ChatMessageEntity[]> {
     const result = await this.query(`
       SELECT * FROM ${this.tableName}
-      WHERE site_id = $1
+      WHERE site_id = $1 AND ($2::text IS NULL OR organization_id = $2)
       ORDER BY created_at ASC
-    `, [siteId]);
+    `, [siteId, orgId || null]);
     return result.rows;
   }
 }

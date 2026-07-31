@@ -7,6 +7,7 @@ export interface AuthenticatedRequest extends Request {
     role: string;
     siteId?: string;
     organizationId?: string;
+    workerId?: string;
   };
 }
 
@@ -30,7 +31,8 @@ export const requireAuth = (
     uid: payload.uid,
     role: payload.role,
     siteId: payload.siteId,
-    organizationId: payload.organizationId
+    organizationId: payload.organizationId,
+    workerId: payload.workerId
   };
   next();
 };

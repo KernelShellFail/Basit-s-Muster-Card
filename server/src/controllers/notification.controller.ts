@@ -6,7 +6,8 @@ const notificationRepo = new NotificationRepository();
 
 export const getNotifications = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const notifications = await notificationRepo.findOrderedByCreatedAt();
+    const orgId = req.user?.organizationId;
+    const notifications = await notificationRepo.findAllByOrg(orgId || '');
     res.json(notifications);
   } catch (err) {
     console.error(err);
@@ -16,7 +17,8 @@ export const getNotifications = async (req: AuthenticatedRequest, res: Response)
 
 export const markNotificationsRead = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    await notificationRepo.markAllAsRead();
+    const orgId = req.user?.organizationId;
+    await notificationRepo.markAllAsRead(orgId || '');
     res.json({ success: true });
   } catch (err) {
     console.error(err);

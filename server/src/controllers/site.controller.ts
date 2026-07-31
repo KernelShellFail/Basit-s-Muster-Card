@@ -6,7 +6,8 @@ const siteRepo = new SiteRepository();
 
 export const getSites = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const sites = await siteRepo.findAll();
+    const orgId = req.user?.organizationId;
+    const sites = await siteRepo.findAllByOrg(orgId || '');
     res.json(sites.map(s => ({
       id: s.id,
       name: s.name,
@@ -32,7 +33,8 @@ export const saveSite = async (req: AuthenticatedRequest, res: Response) => {
       gps_coordinates: gpsCoordinates,
       status,
       supervisor_id: supervisorId,
-      workers_count: workersCount
+      workers_count: workersCount,
+      organization_id: req.user?.organizationId
     };
     await siteRepo.save(siteData);
     res.json({ success: true });

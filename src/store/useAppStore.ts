@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { LocalDB, UserProfile, Role, Site, Worker, SystemNotification, ChatMessage, Organization, AttendanceRecord, PaymentRecord, LeaveRequest, LabourSubmission } from '../services/db';
+import { LocalDB, UserProfile, Role } from '../services/db';
 import { showToast } from '../components/Toast';
 
 interface AppState {
@@ -30,7 +30,7 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   selectedRole: 'owner',
-  activeSiteId: 'site-01',
+  activeSiteId: '',
   activeWorkerId: null,
   currentLanguage: 'en',
   isMobileMenuOpen: false,
@@ -42,26 +42,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     const session = localStorage.getItem('mm_session_user');
     const sessionUser = session ? (JSON.parse(session) as UserProfile) : null;
     
-    const isDark = localStorage.getItem('mm_dark_mode') === 'true';
+    // The chalkboard canvas is dark-only.
+    document.documentElement.classList.add('dark');
     const lang = (localStorage.getItem('mm_lang') || 'en') as 'en' | 'hi' | 'mr' | 'gu' | 'ta';
-    
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
 
     set({
       currentUser: sessionUser,
       selectedRole: sessionUser ? sessionUser.role : 'owner',
-      activeSiteId: sessionUser?.siteId || 'site-01',
+      activeSiteId: sessionUser?.siteId || '',
       currentLanguage: lang
     });
   },
 
   setUser: (user) => {
     if (user) {
-      set({ currentUser: user, selectedRole: user.role, activeSiteId: user.siteId || 'site-01' });
+      set({ currentUser: user, selectedRole: user.role, activeSiteId: user.siteId || '' });
     } else {
       set({ currentUser: null });
     }
@@ -111,7 +106,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ 
         currentUser: user, 
         selectedRole: user.role, 
-        activeSiteId: user.siteId || 'site-01' 
+        activeSiteId: user.siteId || '' 
       });
       
       await get().refreshData();
@@ -143,7 +138,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ 
         currentUser: user, 
         selectedRole: user.role, 
-        activeSiteId: user.siteId || 'site-01' 
+        activeSiteId: user.siteId || '' 
       });
       
       await get().refreshData();

@@ -6,7 +6,14 @@ const paymentRepo = new PaymentRepository();
 
 export const getPayments = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const payments = await paymentRepo.findOrderedByDate();
+    const user = req.user;
+    if (!user?.organizationId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const payments = user.role === 'labour' && user.workerId
+      ? await paymentRepo.findAllByWorker(user.workerId)
+      : await paymentRepo.findAllByOrg(user.organizationId);
     const formatted = payments.map(p => ({
       id: p.id,
       workerId: p.worker_id,
@@ -30,9 +37,15 @@ export const getPayments = async (req: AuthenticatedRequest, res: Response) => {
 export const savePayment = async (req: AuthenticatedRequest, res: Response) => {
   const { id, workerId, workerName, date, amount, paymentType, referenceNumber, type, workerSignature, supervisorSignature, notes } = req.body;
   try {
+    // Labour users may only record payments for their own worker profile.
+    const effectiveWorkerId = req.user?.role === 'labour' ? req.user.workerId : workerId;
+    if (req.user?.role === 'labour' && !effectiveWorkerId) {
+      return res.status(403).json({ error: 'Labour users must have a linked worker profile' });
+    }
+
     const paymentData: PaymentEntity = {
       id,
-      worker_id: workerId,
+      worker_id: effectiveWorkerId,
       worker_name: workerName,
       date,
       amount,
@@ -41,7 +54,8 @@ export const savePayment = async (req: AuthenticatedRequest, res: Response) => {
       type,
       worker_signature: workerSignature,
       supervisor_signature: supervisorSignature,
-      notes
+      notes,
+      organization_id: req.user?.organizationId
     };
     await paymentRepo.save(paymentData);
     res.json({ success: true });

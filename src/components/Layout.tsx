@@ -44,7 +44,7 @@ export const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="flex h-dvh w-screen bg-background text-foreground overflow-hidden font-sans selection:bg-brand-500 selection:text-black">
+    <div className="flex h-dvh w-screen bg-just-black text-surface-cream overflow-hidden font-mori selection:bg-primary selection:text-just-black">
       {/* Skip to main content for accessibility */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:font-bold">
         Skip to main content
@@ -54,7 +54,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-just-black">
         {/* Top Header Utilities */}
         <Header />
 

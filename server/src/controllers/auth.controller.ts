@@ -13,6 +13,11 @@ const siteRepo = new SiteRepository();
 export const registerOwner = async (req: AuthenticatedRequest, res: Response) => {
   const { name, email, phone, password, organizationName } = req.body;
   try {
+    const existing = await userRepo.findByIdentifier(email || phone || name);
+    if (existing) {
+      return res.status(409).json({ error: 'A user with this email, phone, or ID already exists' });
+    }
+
     const ownerUid = `usr-owner-${Date.now()}`;
     const orgId = `org-${Date.now()}`;
     const defaultSiteId = `site-${Date.now()}`;
@@ -52,7 +57,8 @@ export const registerOwner = async (req: AuthenticatedRequest, res: Response) =>
       uid: ownerUid,
       role: 'owner',
       siteId: defaultSiteId,
-      organizationId: orgId
+      organizationId: orgId,
+      workerId: null
     });
 
     res.json({
@@ -90,7 +96,8 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
       uid: user.uid,
       role: user.role,
       siteId: user.site_id,
-      organizationId: user.organization_id
+      organizationId: user.organization_id,
+      workerId: user.worker_id || null
     });
 
     res.json({

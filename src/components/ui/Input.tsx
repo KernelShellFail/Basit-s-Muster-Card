@@ -10,7 +10,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, icon, id, ...props }, ref) => {
-    
+
     const defaultId = useId();
     const inputId = id || defaultId;
     const errorId = `${inputId}-error`;
@@ -18,9 +18,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col space-y-1.5 w-full">
         {label && (
-          <label 
-            htmlFor={inputId} 
-            className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1"
+          <label
+            htmlFor={inputId}
+            className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-1"
           >
             {label}
           </label>
@@ -37,9 +37,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             aria-describedby={error ? errorId : undefined}
             className={cn(
-              "flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-[14px] font-medium text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
+              "flex h-12 w-full rounded-[8px] border border-border bg-input px-4 py-2 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
               icon && "pl-11",
-              error && "border-destructive focus-visible:ring-destructive focus-visible:border-destructive",
+              error && "border-fn-error focus-visible:ring-fn-error focus-visible:border-fn-error",
               className
             )}
             {...props}
@@ -52,7 +52,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-sm font-medium text-destructive mt-1"
+              className="text-sm font-medium text-fn-error mt-1"
             >
               {error}
             </motion.p>

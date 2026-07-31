@@ -6,7 +6,14 @@ const submissionRepo = new LabourSubmissionRepository();
 
 export const getLabourSubmissions = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const subs = await submissionRepo.findOrderedByDate();
+    const user = req.user;
+    if (!user?.organizationId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const subs = user.role === 'labour' && user.workerId
+      ? await submissionRepo.findAllByWorker(user.workerId)
+      : await submissionRepo.findAllByOrg(user.organizationId);
     res.json(subs.map(row => ({
       id: row.id,
       workerId: row.worker_id,
@@ -28,9 +35,15 @@ export const getLabourSubmissions = async (req: AuthenticatedRequest, res: Respo
 export const saveLabourSubmission = async (req: AuthenticatedRequest, res: Response) => {
   const { id, workerId, date, status, isNightShift, overtimeHours, timeIn, timeOut, remarks, createdAt } = req.body;
   try {
+    // Labour users may only submit claims for their own worker profile.
+    const effectiveWorkerId = req.user?.role === 'labour' ? req.user.workerId : workerId;
+    if (req.user?.role === 'labour' && !effectiveWorkerId) {
+      return res.status(403).json({ error: 'Labour users must have a linked worker profile' });
+    }
+
     const submissionData: LabourSubmissionEntity = {
       id,
-      worker_id: workerId,
+      worker_id: effectiveWorkerId,
       date,
       status,
       is_night_shift: isNightShift || false,
@@ -38,7 +51,8 @@ export const saveLabourSubmission = async (req: AuthenticatedRequest, res: Respo
       time_in: timeIn,
       time_out: timeOut,
       remarks,
-      created_at: createdAt || new Date().toISOString()
+      created_at: createdAt || new Date().toISOString(),
+      organization_id: req.user?.organizationId
     };
     await submissionRepo.save(submissionData);
     res.json({ success: true });

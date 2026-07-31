@@ -21,6 +21,20 @@ import {
   X
 } from 'lucide-react';
 
+// Discipline color taxonomy — each module wears its category hue.
+const MODULE_TEXT: Record<string, string> = {
+  dashboard: 'text-shockingly-green',
+  verification: 'text-shockingly-green',
+  workers: 'text-orangey',
+  attendance: 'text-pink',
+  payments: 'text-lilac',
+  leaves: 'text-lilac',
+  sites: 'text-blue',
+  staff: 'text-blue',
+  chat: 'text-blue',
+  settings: 'text-blue',
+};
+
 const itemVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: (i: number) => ({
@@ -114,7 +128,7 @@ export const Sidebar = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-off-black-ink/40 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-just-black/60 backdrop-blur-sm z-40 md:hidden"
           />
         )}
       </AnimatePresence>
@@ -127,7 +141,7 @@ export const Sidebar = () => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 h-dvh md:h-screen bg-background/95 glass-panel border-r border-border flex flex-col justify-between shadow-sm md:relative transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-50 h-dvh md:h-screen bg-just-black/95 glass-panel border-r border-border flex flex-col justify-between md:relative transition-transform duration-300",
           isMobileMenuOpen ? "translate-x-0 w-[280px]" : "-translate-x-full md:translate-x-0"
         )}
       >
@@ -138,7 +152,7 @@ export const Sidebar = () => {
               <motion.div
                 whileHover={{ rotate: 15, scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0 shadow-sm"
+                className="w-10 h-10 rounded-full border border-surface-cream text-surface-cream flex items-center justify-center shrink-0"
               >
                 <HardHat className="w-5 h-5" />
               </motion.div>
@@ -149,27 +163,27 @@ export const Sidebar = () => {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="font-medium text-[22px] tracking-[-0.03em] truncate text-foreground whitespace-nowrap origin-left"
+                    className="font-semibold text-[22px] tracking-[-0.03em] truncate text-surface-cream whitespace-nowrap origin-left"
                   >
-                    MusterMate
+                    Muster<span className="text-shockingly-green">Mate</span>
                   </motion.span>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Desktop Collapse Toggle */}
+            {/* Desktop Collapse Toggle — borderless round icon button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden md:flex absolute -right-5 top-6 w-10 h-10 rounded-full bg-background text-foreground items-center justify-center border border-border shadow-sm hover:bg-muted transition-colors z-50"
+              className="hidden md:flex absolute -right-4 top-6 w-9 h-9 rounded-full text-surface-50 hover:text-surface-cream items-center justify-center transition-colors z-50"
             >
               <motion.div
                 initial={false}
                 animate={{ rotate: isCollapsed ? 180 : 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <ChevronLeft className="w-10 h-10" />
+                <ChevronLeft className="w-5 h-5" />
               </motion.div>
             </motion.button>
 
@@ -183,12 +197,12 @@ export const Sidebar = () => {
           </div>
 
           {/* Navigation list */}
-          {/* <div className="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar"> */}
           <div className="flex-1 overflow-y-auto p-[10px] m-[10px] custom-scrollbar">
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-1.5">
               <AnimatePresence>
                 {isMounted && navItems.map((item, i) => {
                   const isActive = currentTab === item.id;
+                  const activeColor = MODULE_TEXT[item.id] || 'text-shockingly-green';
                   return (
                     <motion.button
                       custom={i}
@@ -199,27 +213,22 @@ export const Sidebar = () => {
                       onClick={() => handleNavigation(item.id)}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        "relative w-full flex items-center h-[52px] rounded-xl text-[15px] font-medium transition-colors group",
+                        "relative w-full flex items-center h-[48px] rounded-full text-[15px] transition-colors group",
                         isEffectivelyCollapsed ? "justify-center px-0" : "px-4 gap-3",
-                        isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        isActive ? "font-semibold" : "text-surface-50 hover:text-surface-cream"
                       )}
                     >
-                      {/* Active Indicator Pill */}
+                      {/* Active underline hairline in the module color */}
                       {isActive && (
                         <motion.div
                           layoutId="activeTabIndicator"
-                          className="absolute inset-0 bg-primary rounded-xl shadow-[0_4px_15px_-3px_var(--color-primary)]"
+                          className={cn("absolute bottom-0 left-4 right-4 h-px bg-current", activeColor)}
                           transition={{ type: "spring", stiffness: 300, damping: 24 }}
                         />
                       )}
 
-                      {/* Hover background for non-active items */}
-                      {!isActive && (
-                        <div className="absolute inset-0 rounded-xl bg-muted opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      )}
-
                       <motion.span
-                        className="relative z-10 flex items-center justify-center"
+                        className={cn("relative z-10 flex items-center justify-center", isActive && activeColor)}
                         whileHover={!isActive ? { scale: 1.1 } : {}}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -232,7 +241,10 @@ export const Sidebar = () => {
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: "auto" }}
                             exit={{ opacity: 0, width: 0 }}
-                            className="relative z-10 whitespace-nowrap overflow-hidden text-left"
+                            className={cn(
+                              "relative z-10 whitespace-nowrap overflow-hidden text-left",
+                              isActive && activeColor
+                            )}
                           >
                             {item.label}
                           </motion.span>
@@ -241,7 +253,7 @@ export const Sidebar = () => {
 
                       {/* Tooltip for collapsed state */}
                       {isEffectivelyCollapsed && (
-                        <div className="absolute left-full ml-4 px-3 py-1.5 bg-foreground text-background text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap shadow-lg">
+                        <div className="absolute left-full ml-4 px-3 py-1.5 bg-off-black text-surface-cream text-sm rounded-[8px] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap border border-border">
                           {item.label}
                         </div>
                       )}
@@ -254,7 +266,7 @@ export const Sidebar = () => {
         </div>
 
         {/* Session User Profile & Logout */}
-        <div className="p-4 border-t border-border bg-background/50 shrink-0">
+        <div className="p-4 border-t border-border bg-just-black/50 shrink-0">
           <AnimatePresence>
             {currentUser && !isEffectivelyCollapsed && (
               <motion.div
@@ -263,12 +275,12 @@ export const Sidebar = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center gap-3 mb-4 px-2 overflow-hidden"
               >
-                <div className="w-10 h-10 rounded-full bg-muted border border-border text-foreground flex items-center justify-center font-medium text-[16px] uppercase shrink-0 shadow-inner">
+                <div className="w-10 h-10 rounded-full border border-border text-surface-cream flex items-center justify-center font-medium text-[16px] uppercase shrink-0">
                   {currentUser.name.slice(0, 2)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[14px] font-semibold truncate leading-tight text-foreground">{currentUser.name}</p>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium truncate mt-0.5">
+                  <p className="text-[14px] font-semibold truncate leading-tight text-surface-cream">{currentUser.name}</p>
+                  <p className="text-[11px] text-surface-50 uppercase tracking-wider font-medium truncate mt-0.5">
                     {currentUser.role}
                   </p>
                 </div>
@@ -281,8 +293,7 @@ export const Sidebar = () => {
             whileTap={{ scale: 0.98 }}
             onClick={() => logoutUser()}
             className={cn(
-              "w-full flex items-center justify-center h-[52px] rounded-xl text-[14px] font-medium transition-all duration-200",
-              "border border-border text-foreground hover:bg-destructive hover:text-destructive-foreground hover:border-destructive shadow-sm group",
+              "w-full flex items-center justify-center h-[48px] rounded-full text-[14px] font-semibold transition-all duration-200 border border-surface-cream text-surface-cream hover:text-fn-error hover:border-fn-error",
               isEffectivelyCollapsed ? "px-0" : "px-4 gap-2"
             )}
           >

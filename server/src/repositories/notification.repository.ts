@@ -7,6 +7,7 @@ export interface NotificationEntity {
   type: string;
   read: boolean;
   created_at: string;
+  organization_id?: string;
 }
 
 export class NotificationRepository extends BaseRepository<NotificationEntity> {
@@ -14,12 +15,15 @@ export class NotificationRepository extends BaseRepository<NotificationEntity> {
     super('notifications');
   }
 
-  async markAllAsRead(): Promise<void> {
-    await this.query(`UPDATE ${this.tableName} SET read = TRUE`);
+  async findAllByOrg(orgId: string): Promise<NotificationEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE organization_id = $1 ORDER BY created_at DESC`,
+      [orgId]
+    );
+    return result.rows;
   }
 
-  async findOrderedByCreatedAt(): Promise<NotificationEntity[]> {
-    const result = await this.query(`SELECT * FROM ${this.tableName} ORDER BY created_at DESC`);
-    return result.rows;
+  async markAllAsRead(orgId: string): Promise<void> {
+    await this.query(`UPDATE ${this.tableName} SET read = TRUE WHERE organization_id = $1`, [orgId]);
   }
 }

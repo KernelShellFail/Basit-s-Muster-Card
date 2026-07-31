@@ -17,6 +17,14 @@ export class UserRepository extends BaseRepository<User> {
     super('users');
   }
 
+  async findAllByOrg(orgId: string): Promise<User[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE organization_id = $1 ORDER BY name ASC`,
+      [orgId]
+    );
+    return result.rows;
+  }
+
   async findByUid(uid: string): Promise<User | null> {
     const result = await this.query(`SELECT * FROM ${this.tableName} WHERE uid = $1`, [uid]);
     return result.rows[0] || null;
@@ -49,12 +57,12 @@ export class UserRepository extends BaseRepository<User> {
           worker_id = $8,
           password = COALESCE($9, password)
         WHERE uid = $1;
-      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id || 'org-101', user.worker_id || null, user.password || null]);
+      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id || userExist.organization_id, user.worker_id || null, user.password || null]);
     } else {
       await this.query(`
         INSERT INTO ${this.tableName} (uid, name, email, phone, role, site_id, organization_id, password, worker_id)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id || 'org-101', user.password || null, user.worker_id || null]);
+      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id, user.password || null, user.worker_id || null]);
     }
   }
 }

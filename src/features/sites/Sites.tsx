@@ -15,10 +15,14 @@ import {
 import type { Site } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import { slideUp, staggerContainer } from '../../utils/animations';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Badge } from '../../components/ui/Badge';
+import { staggerContainer } from '../../utils/animations';
 import { useSites, useUsers, useAddSite, useRemoveSite } from '../../api/queries';
+import { makeId } from '../../config/appConfig';
 
 export const Sites = () => {
   const { currentLanguage } = useAppStore();
@@ -70,7 +74,7 @@ export const Sites = () => {
       addSite(updatedSite);
       showToast(`Site ${name} updated successfully!`);
     } else {
-      const newId = `site-0${sites.length + 1}`;
+      const newId = makeId('site');
       const newSite: Site = {
         id: newId,
         name,
@@ -104,116 +108,116 @@ export const Sites = () => {
     return supervisor ? supervisor.name : 'Not Assigned';
   };
 
+  const statusBadgeColor = (s: Site['status']) => {
+    if (s === 'active') return 'success' as const;
+    if (s === 'on-hold') return 'warning' as const;
+    return 'muted' as const;
+  };
+
+  const resetForm = () => {
+    setEditingSiteId(null);
+    setName('');
+    setAddress('');
+    setGpsCoordinates('');
+    setStatus('active');
+    setSupervisorId('');
+  };
+
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
-      {/* Title */}
-      <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">{t('sites')} Logs</h1>
-          <p className="text-[16px] text-muted-foreground font-medium mt-4">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
-        </div>
-        
-        <Button
-          onClick={() => {
-            setEditingSiteId(null);
-            setName('');
-            setAddress('');
-            setGpsCoordinates('');
-            setStatus('active');
-            setSupervisorId('');
-            setShowAddModal(true);
-          }}
-          leftIcon={<Plus className="w-5 h-5" />}
-          className="shrink-0"
-        >
-          {t('registerSite')}
-        </Button>
-      </motion.div>
+      <PageHeader
+        eyebrow="sites"
+        eyebrowColor="text-blue"
+        title={`${t('sites')} Logs`}
+        description="Configure physical work locations, GPS parameters, and assign supervising staff."
+        actions={
+          <Button
+            onClick={() => { resetForm(); setShowAddModal(true); }}
+            leftIcon={<Plus className="w-5 h-5" />}
+          >
+            {t('registerSite')}
+          </Button>
+        }
+      />
 
       {/* Sites Grid */}
-      <motion.div variants={slideUp} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {sites.map(site => {
           const supervisorName = getSupervisorName(site.supervisorId);
           
           return (
             <Card key={site.id} className="overflow-hidden border border-border flex flex-col group transition-all duration-300">
               {/* Image banner mock */}
-              <div className="h-40 bg-muted relative flex items-center justify-center border-b border-border overflow-hidden">
-                <Map className="w-20 h-20 text-muted-foreground/30 transform group-hover:scale-110 transition-transform duration-500" />
-                <span className={`absolute top-6 right-6 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.1em] ${
-                  site.status === 'active' ? 'bg-emerald-500/20 text-emerald-600' :
-                  site.status === 'on-hold' ? 'bg-amber-500/20 text-amber-600' :
-                  'bg-muted text-muted-foreground'
-                }`}>
-                  {site.status}
+              <div className="h-28 bg-background relative flex items-center justify-center border-b border-border overflow-hidden">
+                <Map className="w-14 h-14 text-surface-50/30 transform group-hover:scale-110 transition-transform duration-500" />
+                <span className="absolute top-4 right-4">
+                  <Badge color={statusBadgeColor(site.status)}>{site.status}</Badge>
                 </span>
-                <span className="absolute bottom-6 left-6 text-[10px] font-bold uppercase tracking-[0.1em] bg-background/90 backdrop-blur text-foreground px-4 py-1.5 rounded-full border border-border">
-                  ID: {site.id}
+                <span className="absolute bottom-4 left-4">
+                  <Badge color="muted">ID: {site.id}</Badge>
                 </span>
               </div>
 
               {/* Site Details */}
-              <CardContent className="p-8 space-y-6 flex-1 flex flex-col justify-between">
+              <CardContent className="p-6 space-y-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-[20px] font-medium text-foreground truncate" title={site.name}>
+                  <h3 className="text-[24px] font-semibold text-surface-cream truncate" title={site.name}>
                     {site.name}
                   </h3>
-                  <p className="text-[14px] text-muted-foreground font-medium mt-2 flex items-start gap-2">
-                    <MapPin className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-[14px] text-surface-50 font-medium mt-2 flex items-start gap-2">
+                    <MapPin className="w-5 h-5 text-blue shrink-0 mt-0.5" />
                     <span className="line-clamp-2">{site.address}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-6 border-y border-border text-[14px]">
-                  {/* Supervisor */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest block">Supervisor</span>
-                    <span className="font-medium text-foreground truncate block">{supervisorName}</span>
+                <div className="grid grid-cols-2 gap-4 py-5 border-y border-border">
+                  <div>
+                    <span className="text-[11px] font-medium text-surface-50 uppercase tracking-widest block mb-2">Supervisor</span>
+                    <span className="font-semibold text-surface-cream truncate block text-[14px]">{supervisorName}</span>
                   </div>
 
-                  {/* Workers count */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest block">Workers Active</span>
-                    <span className="font-medium text-foreground flex items-center gap-2 text-[16px]">
-                      <Users className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <span className="text-[11px] font-medium text-surface-50 uppercase tracking-widest block mb-2">Workers Active</span>
+                    <span className="font-semibold text-surface-cream flex items-center gap-2 text-[16px]">
+                      <Users className="w-5 h-5 text-blue" />
                       {site.workersCount}
                     </span>
                   </div>
                 </div>
 
                 {/* GPS and Navigation details */}
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2 text-[12px] text-muted-foreground font-medium">
-                    <Navigation className="w-5 h-5 text-muted-foreground" />
-                    <span className="truncate max-w-[120px]" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2 text-[13px] text-surface-50 font-medium min-w-0">
+                    <Navigation className="w-4 h-4 text-blue shrink-0" />
+                    <span className="truncate" title={site.gpsCoordinates}>{site.gpsCoordinates}</span>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-muted/50 rounded-full border border-border p-1">
+                  <div className="flex items-center gap-1 bg-card rounded-full border border-border p-1 shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => window.open(`https://maps.google.com/?q=${site.gpsCoordinates}`, '_blank')}
                       title="View Map"
-                      className="w-8 h-8 rounded-full"
+                      className="h-10 w-10"
                     >
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <MapPin className="w-4 h-4 text-surface-50" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEditSiteClick(site)}
                       title="Edit Site"
-                      className="w-8 h-8 rounded-full"
+                      className="h-10 w-10"
                     >
-                      <Edit2 className="w-4 h-4 text-muted-foreground" />
+                      <Edit2 className="w-4 h-4 text-surface-50" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteSiteClick(site.id, site.name)}
                       title="Delete Site"
-                      className="w-8 h-8 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="h-10 w-10 text-fn-error hover:bg-fn-error/10 hover:text-fn-error"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -234,10 +238,9 @@ export const Sites = () => {
             title={editingSiteId ? 'Edit Construction Site' : 'Register New Construction Site'}
           >
             <form onSubmit={handleRegisterSite} className="space-y-6">
-              {/* Name */}
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Site Location Name *</label>
                 <Input
+                  label="Site Location Name *"
                   type="text"
                   required
                   placeholder="e.g. BKC Commercial Towers"
@@ -246,10 +249,9 @@ export const Sites = () => {
                 />
               </div>
 
-              {/* Address */}
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Physical Address *</label>
                 <Input
+                  label="Physical Address *"
                   type="text"
                   required
                   placeholder="Street and area coordinates..."
@@ -258,10 +260,9 @@ export const Sites = () => {
                 />
               </div>
 
-              {/* GPS Coordinates */}
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">GPS Coordinates (Latitude, Longitude)</label>
                 <Input
+                  label="GPS Coordinates (Latitude, Longitude)"
                   type="text"
                   placeholder="e.g. 19.0596, 72.8682"
                   value={gpsCoordinates}
@@ -269,33 +270,25 @@ export const Sites = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Status */}
-                <div>
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Site Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
-                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="on-hold">On Hold</option>
-                  </select>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  label="Site Status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                >
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="on-hold">On Hold</option>
+                </Select>
 
-                {/* Supervisor Assign */}
-                <div>
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Assign Supervisor</label>
-                  <select
-                    value={supervisorId}
-                    onChange={(e) => setSupervisorId(e.target.value)}
-                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="">Select Supervisor</option>
-                    {supervisorsList.map(s => <option key={s.uid} value={s.uid}>{s.name}</option>)}
-                  </select>
-                </div>
+                <Select
+                  label="Assign Supervisor"
+                  value={supervisorId}
+                  onChange={(e) => setSupervisorId(e.target.value)}
+                >
+                  <option value="">Select Supervisor</option>
+                  {supervisorsList.map(s => <option key={s.uid} value={s.uid}>{s.name}</option>)}
+                </Select>
               </div>
 
               {/* Actions */}

@@ -12,6 +12,7 @@ export interface PaymentEntity {
   worker_signature?: string;
   supervisor_signature?: string;
   notes?: string;
+  organization_id?: string;
 }
 
 export class PaymentRepository extends BaseRepository<PaymentEntity> {
@@ -19,12 +20,28 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     super('payments');
   }
 
+  async findAllByOrg(orgId: string): Promise<PaymentEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE organization_id = $1 ORDER BY date DESC, id DESC`,
+      [orgId]
+    );
+    return result.rows;
+  }
+
+  async findAllByWorker(workerId: string): Promise<PaymentEntity[]> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 ORDER BY date DESC, id DESC`,
+      [workerId]
+    );
+    return result.rows;
+  }
+
   async save(p: PaymentEntity): Promise<void> {
     await this.query(`
       INSERT INTO ${this.tableName} (
-        id, worker_id, worker_name, date, amount, payment_type, reference_number, type, worker_signature, supervisor_signature, notes
+        id, worker_id, worker_name, date, amount, payment_type, reference_number, type, worker_signature, supervisor_signature, notes, organization_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       ON CONFLICT (id) DO UPDATE SET
         worker_name = EXCLUDED.worker_name,
         date = EXCLUDED.date,
@@ -34,14 +51,11 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
         type = EXCLUDED.type,
         worker_signature = EXCLUDED.worker_signature,
         supervisor_signature = EXCLUDED.supervisor_signature,
-        notes = EXCLUDED.notes;
+        notes = EXCLUDED.notes,
+        organization_id = EXCLUDED.organization_id;
     `, [
-      p.id, p.worker_id, p.worker_name, p.date, p.amount, p.payment_type, p.reference_number, p.type, p.worker_signature, p.supervisor_signature, p.notes
+      p.id, p.worker_id, p.worker_name, p.date, p.amount, p.payment_type, p.reference_number, p.type, p.worker_signature, p.supervisor_signature, p.notes, p.organization_id
     ]);
   }
 
-  async findOrderedByDate(): Promise<PaymentEntity[]> {
-    const result = await this.query(`SELECT * FROM ${this.tableName} ORDER BY date DESC, id DESC`);
-    return result.rows;
-  }
 }
