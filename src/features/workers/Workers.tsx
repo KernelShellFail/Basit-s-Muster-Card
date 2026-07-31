@@ -246,12 +246,12 @@ export const Workers = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Page Title & Actions */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('workers')}</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">{t('workers')}</h1>
           <p className="text-[16px] text-muted-foreground font-medium mt-4">Manage profiles, documents, bank credentials, and digital muster sheets.</p>
         </div>
         
@@ -284,7 +284,7 @@ export const Workers = () => {
               <select
                 value={selectedSite}
                 onChange={(e) => setSelectedSite(e.target.value)}
-                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
+                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
               >
                 <option value="All">All Sites</option>
                 {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -293,7 +293,7 @@ export const Workers = () => {
               <select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow"
+                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
               >
                 {trades.map(t => <option key={t} value={t}>{t === 'All' ? 'All Trades' : t}</option>)}
               </select>
@@ -301,7 +301,7 @@ export const Workers = () => {
               <select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value)}
-                className="text-sm bg-background border border-input h-12 rounded-xl px-4 text-foreground focus:ring-2 focus:ring-brand-500 focus:outline-none transition-shadow col-span-2 sm:col-span-1"
+                className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer col-span-2 sm:col-span-1"
               >
                 <option value="All">All Skills</option>
                 <option value="Helper">Helper</option>
@@ -448,18 +448,18 @@ export const Workers = () => {
           >
             <div className="space-y-6">
               {/* Profile Card Summary */}
-              <div className="p-10 rounded-[28px] bg-background border border-border flex flex-col sm:flex-row items-center gap-8">
-                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-32 h-32 rounded-full object-cover shrink-0 border-4 border-foreground" />
+              <div className="p-8 sm:p-10 rounded-[32px] bg-gradient-to-br from-card via-card to-background border border-border/80 flex flex-col sm:flex-row items-center gap-8 shadow-sm">
+                <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-28 h-28 rounded-full object-cover shrink-0 border-4 border-card shadow-md" />
                 <div className="flex-1 text-center sm:text-left space-y-2">
-                  <h4 className="text-[28px] font-medium text-foreground tracking-tight">{viewingWorker.name}</h4>
-                  <p className="text-[14px] text-muted-foreground font-medium uppercase tracking-wide">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
-                  <p className="text-[12px] text-muted-foreground font-medium uppercase tracking-widest mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
+                  <h4 className="text-[26px] font-medium text-foreground tracking-tight">{viewingWorker.name}</h4>
+                  <p className="text-[13px] text-muted-foreground font-semibold uppercase tracking-wider">Trade: {viewingWorker.trade} • {viewingWorker.skillLevel}</p>
+                  <p className="text-[11px] text-muted-foreground/80 font-bold uppercase tracking-widest mt-1">ID: {viewingWorker.id} • Joining Date: {viewingWorker.joiningDate}</p>
                 </div>
-                <div className="shrink-0 flex sm:flex-col gap-3">
-                  <span className="bg-primary/20 text-foreground text-[12px] font-medium uppercase tracking-[0.1em] px-5 py-2 rounded-full">
+                <div className="shrink-0 flex sm:flex-col gap-3 font-semibold text-xs tracking-wider">
+                  <span className="bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary px-5 py-2.5 rounded-full text-center">
                     Wage: ₹{viewingWorker.dailyWage}/day
                   </span>
-                  <span className="bg-muted text-foreground text-[12px] font-medium uppercase tracking-[0.1em] px-5 py-2 rounded-full">
+                  <span className="bg-card border border-border px-5 py-2.5 rounded-full text-center text-foreground">
                     OT: ₹{viewingWorker.overtimeRate}/hr
                   </span>
                 </div>
@@ -470,40 +470,40 @@ export const Workers = () => {
                 {/* Personal & Bank Details */}
                 <div className="space-y-6 md:col-span-1">
                   <div>
-                    <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                      <User className="w-5 h-5 text-brand-500" />
+                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <User className="w-4 h-4 text-foreground" />
                       Personal Bio
                     </h5>
-                    <ul className="text-sm space-y-2.5 text-foreground font-medium">
-                      <li><span className="text-muted-foreground">Father's Name:</span> {viewingWorker.fatherName}</li>
-                      <li><span className="text-muted-foreground">Gender / DOB:</span> {viewingWorker.gender} • {viewingWorker.dob}</li>
-                      <li><span className="text-muted-foreground">Phone:</span> {viewingWorker.phone}</li>
-                      <li><span className="text-muted-foreground">Emergency:</span> {viewingWorker.emergencyContact}</li>
-                      <li><span className="text-muted-foreground">Address:</span> {viewingWorker.address}, {viewingWorker.village}, {viewingWorker.district}, {viewingWorker.state} - {viewingWorker.pinCode}</li>
+                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
+                      <li><span className="text-muted-foreground font-normal">Father's Name:</span> {viewingWorker.fatherName}</li>
+                      <li><span className="text-muted-foreground font-normal">Gender / DOB:</span> {viewingWorker.gender} • {viewingWorker.dob}</li>
+                      <li><span className="text-muted-foreground font-normal">Phone:</span> {viewingWorker.phone}</li>
+                      <li><span className="text-muted-foreground font-normal">Emergency:</span> {viewingWorker.emergencyContact}</li>
+                      <li className="leading-relaxed"><span className="text-muted-foreground font-normal">Address:</span> {viewingWorker.address}, {viewingWorker.village}, {viewingWorker.district}, {viewingWorker.state} - {viewingWorker.pinCode}</li>
                     </ul>
                   </div>
 
-                  <div className="pt-5 border-t border-border">
-                    <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                      <FileText className="w-5 h-5 text-brand-500" />
+                  <div className="pt-6 border-t border-border/50">
+                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <FileText className="w-4 h-4 text-foreground" />
                       Verified Documents
                     </h5>
-                    <ul className="text-sm space-y-2.5 text-foreground font-medium">
-                      <li><span className="text-muted-foreground">Aadhaar Card:</span> {viewingWorker.aadhaar}</li>
-                      <li><span className="text-muted-foreground">PAN Card:</span> {viewingWorker.pan || 'N/A'}</li>
+                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
+                      <li><span className="text-muted-foreground font-normal">Aadhaar Card:</span> {viewingWorker.aadhaar}</li>
+                      <li><span className="text-muted-foreground font-normal">PAN Card:</span> {viewingWorker.pan || 'N/A'}</li>
                     </ul>
                   </div>
 
-                  <div className="pt-5 border-t border-border">
-                    <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                      <CreditCard className="w-5 h-5 text-brand-500" />
+                  <div className="pt-6 border-t border-border/50">
+                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <CreditCard className="w-4 h-4 text-foreground" />
                       Bank Account Info
                     </h5>
-                    <ul className="text-sm space-y-2.5 text-foreground font-medium">
-                      <li><span className="text-muted-foreground">Bank Name:</span> {viewingWorker.bankName}</li>
-                      <li><span className="text-muted-foreground">Account No:</span> {viewingWorker.accountNumber}</li>
-                      <li><span className="text-muted-foreground">IFSC Code:</span> {viewingWorker.ifscCode}</li>
-                      <li><span className="text-muted-foreground">UPI ID:</span> {viewingWorker.upiId || 'N/A'}</li>
+                    <ul className="text-[13px] space-y-3 text-foreground font-medium">
+                      <li><span className="text-muted-foreground font-normal">Bank Name:</span> {viewingWorker.bankName}</li>
+                      <li><span className="text-muted-foreground font-normal">Account No:</span> {viewingWorker.accountNumber}</li>
+                      <li><span className="text-muted-foreground font-normal">IFSC Code:</span> {viewingWorker.ifscCode}</li>
+                      <li><span className="text-muted-foreground font-normal">UPI ID:</span> {viewingWorker.upiId || 'N/A'}</li>
                     </ul>
                   </div>
                 </div>
@@ -511,20 +511,20 @@ export const Workers = () => {
                 {/* Digital Muster Card (Monthly Calendar Sheet) */}
                 <div className="md:col-span-2 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-[14px] font-medium uppercase tracking-[0.1em] text-foreground flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-foreground" />
+                    <h5 className="text-[14px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-foreground" />
                       {t('musterCard')} • July 2026
                     </h5>
                     
-                    <Button variant="outline" size="sm" onClick={() => window.print()} leftIcon={<Printer className="w-5 h-5" />}>
+                    <Button variant="outline" size="sm" onClick={() => window.print()} leftIcon={<Printer className="w-4 h-4" />}>
                       Print Card
                     </Button>
                   </div>
 
                   {/* Calendar Sheet Grid (31 Days) */}
-                  <div className="grid grid-cols-7 gap-2 border border-border p-6 rounded-[28px] bg-background text-center">
+                  <div className="grid grid-cols-7 gap-2 border border-border/80 p-6 rounded-[28px] bg-card/30 text-center">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-                      <div key={idx} className="text-[11px] font-extrabold text-muted-foreground py-1">{day}</div>
+                      <div key={idx} className="text-[10px] font-bold text-muted-foreground py-1 uppercase tracking-widest">{day}</div>
                     ))}
                     
                     {[...Array(3)].map((_, i) => <div key={`pad-${i}`} className="py-2.5" />)}
@@ -537,26 +537,26 @@ export const Workers = () => {
                       const status = attendanceRecord ? attendanceRecord.status : 'Unmarked';
                       
                       const statusColorMap: Record<string, string> = {
-                        'Present': 'bg-foreground text-background',
-                        'Half-Day': 'bg-primary/20 text-foreground',
-                        'Absent': 'bg-muted text-muted-foreground',
-                        'Paid-Leave': 'bg-background border border-foreground text-foreground',
-                        'Unpaid-Leave': 'bg-background border border-border text-muted-foreground',
-                        'Weekly-Off': 'bg-background text-foreground',
-                        'Holiday': 'bg-muted text-foreground',
-                        'Unmarked': 'bg-transparent text-muted-foreground hover:bg-muted/50 transition-colors'
+                        'Present': 'bg-foreground text-background font-bold shadow-sm',
+                        'Half-Day': 'bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary font-bold',
+                        'Absent': 'bg-background border border-border/60 text-muted-foreground/60',
+                        'Paid-Leave': 'bg-background border border-border/80 text-foreground font-bold shadow-sm',
+                        'Unpaid-Leave': 'bg-background border border-border/40 text-muted-foreground/50',
+                        'Weekly-Off': 'bg-background border border-border/40 text-foreground/80 font-bold',
+                        'Holiday': 'bg-muted text-foreground/80 font-bold',
+                        'Unmarked': 'bg-transparent text-muted-foreground/30 hover:bg-muted/50 transition-colors'
                       };
 
                       return (
                         <div 
                           key={dayNumber} 
-                          className={`py-2 text-xs rounded-xl flex flex-col items-center justify-center border border-transparent cursor-default transition-all ${
+                          className={`py-2.5 text-xs rounded-xl flex flex-col items-center justify-center border border-transparent cursor-default transition-all ${
                             statusColorMap[status] || 'bg-transparent'
                           }`}
                           title={`Date: ${dateStr}\nStatus: ${status}`}
                         >
                           <span className="block font-bold">{dayNumber}</span>
-                          <span className="block text-[9px] font-black opacity-90 mt-0.5">
+                          <span className="block text-[8px] font-black opacity-80 mt-0.5 uppercase tracking-wide">
                             {status === 'Present' ? 'P' :
                              status === 'Half-Day' ? 'H' :
                              status === 'Absent' ? 'A' :
@@ -592,52 +592,52 @@ export const Workers = () => {
                     return (
                       <div className="space-y-6">
                         {/* Attendance Counter Grid */}
-                        <div className="grid grid-cols-4 gap-4 text-center text-[10px] uppercase tracking-widest font-medium">
-                          <div className="p-4 rounded-[28px] border border-border bg-foreground text-background">
+                        <div className="grid grid-cols-4 gap-4 text-center text-[10px] uppercase tracking-widest font-bold">
+                          <div className="p-4 rounded-2xl border border-border bg-foreground text-background shadow-sm">
                             <p className="opacity-70">Presents</p>
-                            <h4 className="text-[28px] font-medium mt-2">{stats.presents}</h4>
+                            <h4 className="text-[24px] font-medium mt-2">{stats.presents}</h4>
                           </div>
-                          <div className="p-4 rounded-[28px] border border-border bg-primary/20 text-foreground">
-                            <p className="text-muted-foreground">Half-Days</p>
-                            <h4 className="text-[28px] font-medium mt-2">{stats.halfDays}</h4>
+                          <div className="p-4 rounded-2xl border border-border/80 bg-primary/10 text-primary-foreground dark:text-primary">
+                            <p className="opacity-80">Half-Days</p>
+                            <h4 className="text-[24px] font-medium mt-2">{stats.halfDays}</h4>
                           </div>
-                          <div className="p-4 rounded-[28px] border border-border bg-muted text-foreground">
+                          <div className="p-4 rounded-2xl border border-border bg-card text-foreground">
                             <p className="text-muted-foreground">Absents</p>
-                            <h4 className="text-[28px] font-medium mt-2">{stats.absents}</h4>
+                            <h4 className="text-[24px] font-medium mt-2">{stats.absents}</h4>
                           </div>
-                          <div className="p-4 rounded-[28px] border border-border bg-background text-foreground">
+                          <div className="p-4 rounded-2xl border border-border bg-background text-foreground">
                             <p className="text-muted-foreground">OT Hours</p>
-                            <h4 className="text-[28px] font-medium mt-2">{stats.totalOTHours}h</h4>
+                            <h4 className="text-[24px] font-medium mt-2">{stats.totalOTHours}h</h4>
                           </div>
                         </div>
 
                         {/* Wage Breakdown Box */}
-                        <div className="p-6 rounded-[28px] border border-border bg-background space-y-4">
-                          <h6 className="text-[12px] font-medium text-muted-foreground uppercase tracking-[0.1em] mb-4">July Earnings Statement</h6>
+                        <div className="p-8 rounded-[28px] border border-border/80 bg-card/40 space-y-4">
+                          <h6 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.12em] mb-4">July Earnings Statement</h6>
                           
-                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
                             <span>Base Wage Earned:</span>
-                            <span className="font-medium text-foreground">₹{grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * 150)}</span>
+                            <span className="font-semibold text-foreground">₹{grossWages - (stats.totalOTHours * viewingWorker.overtimeRate) - (stats.nightShiftsCount * 150)}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
                             <span>Overtime Earned ({stats.totalOTHours} hrs):</span>
-                            <span className="font-medium text-foreground">₹{stats.totalOTHours * viewingWorker.overtimeRate}</span>
+                            <span className="font-semibold text-foreground">₹{stats.totalOTHours * viewingWorker.overtimeRate}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[14px] font-medium text-muted-foreground">
+                          <div className="flex items-center justify-between text-[13px] font-medium text-muted-foreground">
                             <span>Night Shift Allowance:</span>
-                            <span className="font-medium text-foreground">₹{stats.nightShiftsCount * 150}</span>
+                            <span className="font-semibold text-foreground">₹{stats.nightShiftsCount * 150}</span>
                           </div>
                           
-                          <div className="border-t border-border pt-4 flex items-center justify-between text-[14px] font-medium text-foreground">
+                          <div className="border-t border-border/50 pt-4 flex items-center justify-between text-[14px] font-semibold text-foreground">
                             <span>Gross Monthly Wages:</span>
                             <span>₹{grossWages}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[14px] font-medium text-foreground bg-primary/10 p-3 rounded-xl mt-2">
+                          <div className="flex items-center justify-between text-[14px] font-semibold text-foreground bg-primary/5 border border-primary/10 p-3.5 rounded-xl mt-2">
                             <span>Total Wage Released (Paid):</span>
-                            <span className="font-medium">₹{totalPaid}</span>
+                            <span className="font-semibold">₹{totalPaid}</span>
                           </div>
                           
-                          <div className="border-t border-border pt-6 mt-4 flex items-center justify-between text-[20px] font-medium text-foreground">
+                          <div className="border-t border-border/50 pt-6 mt-4 flex items-center justify-between text-[18px] font-bold text-foreground">
                             <span>Net Balance Due:</span>
                             <span className="text-foreground">₹{pendingBalance}</span>
                           </div>

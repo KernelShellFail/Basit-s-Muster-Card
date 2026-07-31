@@ -105,12 +105,12 @@ export const Sites = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Title */}
       <motion.div variants={slideUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('sites')} Logs</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">{t('sites')} Logs</h1>
           <p className="text-[16px] text-muted-foreground font-medium mt-4">Configure physical work locations, GPS parameters, and assign supervising staff.</p>
         </div>
         

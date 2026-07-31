@@ -114,36 +114,36 @@ export const CrossCheck = () => {
   };
 
   return (
-    <div className="flex flex-col gap-[80px]">
+    <div className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">Muster Cross-Check</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-medium tracking-[-1.8px] leading-[1.1] text-foreground">Muster Cross-Check</h1>
           <p className="text-[16px] text-muted-foreground font-medium mt-4">Cross-examine official supervisor logs against self-submitted work claims from labours.</p>
         </div>
       </div>
 
       {/* Date & Site Filter Controls */}
-      <div className="p-8 rounded-xl bg-background border border-border flex flex-col md:flex-row gap-6 items-center">
+      <div className="p-8 rounded-[32px] bg-gradient-to-br from-card via-card to-background border border-border/80 flex flex-col md:flex-row gap-6 items-center w-full shadow-sm">
         {/* Date Selector */}
-        <div className="w-full md:w-auto flex items-center gap-4">
-          <Calendar className="w-5 h-5 text-muted-foreground shrink-0" />
+        <div className="w-full md:w-auto flex-1 flex items-center gap-4">
+          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
+            className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow w-full"
           />
         </div>
 
         {/* Site Selector */}
-        <div className="w-full md:w-auto flex items-center gap-4">
-          <MapPin className="w-5 h-5 text-foreground shrink-0" />
+        <div className="w-full md:w-auto flex-1 flex items-center gap-4">
+          <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
           <select
             value={selectedSiteId}
             onChange={(e) => setSelectedSiteId(e.target.value)}
-            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
+            className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow w-full cursor-pointer"
           >
             {sites.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
@@ -152,12 +152,12 @@ export const CrossCheck = () => {
         </div>
 
         {/* Verification Status Filter */}
-        <div className="w-full md:w-auto flex items-center gap-4">
-          <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Verification Filter</span>
+        <div className="w-full md:w-auto flex-1 flex items-center gap-4">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0">Filter</span>
           <select
             value={statusFilter}
             onChange={(e: any) => setStatusFilter(e.target.value)}
-            className="text-[14px] font-medium px-4 h-12 rounded-xl border border-border bg-background text-foreground focus:outline-none"
+            className="text-sm bg-background border border-border h-12 rounded-xl px-4 text-foreground focus:ring-1 focus:ring-ring focus:outline-none transition-shadow w-full cursor-pointer"
           >
             <option value="All">All Entries ({comparisonList.length})</option>
             <option value="match">Verified Matches ({matchesCount})</option>
@@ -169,44 +169,34 @@ export const CrossCheck = () => {
 
       {/* Metrics breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-xl border border-border bg-background text-foreground flex items-center gap-4">
-          <CheckCircle2 className="w-8 h-8 shrink-0 text-primary" />
-          <div>
-            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Verified Matches</span>
-            <span className="text-[28px] font-medium leading-none mt-1 block">{matchesCount} Workers</span>
+        {[
+          { label: 'Verified Matches', value: `${matchesCount} Workers`, icon: CheckCircle2, textClass: 'text-foreground', bg: 'bg-card border-border/80' },
+          { label: 'Mismatched Discrepancies', value: `${mismatchCount} Alerts`, icon: AlertCircle, textClass: 'text-destructive', bg: 'bg-destructive/5 border-destructive/20' },
+          { label: 'Pending Self-Submit', value: `${pendingCount} Workers`, icon: HelpCircle, textClass: 'text-muted-foreground', bg: 'bg-card border-border/80' },
+        ].map((stat, idx) => (
+          <div key={idx} className={`p-6 rounded-[22px] border flex items-center gap-4 shadow-sm ${stat.bg}`}>
+            <stat.icon className={`w-8 h-8 shrink-0 ${stat.textClass}`} />
+            <div>
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block">{stat.label}</span>
+              <span className={`text-2xl font-bold mt-1 block ${stat.textClass === 'text-muted-foreground' ? 'text-foreground' : stat.textClass}`}>{stat.value}</span>
+            </div>
           </div>
-        </div>
-
-        <div className="p-6 rounded-xl border border-destructive/20 bg-destructive/5 text-foreground flex items-center gap-4">
-          <AlertCircle className="w-8 h-8 shrink-0 text-destructive" />
-          <div>
-            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Mismatched Discrepancies</span>
-            <span className="text-[28px] font-medium leading-none mt-1 block">{mismatchCount} Alerts</span>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-xl border border-border bg-background text-foreground flex items-center gap-4">
-          <HelpCircle className="w-8 h-8 shrink-0 text-muted-foreground" />
-          <div>
-            <span className="text-[12px] uppercase tracking-[0.1em] font-medium text-muted-foreground block">Pending Self-Submit</span>
-            <span className="text-[28px] font-medium leading-none mt-1 block">{pendingCount} Workers</span>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Comparison Grid Table */}
-      <div className="rounded-[28px] border border-border bg-background shadow-none overflow-hidden">
+      <div className="rounded-[32px] border border-border/80 bg-card overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-transparent text-[12px] text-muted-foreground font-medium uppercase tracking-[0.1em] border-b border-border">
-                <th className="p-6">Worker Profile</th>
-                <th className="p-6">Roster (Supervisor Log)</th>
-                <th className="p-6">Self-Claim (Labour Log)</th>
-                <th className="p-6">Status & Action</th>
+              <tr className="bg-muted/20 text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.1em] border-b border-border/50">
+                <th className="py-4 px-8">Worker Profile</th>
+                <th className="py-4 px-8">Roster (Supervisor Log)</th>
+                <th className="py-4 px-8">Self-Claim (Labour Log)</th>
+                <th className="py-4 px-8">Status & Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/30">
               {filteredList.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="p-8 text-center text-[14px] text-muted-foreground font-medium">
@@ -215,60 +205,60 @@ export const CrossCheck = () => {
                 </tr>
               ) : (
                 filteredList.map(item => (
-                  <tr key={item.worker.id} className="hover:bg-muted/50 transition-colors">
+                  <tr key={item.worker.id} className="hover:bg-muted/20 transition-colors">
                     {/* Worker Details */}
-                    <td className="p-6">
+                    <td className="py-5 px-8">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full border border-border bg-muted text-foreground flex items-center justify-center font-bold text-[14px]">
+                        <div className="w-10 h-10 rounded-full border border-border/80 bg-background text-foreground flex items-center justify-center font-bold text-[13px] uppercase">
                           {item.worker.name.slice(0, 2)}
                         </div>
                         <div>
-                          <p className="font-medium text-[16px] text-foreground leading-tight">{item.worker.name}</p>
-                          <p className="text-[12px] text-muted-foreground uppercase tracking-widest font-medium mt-1">{item.worker.id} • {item.worker.trade}</p>
+                          <p className="font-bold text-[15px] text-foreground leading-tight">{item.worker.name}</p>
+                          <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mt-1">{item.worker.id} • {item.worker.trade}</p>
                         </div>
                       </div>
                     </td>
 
                     {/* Supervisor Entry */}
-                    <td className="p-6">
+                    <td className="py-5 px-8">
                       {item.roster ? (
                         <div className="space-y-1">
-                          <p className="font-medium text-[14px] text-foreground">{item.roster.status}</p>
-                          <p className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium">
+                          <p className="font-bold text-[14px] text-foreground">{item.roster.status}</p>
+                          <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
                             {item.roster.overtimeHours}h OT • {item.roster.isNightShift ? 'Night Shift' : 'Day Shift'}
                           </p>
                         </div>
                       ) : (
-                        <span className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium italic">Not Marked</span>
+                        <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium italic">Not Marked</span>
                       )}
                     </td>
 
                     {/* Labour self claim */}
-                    <td className="p-6">
+                    <td className="py-5 px-8">
                       {item.claim ? (
                         <div className="space-y-1">
-                          <p className="font-medium text-[14px] text-foreground">{item.claim.status}</p>
-                          <p className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium">
+                          <p className="font-bold text-[14px] text-foreground">{item.claim.status}</p>
+                          <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
                             {item.claim.overtimeHours}h OT • {item.claim.isNightShift ? 'Night Shift' : 'Day Shift'}
                           </p>
                         </div>
                       ) : (
-                        <span className="text-[12px] uppercase tracking-widest text-muted-foreground font-medium italic">Pending Self-Submit</span>
+                        <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium italic">Pending Self-Submit</span>
                       )}
                     </td>
 
                     {/* Status badges & Resolution Actions */}
-                    <td className="p-6">
+                    <td className="py-5 px-8">
                       {item.status === 'match' && (
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-foreground text-background">
-                          <CheckCircle className="w-4 h-4" />
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-foreground text-background">
+                          <CheckCircle className="w-3.5 h-3.5" />
                           Verified Match
                         </span>
                       )}
                       
                       {item.status === 'pending' && (
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-muted text-muted-foreground border border-border">
-                          <HelpCircle className="w-4 h-4" />
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-background border border-border text-muted-foreground/60">
+                          <HelpCircle className="w-3.5 h-3.5" />
                           Awaiting Claim
                         </span>
                       )}
@@ -280,9 +270,9 @@ export const CrossCheck = () => {
                             claim: item.claim!,
                             worker: item.worker
                           })}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] bg-background text-foreground border border-foreground hover:bg-muted/50 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary hover:border-primary/50 transition-colors"
                         >
-                          <AlertTriangle className="w-4 h-4" />
+                          <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
                           Resolve Discrepancy
                         </button>
                       )}
@@ -300,7 +290,7 @@ export const CrossCheck = () => {
         isOpen={!!resolvingDiscrepancy}
         onClose={() => setResolvingDiscrepancy(null)}
         title="Resolve Muster Discrepancy"
-        description={resolvingDiscrepancy ? `Compare the logged hours for ${resolvingDiscrepancy.worker.name} on ${selectedDate}. Select the entry to set as the official database record.` : undefined}
+        description={resolvingDiscrepancy ? `Compare logged logs for ${resolvingDiscrepancy.worker.name} on ${selectedDate} and choose the correct entry.` : undefined}
       >
         {resolvingDiscrepancy && (
           <div className="space-y-6">
@@ -309,18 +299,18 @@ export const CrossCheck = () => {
               {/* Option A: Supervisor */}
               <button
                 onClick={() => handleResolve('roster')}
-                className="p-6 text-left border border-border hover:border-foreground bg-background rounded-[28px] flex flex-col justify-between transition-all group"
+                className="p-6.5 text-left border border-border/80 hover:border-foreground/30 bg-card rounded-[22px] flex flex-col justify-between transition-all group"
               >
                 <div>
-                  <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block mb-2">Entry A</span>
-                  <h4 className="text-[16px] font-medium text-foreground">Supervisor Roster</h4>
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground block mb-2">Entry A</span>
+                  <h4 className="text-[16px] font-bold text-foreground">Supervisor Roster</h4>
                 </div>
-                <div className="mt-6 text-[14px] space-y-2 text-foreground font-medium">
-                  <p><strong className="text-muted-foreground font-normal">Status:</strong> {resolvingDiscrepancy.roster.status}</p>
-                  <p><strong className="text-muted-foreground font-normal">Overtime:</strong> {resolvingDiscrepancy.roster.overtimeHours} hours</p>
-                  <p><strong className="text-muted-foreground font-normal">Shift:</strong> {resolvingDiscrepancy.roster.isNightShift ? 'Night' : 'Day'}</p>
+                <div className="mt-6 text-sm space-y-2 text-foreground font-medium">
+                  <p><span className="text-muted-foreground font-normal">Status:</span> {resolvingDiscrepancy.roster.status}</p>
+                  <p><span className="text-muted-foreground font-normal">Overtime:</span> {resolvingDiscrepancy.roster.overtimeHours} hours</p>
+                  <p><span className="text-muted-foreground font-normal">Shift:</span> {resolvingDiscrepancy.roster.isNightShift ? 'Night' : 'Day'}</p>
                 </div>
-                <span className="mt-6 w-full py-3 rounded-full bg-background text-[12px] uppercase tracking-widest font-medium text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
+                <span className="mt-6 w-full py-3.5 rounded-xl bg-background text-[11px] uppercase tracking-widest font-bold text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                   Accept Entry A
                 </span>
               </button>
@@ -328,25 +318,25 @@ export const CrossCheck = () => {
               {/* Option B: Labour */}
               <button
                 onClick={() => handleResolve('claim')}
-                className="p-6 text-left border border-border hover:border-foreground bg-background rounded-[28px] flex flex-col justify-between transition-all group"
+                className="p-6.5 text-left border border-border/80 hover:border-foreground/30 bg-card rounded-[22px] flex flex-col justify-between transition-all group"
               >
                 <div>
-                  <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground block mb-2">Entry B</span>
-                  <h4 className="text-[16px] font-medium text-foreground">Labour Claim</h4>
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground block mb-2">Entry B</span>
+                  <h4 className="text-[16px] font-bold text-foreground">Labour Claim</h4>
                 </div>
-                <div className="mt-6 text-[14px] space-y-2 text-foreground font-medium">
-                  <p><strong className="text-muted-foreground font-normal">Status:</strong> {resolvingDiscrepancy.claim.status}</p>
-                  <p><strong className="text-muted-foreground font-normal">Overtime:</strong> {resolvingDiscrepancy.claim.overtimeHours} hours</p>
-                  <p><strong className="text-muted-foreground font-normal">Shift:</strong> {resolvingDiscrepancy.claim.isNightShift ? 'Night' : 'Day'}</p>
+                <div className="mt-6 text-sm space-y-2 text-foreground font-medium">
+                  <p><span className="text-muted-foreground font-normal">Status:</span> {resolvingDiscrepancy.claim.status}</p>
+                  <p><span className="text-muted-foreground font-normal">Overtime:</span> {resolvingDiscrepancy.claim.overtimeHours} hours</p>
+                  <p><span className="text-muted-foreground font-normal">Shift:</span> {resolvingDiscrepancy.claim.isNightShift ? 'Night' : 'Day'}</p>
                 </div>
-                <span className="mt-6 w-full py-3 rounded-full bg-background text-[12px] uppercase tracking-widest font-medium text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
+                <span className="mt-6 w-full py-3.5 rounded-xl bg-background text-[11px] uppercase tracking-widest font-bold text-center border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                   Accept Entry B
                 </span>
               </button>
 
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-construction-150 dark:border-construction-800/40">
+            <div className="flex justify-end pt-4 border-t border-border/50">
               <Button
                 variant="outline"
                 onClick={() => setResolvingDiscrepancy(null)}

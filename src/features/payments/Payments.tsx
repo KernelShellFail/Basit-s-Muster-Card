@@ -112,7 +112,7 @@ export const Payments = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.strokeStyle = '#0f172a'; 
+    ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#14140f'; 
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
 
@@ -201,38 +201,38 @@ export const Payments = () => {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-[80px]">
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col gap-10 md:gap-16 lg:gap-20">
       
       {/* Title */}
       <motion.div variants={slideUp}>
-        <h1 className="text-[60px] font-medium tracking-[-1.8px] leading-[1] text-foreground">{t('payments')}</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-[-0.03em] leading-[1.1] text-foreground">{t('payments')}</h1>
         <p className="text-[16px] text-muted-foreground font-medium mt-4">Review live July 2026 payroll sheets, release partial/full wages, and collect digital receipts.</p>
       </motion.div>
 
       {/* Wages Ledger Card */}
       <motion.div variants={slideUp}>
-        <Card className="overflow-hidden border border-border">
-          <div className="p-6 border-b border-border bg-background">
-            <h3 className="text-[14px] font-medium text-muted-foreground uppercase tracking-widest">Wages Tally Sheet (July 2026)</h3>
+        <Card className="rounded-[32px] border border-border/80 bg-card overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <div className="p-8 border-b border-border/50 bg-card/45">
+            <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Wages Tally Sheet (July 2026)</h3>
           </div>
           
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Worker ID & Name</TableHead>
-                <TableHead>Daily Wage</TableHead>
-                <TableHead className="text-center">Presents / Half</TableHead>
-                <TableHead className="text-center">OT Hours</TableHead>
-                <TableHead>Gross Earnings</TableHead>
-                <TableHead>Paid to Date</TableHead>
-                <TableHead>Balance Due</TableHead>
-                <TableHead className="text-center">Payouts</TableHead>
+              <TableRow className="bg-muted/20 text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.1em] border-b border-border/50">
+                <TableHead className="py-4 px-6">Worker ID & Name</TableHead>
+                <TableHead className="py-4 px-6">Daily Wage</TableHead>
+                <TableHead className="py-4 px-6 text-center">Presents / Half</TableHead>
+                <TableHead className="py-4 px-6 text-center">OT Hours</TableHead>
+                <TableHead className="py-4 px-6">Gross Earnings</TableHead>
+                <TableHead className="py-4 px-6">Paid to Date</TableHead>
+                <TableHead className="py-4 px-6">Balance Due</TableHead>
+                <TableHead className="py-4 px-6 text-center">Payouts</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="divide-y divide-border/30">
               {siteWorkers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="p-8 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="p-8 text-center text-sm font-semibold text-muted-foreground">
                     No active workers assigned to this site.
                   </TableCell>
                 </TableRow>
@@ -242,41 +242,41 @@ export const Payments = () => {
                   const receipts = localPayments.filter(p => p.workerId === w.id);
 
                   return (
-                    <TableRow key={w.id}>
-                      <TableCell>
+                    <TableRow key={w.id} className="hover:bg-muted/20 transition-colors">
+                      <TableCell className="py-4 px-6">
                         <p className="font-bold text-foreground leading-tight">{w.name}</p>
-                        <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{w.id} • {w.trade}</p>
+                        <p className="text-[11px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider">{w.id} • {w.trade}</p>
                       </TableCell>
 
-                      <TableCell className="font-semibold text-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 font-semibold text-foreground whitespace-nowrap">
                         ₹{w.dailyWage}
                       </TableCell>
 
-                      <TableCell className="text-center font-bold text-muted-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 text-center font-bold text-muted-foreground whitespace-nowrap">
                         {financials.presents} P / {financials.halfDays} H
                       </TableCell>
 
-                      <TableCell className="text-center font-bold text-muted-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 text-center font-bold text-muted-foreground whitespace-nowrap">
                         {financials.totalOTHours} hrs
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 font-semibold text-foreground whitespace-nowrap">
                         ₹{financials.grossWages}
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 font-semibold text-foreground whitespace-nowrap">
                         ₹{financials.totalPaid}
                       </TableCell>
 
-                      <TableCell className="font-medium text-foreground whitespace-nowrap">
+                      <TableCell className="py-4 px-6 font-bold text-foreground whitespace-nowrap">
                         ₹{financials.balanceDue}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="py-4 px-6">
                         <div className="flex items-center justify-center gap-2">
                           <Button
                             size="sm"
-                            className="px-4"
+                            className="px-4 py-2 text-xs font-bold shadow-sm"
                             disabled={financials.balanceDue <= 0}
                             onClick={() => handleOpenPayout(w, financials.balanceDue)}
                             leftIcon={<IndianRupee className="w-4 h-4" />}
@@ -293,8 +293,9 @@ export const Payments = () => {
                                 setSelectedReceipt(receipts[receipts.length - 1]);
                               }}
                               title="View Payments Receipts Logs"
+                              className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted"
                             >
-                              <Eye className="w-5 h-5 text-muted-foreground" />
+                              <Eye className="w-4 h-4" />
                             </Button>
                           )}
                         </div>
@@ -316,30 +317,30 @@ export const Payments = () => {
             onClose={() => setPayingWorker(null)}
             title="Process Wage Payment Log"
           >
-            <div className="space-y-8">
-              <div className="p-6 rounded-[28px] bg-background border border-border text-foreground space-y-2">
-                <p><span className="font-medium text-muted-foreground">Worker:</span> {payingWorker.name} ({payingWorker.id})</p>
-                <p><span className="font-medium text-muted-foreground">Assigned Trade:</span> {payingWorker.trade} ({payingWorker.skillLevel})</p>
-                <p><span className="font-medium text-muted-foreground">Bank Target:</span> {payingWorker.bankName} - A/C: {payingWorker.accountNumber}</p>
+            <div className="space-y-6">
+              <div className="p-6 rounded-[22px] bg-gradient-to-br from-card via-card to-background border border-border/80 text-foreground space-y-2.5 text-xs font-medium leading-relaxed">
+                <p><span className="text-muted-foreground font-normal">Worker:</span> <strong className="text-foreground">{payingWorker.name}</strong> ({payingWorker.id})</p>
+                <p><span className="text-muted-foreground font-normal">Assigned Trade:</span> {payingWorker.trade} ({payingWorker.skillLevel})</p>
+                <p><span className="text-muted-foreground font-normal">Bank Target:</span> {payingWorker.bankName} - A/C: {payingWorker.accountNumber}</p>
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Release Payout Amount (₹) *</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Release Payout Amount (₹) *</label>
                 <Input
                   type="number"
                   value={payAmount.toString()}
                   onChange={(e) => setPayAmount(Number(e.target.value))}
-                  className="font-bold text-lg"
+                  className="font-bold text-lg h-12"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Payment Method</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Payment Method</label>
                   <select
                     value={paymentType}
                     onChange={(e) => setPaymentType(e.target.value as any)}
-                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-[14px] font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer font-medium"
                   >
                     <option value="Cash">Cash</option>
                     <option value="Bank Transfer">Bank Transfer</option>
@@ -349,31 +350,33 @@ export const Payments = () => {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Reference No</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Reference No</label>
                   <Input
                     type="text"
                     placeholder="Txn ID"
                     value={referenceNumber}
                     onChange={(e) => setReferenceNumber(e.target.value)}
+                    className="h-12 text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Receipt Notes</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Receipt Notes</label>
                 <Input
                   type="text"
                   placeholder="e.g. Paid full July wage cycle"
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
+                  className="h-12 text-sm"
                 />
               </div>
 
               {/* Signature Canvas */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                    <Signature className="w-5 h-5 text-brand-500" />
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                    <Signature className="w-4 h-4 text-foreground" />
                     Labor Signature
                   </label>
                   {hasSignature && (
@@ -385,7 +388,7 @@ export const Payments = () => {
                     </button>
                   )}
                 </div>
-                <div className="border border-input rounded-xl bg-accent/10 overflow-hidden relative touch-none">
+                <div className="border border-border/80 rounded-xl bg-card overflow-hidden relative touch-none">
                   <canvas
                     ref={canvasRef}
                     onMouseDown={startDrawing}
@@ -405,7 +408,7 @@ export const Payments = () => {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3">
+              <div className="pt-4 border-t border-border/50 flex justify-end gap-3">
                 <Button variant="outline" onClick={() => setPayingWorker(null)}>
                   Cancel
                 </Button>
@@ -427,61 +430,61 @@ export const Payments = () => {
             title={`Payment History - ${viewingReceiptsWorker.name}`}
             className="max-w-4xl"
           >
-            <div className="flex flex-col md:flex-row h-[60vh] -mx-6 -mb-6 -mt-2">
+            <div className="flex flex-col md:flex-row h-auto md:h-[60vh] -mx-6 -mb-6 -mt-2">
               {/* Left Side: Receipts list */}
-              <div className="w-full md:w-1/3 border-r border-border overflow-y-auto p-6 space-y-2">
-                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-4">All Payout slips</p>
+              <div className="w-full md:w-1/3 border-r border-border/50 overflow-y-auto p-6 space-y-2.5 max-h-[220px] md:max-h-none shrink-0 bg-muted/10">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">All Payout slips</p>
                 {localPayments.filter(p => p.workerId === viewingReceiptsWorker.id).map(pay => (
                   <button
                     key={pay.id}
                     onClick={() => setSelectedReceipt(pay)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all ${
+                    className={`w-full text-left p-4 rounded-2xl border transition-all ${
                       selectedReceipt?.id === pay.id
-                        ? 'border-brand-500 bg-brand-500/10 shadow-sm'
-                        : 'border-border hover:bg-accent/50'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border/60 hover:bg-card bg-background'
                     }`}
                   >
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="text-sm text-foreground">₹{pay.amount}</span>
+                    <div className="flex items-center justify-between font-bold text-xs">
+                      <span className="text-foreground">₹{pay.amount}</span>
                       <span className="text-[10px] text-muted-foreground">{pay.date}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1.5 font-medium">{pay.paymentType} • Ref: {pay.referenceNumber || 'N/A'}</p>
+                    <p className="text-[11px] text-muted-foreground mt-2 font-medium">{pay.paymentType} • Ref: {pay.referenceNumber || 'N/A'}</p>
                   </button>
                 ))}
               </div>
 
               {/* Right Side: Receipt Detail Viewer */}
-              <div className="w-full md:w-2/3 p-6 sm:p-10 overflow-y-auto bg-background border-l border-border flex flex-col justify-between">
+              <div className="w-full md:w-2/3 p-6 sm:p-10 overflow-y-auto bg-background border-l border-border/50 flex flex-col justify-between">
                 {selectedReceipt ? (
                   <div className="space-y-8">
                     {/* Receipt Sheet */}
-                    <Card id="salary-slip" className="bg-background border border-border">
+                    <Card id="salary-slip" className="bg-card border border-border/80 rounded-[28px] overflow-hidden">
                       <CardContent className="p-8 sm:p-10 space-y-8">
-                        <div className="text-center pb-8 border-b border-border">
-                          <h4 className="text-[24px] font-medium text-foreground tracking-[-0.72px]">MusterMate Buildcon</h4>
-                          <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-widest mt-2">Wage Payment Receipt</p>
+                        <div className="text-center pb-8 border-b border-border/50">
+                          <h4 className="text-[22px] font-medium text-foreground tracking-tight">MusterMate Buildcon</h4>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Wage Payment Receipt</p>
                         </div>
                         
-                        <div className="text-sm text-muted-foreground space-y-3 font-medium">
-                          <div className="flex justify-between"><strong>Receipt ID:</strong> <span>{selectedReceipt.id}</span></div>
-                          <div className="flex justify-between"><strong>Date:</strong> <span>{selectedReceipt.date}</span></div>
-                          <div className="flex justify-between"><strong>Worker:</strong> <span>{selectedReceipt.workerName}</span></div>
-                          <div className="flex justify-between"><strong>Paid Amount:</strong> <span className="font-bold text-foreground">₹{selectedReceipt.amount}</span></div>
-                          <div className="flex justify-between"><strong>Paid Via:</strong> <span>{selectedReceipt.paymentType}</span></div>
+                        <div className="text-[13px] text-muted-foreground space-y-3.5 font-medium">
+                          <div className="flex justify-between"><span>Receipt ID:</span> <span className="font-semibold text-foreground">{selectedReceipt.id}</span></div>
+                          <div className="flex justify-between"><span>Date:</span> <span className="font-semibold text-foreground">{selectedReceipt.date}</span></div>
+                          <div className="flex justify-between"><span>Worker:</span> <span className="font-semibold text-foreground">{selectedReceipt.workerName}</span></div>
+                          <div className="flex justify-between"><span>Paid Amount:</span> <span className="font-bold text-foreground">₹{selectedReceipt.amount}</span></div>
+                          <div className="flex justify-between"><span>Paid Via:</span> <span className="font-semibold text-foreground">{selectedReceipt.paymentType}</span></div>
                           {selectedReceipt.referenceNumber && (
-                            <div className="flex justify-between"><strong>Ref No:</strong> <span>{selectedReceipt.referenceNumber}</span></div>
+                            <div className="flex justify-between"><span>Ref No:</span> <span className="font-semibold text-foreground">{selectedReceipt.referenceNumber}</span></div>
                           )}
                           {selectedReceipt.notes && (
-                            <div className="flex justify-between"><strong>Notes:</strong> <span>{selectedReceipt.notes}</span></div>
+                            <div className="flex justify-between"><span>Notes:</span> <span className="font-semibold text-foreground leading-normal">{selectedReceipt.notes}</span></div>
                           )}
                         </div>
 
                         {/* Display Signature */}
                         {selectedReceipt.workerSignature && (
-                          <div className="pt-6 border-t border-border text-center">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Sign Tally Verify</p>
-                            <div className="bg-accent/50 p-3 rounded-xl border border-border inline-block">
-                              <img src={selectedReceipt.workerSignature} alt="Worker Sign" className="h-16 object-contain dark:invert" />
+                          <div className="pt-6 border-t border-border/50 text-center">
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Sign Tally Verify</p>
+                            <div className="bg-muted p-3.5 rounded-xl border border-border/85 inline-block">
+                              <img src={selectedReceipt.workerSignature} alt="Worker Sign" className="h-14 object-contain dark:invert" />
                             </div>
                           </div>
                         )}
@@ -491,17 +494,17 @@ export const Payments = () => {
                     <div className="flex gap-4">
                       <Button
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 py-3.5"
                         onClick={() => window.print()}
-                        leftIcon={<Printer className="w-5 h-5" />}
+                        leftIcon={<Printer className="w-4 h-4" />}
                       >
                         Print Receipt
                       </Button>
                       <Button
                         variant="ghost"
-                        className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="flex-1 py-3.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => handleDeleteReceipt(selectedReceipt.id)}
-                        leftIcon={<Trash2 className="w-5 h-5" />}
+                        leftIcon={<Trash2 className="w-4 h-4" />}
                       >
                         Rollback Payout
                       </Button>

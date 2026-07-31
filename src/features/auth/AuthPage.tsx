@@ -79,43 +79,48 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-background relative flex flex-col items-center justify-center p-6 overflow-hidden">
+      
+      {/* Background ambient glows */}
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-[radial-gradient(circle_at_center,rgba(190,255,80,0.06),transparent_60%)] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-[radial-gradient(circle_at_center,rgba(190,255,80,0.04),transparent_60%)] pointer-events-none" />
+
       {/* Navbar / Logo area for the page */}
-      <div className="w-full max-w-[1200px] absolute top-8 left-0 right-0 mx-auto px-6 md:px-8 flex justify-between items-center">
-        <h1 className="text-2xl font-medium tracking-tight text-foreground">Perk / MusterMate</h1>
+      <div className="w-full max-w-7xl px-6 md:px-8 flex justify-between items-center mb-10 lg:absolute lg:top-8 lg:left-0 lg:right-0 lg:mx-auto">
+        <h1 className="text-[12px] font-black uppercase tracking-widest text-foreground">Perk / MusterMate</h1>
       </div>
 
-      <div className="w-full max-w-[480px]">
+      <div className="w-full max-w-[460px] z-10">
         
         {/* Branding header */}
-        <div className="mb-12 text-center">
-          <h2 className="text-[60px] leading-[1] tracking-[-1.8px] font-medium text-foreground mb-4">
+        <div className="mb-10 text-center">
+          <h2 className="text-4xl sm:text-5xl md:text-5xl font-medium tracking-tight text-foreground leading-[1.15]">
             Welcome<br/>back.
           </h2>
-          <p className="text-[16px] text-muted-foreground font-medium">Enter your credentials to access the command center.</p>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-4">Enter your credentials to access the command center</p>
         </div>
 
-        {/* Parallax Card Container */}
-        <Card className="w-full p-8 sm:p-12 bg-background border border-border rounded-xl shadow-none space-y-10">
+        {/* Card Container */}
+        <Card className="w-full p-8 sm:p-12 bg-gradient-to-br from-card via-card to-background border border-border/80 rounded-[32px] shadow-sm space-y-8">
           
           {/* Tab Selector - Underline Link Style */}
-          <div className="flex gap-6 border-b border-border">
+          <div className="flex gap-6 border-b border-border/50">
             <button
               onClick={() => setIsLogin(true)}
-              className={`py-3 text-[16px] font-medium transition-all ${
+              className={`pb-3 text-[12px] uppercase tracking-wider font-bold transition-all border-b-2 ${
                 isLogin 
-                  ? 'text-foreground border-b-[3px] border-foreground' 
-                  : 'text-muted-foreground hover:text-foreground border-b-[3px] border-transparent'
+                  ? 'text-foreground border-foreground' 
+                  : 'text-muted-foreground hover:text-foreground border-transparent'
               }`}
             >
               Login
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`py-3 text-[16px] font-medium transition-all ${
+              className={`pb-3 text-[12px] uppercase tracking-wider font-bold transition-all border-b-2 ${
                 !isLogin 
-                  ? 'text-foreground border-b-[3px] border-foreground' 
-                  : 'text-muted-foreground hover:text-foreground border-b-[3px] border-transparent'
+                  ? 'text-foreground border-foreground' 
+                  : 'text-muted-foreground hover:text-foreground border-transparent'
               }`}
             >
               Register
@@ -124,13 +129,14 @@ export const AuthPage = () => {
 
           {isLogin ? (
             /* LOGIN FORM */
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-8">
-              <div className="space-y-6">
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
+              <div className="space-y-5">
                 <Input
                   label="Login ID"
                   placeholder="owner@mustermate.com"
                   error={loginForm.formState.errors.loginId?.message}
                   {...loginForm.register('loginId')}
+                  className="h-12"
                 />
                 <Input
                   label="Password"
@@ -138,6 +144,7 @@ export const AuthPage = () => {
                   placeholder="••••••••"
                   error={loginForm.formState.errors.password?.message}
                   {...loginForm.register('password')}
+                  className="h-12"
                 />
               </div>
 
@@ -145,28 +152,28 @@ export const AuthPage = () => {
                 type="submit"
                 disabled={loading}
                 isLoading={loading}
-                className="w-full"
+                className="w-full h-12 shadow-sm font-bold text-xs"
                 size="lg"
               >
                 Log in
               </Button>
 
               {/* Quick Demo Info Alert */}
-              <div className="pt-8 border-t border-border space-y-4">
-                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+              <div className="pt-8 border-t border-border/50 space-y-4">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-foreground border border-border/80">
                   Demo Credentials
                 </span>
-                <ul className="text-[14px] text-muted-foreground font-medium space-y-3">
-                  <li className="flex justify-between border-b border-border pb-2"><span>Owner</span> <span className="text-foreground">owner123</span></li>
-                  <li className="flex justify-between"><span>Supervisor</span> <span className="text-foreground">super123</span></li>
+                <ul className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider space-y-3">
+                  <li className="flex justify-between border-b border-border/50 pb-2"><span>Owner</span> <span className="text-foreground font-bold">owner123</span></li>
+                  <li className="flex justify-between"><span>Supervisor</span> <span className="text-foreground font-bold">super123</span></li>
                 </ul>
               </div>
             </form>
           ) : (
             /* OWNER REGISTRATION FORM */
-            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-8">
-              <div className="space-y-6">
-                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
+              <div className="space-y-5">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-foreground border border-border/80">
                   1. Profile Details
                 </span>
                 
@@ -175,6 +182,7 @@ export const AuthPage = () => {
                   placeholder="Rajesh Singhania"
                   error={registerForm.formState.errors.name?.message}
                   {...registerForm.register('name')}
+                  className="h-12"
                 />
 
                 <Input
@@ -183,6 +191,7 @@ export const AuthPage = () => {
                   placeholder="name@firm.com"
                   error={registerForm.formState.errors.email?.message}
                   {...registerForm.register('email')}
+                  className="h-12"
                 />
 
                 <Input
@@ -190,6 +199,7 @@ export const AuthPage = () => {
                   placeholder="+91 98765 43210"
                   error={registerForm.formState.errors.phone?.message}
                   {...registerForm.register('phone')}
+                  className="h-12"
                 />
 
                 <Input
@@ -198,13 +208,14 @@ export const AuthPage = () => {
                   placeholder="Create Password"
                   error={registerForm.formState.errors.password?.message}
                   {...registerForm.register('password')}
+                  className="h-12"
                 />
               </div>
 
-              <div className="w-full h-px bg-border my-8" />
+              <div className="w-full h-px bg-border/50 my-6" />
 
-              <div className="space-y-6">
-                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.1em] text-foreground border border-border">
+              <div className="space-y-5">
+                <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-foreground border border-border/80">
                   2. Organization
                 </span>
                 
@@ -213,6 +224,7 @@ export const AuthPage = () => {
                   placeholder="Singhania Infrastructures Ltd."
                   error={registerForm.formState.errors.organizationName?.message}
                   {...registerForm.register('organizationName')}
+                  className="h-12"
                 />
               </div>
 
@@ -220,7 +232,7 @@ export const AuthPage = () => {
                 type="submit"
                 disabled={loading}
                 isLoading={loading}
-                className="w-full mt-8"
+                className="w-full h-12 shadow-sm font-bold text-xs"
                 size="lg"
               >
                 Create Account

@@ -12,6 +12,21 @@
   --color-stone: #919183;
   --color-smoke: #b9b9b7;
 
+  /* ─── Safety & Construction Palette (For compatibility and design unity) ─── */
+  --color-safety-500: #eab308;
+  --color-safety-600: #ca8a04;
+  --color-construction-50: #f8fafc;
+  --color-construction-100: #f1f5f9;
+  --color-construction-200: #e2e8f0;
+  --color-construction-400: #94a3b8;
+  --color-construction-450: #64748b;
+  --color-construction-500: #64748b;
+  --color-construction-550: #475569;
+  --color-construction-800: #1e293b;
+  --color-construction-850: #0f172a;
+  --color-construction-900: #0f172a;
+  --color-construction-950: #020617;
+
   /* ─── Semantic Aliases ─── */
   --color-background: var(--color-pure-white);
   --color-foreground: var(--color-off-black-ink);
@@ -112,12 +127,39 @@
   }
 }
 
+.dark {
+  --color-background: var(--color-off-black-ink);
+  --color-foreground: var(--color-off-white-canvas);
+  --color-card: var(--color-deep-charcoal);
+  --color-card-foreground: var(--color-pure-white);
+  --color-border: #282822;
+  --color-input: #1e1e1a;
+  --color-ring: var(--color-electric-lime);
+  --color-secondary: var(--color-deep-charcoal);
+  --color-secondary-foreground: var(--color-pure-white);
+  --color-muted: #282822;
+  --color-muted-foreground: var(--color-smoke);
+  
+  --color-construction-50: #161612;
+  --color-construction-100: #1e1e1a;
+  --color-construction-200: #282822;
+  --color-construction-400: var(--color-stone);
+  --color-construction-450: var(--color-smoke);
+  --color-construction-500: var(--color-smoke);
+  --color-construction-550: var(--color-ash);
+  --color-construction-800: #1e1e1a;
+  --color-construction-850: var(--color-pure-white);
+  --color-construction-900: #161612;
+  --color-construction-950: #0c0c0a;
+}
+
 body {
-  background-color: var(--color-pure-white);
-  color: var(--color-off-black-ink);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-otsono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ─── Accessibility: WCAG AA Focus Rings ─── */

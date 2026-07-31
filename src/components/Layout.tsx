@@ -44,7 +44,7 @@ export const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden font-sans selection:bg-brand-500 selection:text-black">
+    <div className="flex h-dvh w-screen bg-background text-foreground overflow-hidden font-sans selection:bg-brand-500 selection:text-black">
       {/* Skip to main content for accessibility */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:font-bold">
         Skip to main content

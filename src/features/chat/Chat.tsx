@@ -109,14 +109,14 @@ export const Chat = () => {
   };
 
   return (
-    <motion.div variants={slideUp} initial="hidden" animate="visible" className="h-[calc(100vh-9rem)]">
-      <Card glass className="h-full flex overflow-hidden p-0 border-border">
+    <motion.div variants={slideUp} initial="hidden" animate="visible" className="h-[calc(100dvh-12rem)] md:h-[calc(100vh-13rem)]">
+      <Card className="h-full flex overflow-hidden p-0 border border-border/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
         
         {/* Channels Sidebar List (Hidden for Labour role for simplicity) */}
         {selectedRole !== 'labour' && (
-          <div className="w-64 border-r border-border bg-accent/30 flex flex-col p-5 space-y-5 shrink-0 hidden md:flex">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-brand-500" />
+          <div className="w-64 border-r border-border/50 bg-muted/10 flex flex-col p-5 space-y-5 shrink-0 hidden md:flex animate-fade-in">
+            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-foreground" />
               Muster Channels
             </h3>
             
@@ -125,54 +125,54 @@ export const Chat = () => {
                 onClick={() => {
                   setActiveChannel('global');
                 }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border ${
                   activeChannel === 'global'
-                    ? 'bg-brand-500 text-brand-foreground shadow-md shadow-brand-500/20 scale-[1.02]'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    ? 'bg-primary border-primary/25 text-primary-foreground shadow-md shadow-primary/10 scale-[1.02]'
+                    : 'text-muted-foreground border-transparent hover:bg-card hover:text-foreground'
                 }`}
               >
-                # organization-wide-team
+                # team-hq
               </button>
 
               <button
                 onClick={() => {
                   setActiveChannel('site');
                 }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all truncate ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border truncate ${
                   activeChannel === 'site'
-                    ? 'bg-brand-500 text-brand-foreground shadow-md shadow-brand-500/20 scale-[1.02]'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    ? 'bg-primary border-primary/25 text-primary-foreground shadow-md shadow-primary/10 scale-[1.02]'
+                    : 'text-muted-foreground border-transparent hover:bg-card hover:text-foreground'
                 }`}
               >
-                # site-{activeSiteId.split('-')[1]} ({getSiteName().substring(0, 15)}...)
+                # site-{activeSiteId.split('-')[1]} ({getSiteName().substring(0, 10)}...)
               </button>
             </div>
           </div>
         )}
 
         {/* Chat Conversation pane */}
-        <div className="flex-1 flex flex-col justify-between overflow-hidden bg-background/50">
+        <div className="flex-1 flex flex-col justify-between overflow-hidden bg-card/40">
           {/* Header bar */}
-          <div className="h-16 border-b border-border px-6 sm:px-8 flex items-center justify-between shrink-0 bg-background/80 backdrop-blur-md">
+          <div className="h-16 border-b border-border/50 px-6 sm:px-8 flex items-center justify-between shrink-0 bg-card/65 backdrop-blur-md">
             <div>
-              <h4 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+              <h4 className="text-[12px] font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                {selectedRole === 'labour' ? `# site-${activeSiteId.split('-')[1]} team` : (activeChannel === 'global' ? '# organization-wide-team' : `# site-${activeSiteId.split('-')[1]} room`)}
+                {selectedRole === 'labour' ? `# site-${activeSiteId.split('-')[1]} team` : (activeChannel === 'global' ? '# team-hq' : `# site-${activeSiteId.split('-')[1]} room`)}
               </h4>
-              <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest font-semibold hidden xs:block">Active thread with real-time replication</p>
+              <p className="text-[9px] text-muted-foreground mt-1 uppercase tracking-widest font-bold hidden xs:block">Real-time team channel</p>
             </div>
 
             {/* Mobile Channel Switcher */}
             {selectedRole !== 'labour' && (
-              <div className="flex md:hidden bg-accent/50 p-1 rounded-xl border border-border shrink-0">
+              <div className="flex md:hidden bg-muted/40 p-1 rounded-xl border border-border/80 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setActiveChannel('global');
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
                     activeChannel === 'global'
-                      ? 'bg-brand-500 text-brand-foreground shadow-sm'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -183,9 +183,9 @@ export const Chat = () => {
                   onClick={() => {
                     setActiveChannel('site');
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
                     activeChannel === 'site'
-                      ? 'bg-brand-500 text-brand-foreground shadow-sm'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -198,7 +198,7 @@ export const Chat = () => {
           {/* Message Stream */}
           <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
             {chatMessages.length === 0 ? (
-              <div className="text-center py-20 text-sm text-muted-foreground font-medium">
+              <div className="text-center py-20 text-sm text-muted-foreground font-semibold">
                 No messages posted here yet. Start the conversation!
               </div>
             ) : (
@@ -210,32 +210,32 @@ export const Chat = () => {
                     key={msg.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3, delay: idx * 0.02 }}
                     className={`flex gap-3 max-w-[85%] sm:max-w-[70%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-accent text-foreground flex items-center justify-center font-black text-xs shrink-0 border border-border shadow-inner">
-                      {msg.senderName.substring(0, 2).toUpperCase()}
+                    <div className="w-9 h-9 rounded-full bg-background text-foreground flex items-center justify-center font-bold text-xs shrink-0 border border-border/80 shadow-sm uppercase">
+                      {msg.senderName.substring(0, 2)}
                     </div>
 
                     <div className={`space-y-1 ${isMe ? 'items-end flex flex-col' : 'items-start flex flex-col'}`}>
-                      <div className={`flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest ${isMe ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-wider ${isMe ? 'flex-row-reverse' : ''}`}>
                         <span>{msg.senderName}</span>
-                        <span className="bg-accent px-1.5 py-0.5 rounded text-[9px]">
+                        <span className="bg-muted px-1.5 py-0.5 rounded text-[8px] tracking-widest uppercase">
                           {msg.senderRole}
                         </span>
                       </div>
 
-                      <div className={`p-4 rounded-2xl text-sm font-medium leading-relaxed shadow-sm backdrop-blur-sm ${
+                      <div className={`p-4 rounded-2xl text-[13px] font-semibold leading-relaxed shadow-sm backdrop-blur-sm ${
                         isMe 
-                          ? 'bg-brand-500 text-brand-foreground rounded-tr-sm shadow-brand-500/10' 
-                          : 'bg-background text-foreground rounded-tl-sm border border-border'
+                          ? 'bg-primary border border-primary/25 text-primary-foreground rounded-tr-sm shadow-primary/5' 
+                          : 'bg-background text-foreground rounded-tl-sm border border-border/80'
                       }`}>
                         {msg.text}
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold mt-1">
+                      <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-bold mt-1 uppercase tracking-wide">
                         <span>{formatMessageTime(msg.createdAt)}</span>
-                        {isMe && <CheckCheck className="w-5 h-5 text-emerald-500" />}
+                        {isMe && <CheckCheck className="w-4 h-4 text-emerald-500" />}
                       </div>
                     </div>
                   </motion.div>
@@ -249,13 +249,13 @@ export const Chat = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-end gap-3 max-w-sm"
               >
-                <div className="w-10 h-10 rounded-full bg-accent text-foreground flex items-center justify-center font-black text-xs shrink-0 border border-border">SK</div>
-                <div className="bg-background p-4 rounded-2xl rounded-tl-sm border border-border text-xs text-muted-foreground font-semibold flex items-center gap-2 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-background text-foreground flex items-center justify-center font-bold text-xs shrink-0 border border-border/80 shadow-sm">SK</div>
+                <div className="bg-background p-4 rounded-2xl rounded-tl-sm border border-border/85 text-[11px] text-muted-foreground font-bold flex items-center gap-2 shadow-sm uppercase tracking-wider">
                   <span>Satish Kamble typing</span>
                   <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" />
-                    <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:0.15s]" />
-                    <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:0.3s]" />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.15s]" />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.3s]" />
                   </span>
                 </div>
               </motion.div>
@@ -265,15 +265,15 @@ export const Chat = () => {
           </div>
 
           {/* Input Bar */}
-          <form onSubmit={handleSend} className="p-4 sm:p-6 border-t border-border bg-background/80 backdrop-blur-md shrink-0 flex items-center gap-3">
+          <form onSubmit={handleSend} className="p-4 sm:p-6 border-t border-border/50 bg-card/65 backdrop-blur-md shrink-0 flex items-center gap-3">
             <Button 
               type="button"
               variant="ghost"
               size="icon"
               title="Attach documents"
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 text-muted-foreground h-11 w-11 hover:bg-muted"
             >
-              <Paperclip className="w-5 h-5" />
+              <Paperclip className="w-4 h-4" />
             </Button>
             
             <Input
@@ -281,15 +281,15 @@ export const Chat = () => {
               placeholder="Type your message here..."
               value={text}
               onChange={(e) => setText(e.target.value)}
-              className="flex-1 shadow-inner h-12"
+              className="flex-1 shadow-inner h-11 text-xs"
             />
 
             <Button
               type="submit"
               size="icon"
-              className="shrink-0 h-12 w-12 rounded-xl"
+              className="shrink-0 h-11 w-11 rounded-xl"
             >
-              <Send className="w-5 h-5 ml-1" />
+              <Send className="w-4 h-4 ml-0.5" />
             </Button>
           </form>
 

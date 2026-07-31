@@ -112,92 +112,87 @@ export const LabourDashboard = () => {
   const balanceDue = Math.max(0, totalVerifiedEarnings - totalReceived);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 md:space-y-16">
       
       {/* Welcome Banner */}
-      <div className="p-6 rounded-3xl bg-slate-900 text-white relative overflow-hidden border border-slate-800 shadow-md">
-        <div className="absolute top-[-40%] right-[-10%] w-60 h-60 rounded-full bg-safety-500/10 blur-[80px]" />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
+      <div className="p-10 rounded-[32px] bg-gradient-to-br from-card via-card to-background text-foreground relative overflow-hidden border border-border/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+        <div className="absolute top-[-40%] right-[-10%] w-60 h-60 rounded-full bg-primary/10 blur-[80px]" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 relative z-10">
           <div>
-            <h1 className="text-xl md:text-2xl font-black flex items-center gap-2">
-              <HardHat className="w-6.5 h-6.5 text-safety-500 animate-pulse" />
-              Hello, {workerProfile.name}! (नमस्ते)
+            <h1 className="text-2xl md:text-[32px] font-medium tracking-tight flex items-center gap-2.5">
+              <HardHat className="w-8 h-8 text-foreground" />
+              Hello, {workerProfile.name}!
             </h1>
-            <p className="text-xs text-slate-400 mt-1">Worker ID: {workerProfile.id} • Trade: {workerProfile.trade} • Skill: {workerProfile.skillLevel}</p>
+            <p className="text-[14px] text-muted-foreground mt-3 font-medium">Worker ID: {workerProfile.id} • Trade: {workerProfile.trade} • Skill: {workerProfile.skillLevel}</p>
           </div>
           
-          <div className="flex gap-4 shrink-0 text-xs">
-            <div className="px-4 py-2 border border-slate-800 bg-slate-950/40 rounded-2xl">
-              <span className="text-[10px] text-slate-400 block font-bold">DAILY RATE (दैनिक दर)</span>
-              <span className="font-black text-safety-500 text-sm">₹{workerProfile.dailyWage} / day</span>
+          <div className="flex gap-3 shrink-0 text-xs font-semibold tracking-wider">
+            <div className="px-5 py-3 border border-border/60 bg-background/50 rounded-2xl">
+              <span className="text-[9px] text-muted-foreground block mb-1">DAILY RATE</span>
+              <span className="font-bold text-foreground text-sm">₹{workerProfile.dailyWage} / day</span>
             </div>
-            <div className="px-4 py-2 border border-slate-800 bg-slate-950/40 rounded-2xl">
-              <span className="text-[10px] text-slate-400 block font-bold">OVERTIME RATE (अतिरिक्त कार्य दर)</span>
-              <span className="font-black text-safety-500 text-sm">₹{workerProfile.overtimeRate} / hr</span>
+            <div className="px-5 py-3 border border-border/60 bg-background/50 rounded-2xl">
+              <span className="text-[9px] text-muted-foreground block mb-1">OVERTIME RATE</span>
+              <span className="font-bold text-foreground text-sm">₹{workerProfile.overtimeRate} / hr</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Grid: Tally Metric Counters */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4.5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800/80 shadow-sm">
-          <p className="text-[10px] font-bold text-construction-450 uppercase tracking-wider">Verified Presents</p>
-          <h3 className="text-lg font-black text-construction-850 dark:text-white mt-1">{presentsCount} Days</h3>
-        </div>
-        <div className="p-4.5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800/80 shadow-sm">
-          <p className="text-[10px] font-bold text-construction-450 uppercase tracking-wider">Verified OT Hours</p>
-          <h3 className="text-lg font-black text-construction-850 dark:text-white mt-1">{totalVerifiedOT} Hrs</h3>
-        </div>
-        <div className="p-4.5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800/80 shadow-sm">
-          <p className="text-[10px] font-bold text-construction-450 uppercase tracking-wider">Total Earnings (verified)</p>
-          <h3 className="text-lg font-black text-emerald-600 dark:text-emerald-500 mt-1">₹{totalVerifiedEarnings}</h3>
-        </div>
-        <div className="p-4.5 rounded-2xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800/80 shadow-sm">
-          <p className="text-[10px] font-bold text-construction-450 uppercase tracking-wider">Remaining Balance</p>
-          <h3 className="text-lg font-black text-amber-500 mt-1">₹{balanceDue}</h3>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Verified Presents', value: `${presentsCount} Days` },
+          { label: 'Verified OT Hours', value: `${totalVerifiedOT} Hrs` },
+          { label: 'Total Earnings (verified)', value: `₹${totalVerifiedEarnings}`, textClass: 'text-foreground' },
+          { label: 'Remaining Balance', value: `₹${balanceDue}`, textClass: 'text-primary-foreground bg-primary border-primary/20 shadow-[0_4px_15px_-3px_rgba(190,255,80,0.3)]' },
+        ].map((stat, i) => (
+          <div key={i} className={`p-6.5 rounded-[22px] border bg-card/60 border-border/80 transition-all ${stat.textClass?.includes('bg-primary') ? stat.textClass : ''}`}>
+            <p className={`text-[10px] font-semibold uppercase tracking-wider ${stat.textClass?.includes('bg-primary') ? 'text-black/60' : 'text-muted-foreground'}`}>{stat.label}</p>
+            <h3 className={`text-[22px] sm:text-2xl font-bold mt-2 tracking-tight ${stat.textClass?.includes('bg-primary') ? 'text-black' : (stat.textClass || 'text-foreground')}`}>{stat.value}</h3>
+          </div>
+        ))}
       </div>
 
       {/* Wage Calculation Breakdown Formula Alert */}
-      <div className="p-4.5 rounded-2xl border border-sky-100 dark:border-sky-950/25 bg-sky-500/5 text-[11px] text-sky-850 dark:text-sky-350 font-semibold space-y-1 shadow-sm">
-        <p className="font-extrabold flex items-center gap-1.5 text-sky-700 dark:text-sky-400">
-          <HelpCircle className="w-5 h-5 text-sky-500" />
+      <div className="p-5 rounded-2xl border border-border/60 bg-card/40 text-[12px] text-muted-foreground font-semibold space-y-1 shadow-sm leading-relaxed">
+        <p className="font-bold flex items-center gap-1.5 text-foreground mb-1">
+          <HelpCircle className="w-5 h-5 text-muted-foreground" />
           Wages Tally Formula (कमाई की गणना का सूत्र):
         </p>
-        <p className="pl-5.5 text-construction-550 dark:text-construction-400 text-[10px]">
-          Verified Wages = <span className="text-sky-600 dark:text-sky-400 font-bold">(Presents × ₹{workerProfile.dailyWage})</span> + <span className="text-sky-600 dark:text-sky-400 font-bold">(OT Hours × ₹{workerProfile.overtimeRate})</span> + <span className="text-sky-600 dark:text-sky-400 font-bold">(Night Shifts × ₹150)</span>
+        <p className="pl-6 text-[11px]">
+          Verified Wages = <span className="font-bold text-foreground">(Presents × ₹{workerProfile.dailyWage})</span> + <span className="font-bold text-foreground">(OT Hours × ₹{workerProfile.overtimeRate})</span> + <span className="font-bold text-foreground">(Night Shifts × ₹150)</span>
         </p>
       </div>
 
       {/* Split layout: Claim form and comparison logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Side: Attendance Self-Submit Form */}
-        <div className="lg:col-span-1 p-5 rounded-3xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm space-y-4">
-          <h3 className="text-xs font-black text-construction-850 dark:text-white flex items-center gap-2 border-b border-construction-100 dark:border-construction-800 pb-3">
-            <CalendarRange className="w-5 h-5 text-safety-500" />
-            Submit Daily Claim (रजा / हाजिरी दावा)
+        <div className="lg:col-span-1 p-8 rounded-[28px] bg-card border border-border/80 shadow-sm space-y-6">
+          <h3 className="text-[18px] font-medium text-foreground flex items-center gap-2 border-b border-border/50 pb-4">
+            <CalendarRange className="w-5 h-5 text-foreground" />
+            Submit Daily Claim
           </h3>
 
-          <form onSubmit={handleClaimSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleClaimSubmit} className="space-y-5 text-xs">
             <div>
-              <label className="text-[10px] font-bold text-construction-500 block mb-1">Select Date *</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Select Date *</label>
               <input
                 type="date"
                 required
                 value={claimDate}
                 onChange={(e) => setClaimDate(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-850 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500"
+                className="w-full text-sm px-4 py-3 border border-border/80 bg-background text-foreground rounded-xl focus:ring-1 focus:ring-ring focus:outline-none transition-shadow"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-construction-500 block mb-1">My Status *</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">My Status *</label>
               <select
                 value={claimStatus}
                 onChange={(e: any) => setClaimStatus(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-850 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500"
+                className="w-full text-sm px-4 py-3 border border-border/80 bg-background text-foreground rounded-xl focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
               >
                 <option value="Present">Present (उपस्थित)</option>
                 <option value="Half-Day">Half Day (आधा दिन)</option>
@@ -206,14 +201,14 @@ export const LabourDashboard = () => {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3.5 pt-1">
+            <div className="grid grid-cols-2 gap-4 pt-1">
               {/* Overtime */}
               <div>
-                <label className="text-[10px] font-bold text-construction-500 block mb-1">OT Hours (अतिरिक्त घंटे)</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">OT Hours (अतिरिक्त घंटे)</label>
                 <select
                   value={overtimeHours}
                   onChange={(e) => setOvertimeHours(Number(e.target.value))}
-                  className="w-full text-xs px-3 py-2 border border-construction-200 dark:border-construction-850 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500"
+                  className="w-full text-sm px-4 py-3 border border-border/80 bg-background text-foreground rounded-xl focus:ring-1 focus:ring-ring focus:outline-none transition-shadow cursor-pointer"
                 >
                   {[0, 1, 2, 3, 4, 5, 6].map(h => (
                     <option key={h} value={h}>{h} Hours</option>
@@ -223,37 +218,37 @@ export const LabourDashboard = () => {
 
               {/* Night Shift Toggle */}
               <div>
-                <label className="text-[10px] font-bold text-construction-500 block mb-1.5">Night Shift (नाइट शिफ्ट)</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Night Shift (नाइट शिफ्ट)</label>
                 <button
                   type="button"
                   onClick={() => setIsNightShift(!isNightShift)}
-                  className={`w-full py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  className={`w-full py-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     isNightShift
-                      ? 'bg-amber-500/10 border-amber-500 text-amber-600'
-                      : 'border-construction-200 dark:border-construction-800 text-construction-500 dark:text-construction-400 hover:bg-construction-50'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'border-border/80 text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  <Clock className="w-5 h-5" />
+                  <Clock className="w-4 h-4" />
                   {isNightShift ? 'Yes' : 'No'}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-construction-500 block mb-1">Work Remarks (कार्य विवरण)</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Work Remarks (कार्य विवरण)</label>
               <textarea
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
                 placeholder="Describe what you worked on today..."
-                rows={2}
-                className="w-full text-xs px-3.5 py-2.5 border border-construction-200 dark:border-construction-850 bg-white dark:bg-construction-950 text-construction-850 dark:text-white rounded-xl focus:ring-2 focus:ring-safety-500"
+                rows={3}
+                className="w-full text-sm px-4 py-3.5 border border-border/80 bg-background text-foreground rounded-xl focus:ring-1 focus:ring-ring focus:outline-none transition-shadow"
               />
             </div>
 
             <Button
               type="submit"
               isLoading={loading}
-              className="w-full text-xs font-bold text-construction-950 bg-safety-500 hover:bg-safety-600 transition-colors shadow-md"
+              className="w-full py-4 text-xs font-bold shadow-md"
             >
               Submit Work Claim
             </Button>
@@ -261,24 +256,24 @@ export const LabourDashboard = () => {
         </div>
 
         {/* Right Side: Calendar & Compare Sheets */}
-        <div className="lg:col-span-2 p-5 rounded-3xl bg-white dark:bg-construction-900 border border-construction-200 dark:border-construction-800 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-construction-100 dark:border-construction-800 pb-3">
-            <h3 className="text-xs font-black text-construction-850 dark:text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-safety-500" />
-              July 2026 Verification Sheet (जुलाई सत्यापन शीट)
+        <div className="lg:col-span-2 p-8 rounded-[28px] bg-card border border-border/80 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/50 pb-4">
+            <h3 className="text-[18px] font-medium text-foreground flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              July 2026 Verification Sheet
             </h3>
             
             {/* Legend indicators */}
-            <div className="flex flex-wrap gap-2.5 text-[9px] font-bold">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Matches</span>
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Mismatch</span>
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-800" /> No Claim</span>
+            <div className="flex flex-wrap gap-3 text-[10px] font-bold tracking-wide uppercase">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" /> Matches</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_8px_rgba(229,69,69,0.4)]" /> Mismatch</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-muted border border-border" /> No Claim</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1.5 text-center">
+          <div className="grid grid-cols-7 gap-2.5 text-center">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-              <div key={day} className="text-[10px] font-extrabold text-construction-400 py-1">{day}</div>
+              <div key={day} className="text-[10px] font-extrabold text-muted-foreground/80 uppercase tracking-widest py-1">{day}</div>
             ))}
             
             {/* Padding July 2026 Wednesday start */}
@@ -291,7 +286,7 @@ export const LabourDashboard = () => {
               const roster = myRosterLogs.find(r => r.date === dateStr);
               const claim = myClaims.find(s => s.date === dateStr);
               
-              let statusColor = 'border-construction-200 dark:border-construction-800';
+              let statusColor = 'border-border/80 hover:border-foreground/30 bg-background/20';
               let verifyIcon = null;
 
               if (roster && claim) {
@@ -300,14 +295,14 @@ export const LabourDashboard = () => {
                                     roster.isNightShift === claim.isNightShift;
                 if (matchStatus) {
                   statusColor = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-400';
-                  verifyIcon = <CheckCircle2 className="w-5 h-5 text-emerald-500 absolute top-1 right-1" />;
+                  verifyIcon = <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute top-1.5 right-1.5" />;
                 } else {
-                  statusColor = 'bg-red-500/10 border-red-500/40 text-red-700 dark:text-red-400';
-                  verifyIcon = <AlertTriangle className="w-5 h-5 text-red-500 absolute top-1 right-1 animate-pulse" />;
+                  statusColor = 'bg-destructive/10 border-destructive/30 text-destructive';
+                  verifyIcon = <AlertTriangle className="w-4 h-4 text-destructive absolute top-1.5 right-1.5 animate-pulse" />;
                 }
               } else if (roster && !claim) {
                 // Official marked, but labour haven't self-claimed
-                statusColor = 'bg-slate-50 dark:bg-construction-950 border-construction-200 dark:border-construction-800';
+                statusColor = 'bg-background border-border/80';
               } else if (!roster && claim) {
                 // Claimed, but official attendance not marked
                 statusColor = 'bg-amber-500/5 border-amber-300 dark:border-amber-900/50';
@@ -316,20 +311,20 @@ export const LabourDashboard = () => {
               return (
                 <div 
                   key={i}
-                  className={`p-2 rounded-xl border flex flex-col justify-between items-start min-h-[64px] relative ${statusColor} group hover:shadow-sm transition-all`}
+                  className={`p-3.5 rounded-2xl border flex flex-col justify-between items-start min-h-[72px] relative ${statusColor} group hover:shadow-sm transition-all`}
                 >
-                  <span className="text-[10px] font-black">{dayNumber}</span>
+                  <span className="text-[11px] font-bold">{dayNumber}</span>
                   {verifyIcon}
 
                   {/* Summary details */}
-                  <div className="w-full text-[8px] font-bold text-left leading-tight mt-1 space-y-0.5">
+                  <div className="w-full text-[8.5px] font-bold text-left leading-tight mt-2.5 space-y-1">
                     {roster && (
-                      <p className="truncate" title="Official Supervisor check">
+                      <p className="truncate text-foreground/80" title="Official Supervisor check">
                         R: {roster.status === 'Present' ? `P (${roster.overtimeHours}h OT)` : roster.status.slice(0, 4)}
                       </p>
                     )}
                     {claim && (
-                      <p className="opacity-80 truncate" title="Self submission check">
+                      <p className="opacity-80 truncate text-foreground/60" title="Self submission check">
                         S: {claim.status === 'Present' ? `P (${claim.overtimeHours}h OT)` : claim.status.slice(0, 4)}
                       </p>
                     )}
