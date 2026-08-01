@@ -16,6 +16,10 @@ import { slideUp } from '../../utils/animations';
 import { useSites, useChat, useSendChatMessage, useUsers } from '../../api/queries';
 import { ChatMessage } from '../../services/db';
 
+// Org-level (team HQ) channel id. Matches GLOBAL_CHANNEL_ID on the server and
+// is scoped to the caller's organization on every row.
+const GLOBAL_CHANNEL_ID = 'global';
+
 export const Chat = () => {
   const { 
     currentUser, 
@@ -28,7 +32,7 @@ export const Chat = () => {
   const [text, setText] = useState('');
   const [activeChannel, setActiveChannel] = useState<'global' | 'site'>('global');
   
-  const chatSiteId = activeChannel === 'global' ? 'global' : activeSiteId;
+  const chatSiteId = activeChannel === 'global' ? GLOBAL_CHANNEL_ID : activeSiteId;
   const { data: chatMessages = [] } = useChat(chatSiteId);
   const { mutate: sendChatMessage } = useSendChatMessage();
   const [isTyping, setIsTyping] = useState(false);
@@ -48,7 +52,7 @@ export const Chat = () => {
 
     const message: ChatMessage = {
       id: `msg-${Date.now()}`,
-      siteId: selectedRole === 'labour' || selectedRole === 'supervisor' ? activeSiteId : (activeChannel === 'global' ? 'global' : activeSiteId),
+      siteId: selectedRole === 'labour' || selectedRole === 'supervisor' ? activeSiteId : (activeChannel === 'global' ? GLOBAL_CHANNEL_ID : activeSiteId),
       senderId: currentUser?.uid || '',
       senderName: currentUser?.name || 'Anonymous User',
       senderRole: selectedRole,
@@ -76,7 +80,7 @@ export const Chat = () => {
 
         const botMessage = {
           id: `msg-bot-${Date.now()}`,
-          siteId: selectedRole === 'labour' || selectedRole === 'supervisor' ? activeSiteId : (activeChannel === 'global' ? 'global' : activeSiteId),
+          siteId: selectedRole === 'labour' || selectedRole === 'supervisor' ? activeSiteId : (activeChannel === 'global' ? GLOBAL_CHANNEL_ID : activeSiteId),
           senderId: supervisor.uid,
           senderName: supervisor.name,
           senderRole: supervisor.role,

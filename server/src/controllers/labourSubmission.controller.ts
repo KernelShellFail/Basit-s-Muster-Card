@@ -12,7 +12,7 @@ export const getLabourSubmissions = async (req: AuthenticatedRequest, res: Respo
     }
 
     const subs = user.role === 'labour' && user.workerId
-      ? await submissionRepo.findAllByWorker(user.workerId)
+      ? await submissionRepo.findAllByWorker(user.workerId, user.organizationId)
       : await submissionRepo.findAllByOrg(user.organizationId);
     res.json(subs.map(row => ({
       id: row.id,

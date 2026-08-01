@@ -1,32 +1,51 @@
-# React + TypeScript + Vite
+# MusterMate
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Wage management & muster command center for construction workforces. React +
+Vite frontend, Express + PostgreSQL backend, multi-tenant (per-organization)
+with role-based access (owner / admin / supervisor / labour).
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Worker profiles with photos, Aadhaar/PAN/bank details, and printable muster cards
+- Daily attendance (with night-shift + overtime flags) and labour self-claims
+- Wage payments with signature capture and printable PDF receipts
+- Leave requests, site management, and org-level + site-level team chat
+- Real-time notifications and offline read-only cache
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Frontend: React 19, Vite, Tailwind CSS, React Query, Zustand, framer-motion
+- Backend: Express 5, PostgreSQL, custom JWT auth, zod validation
+- PDFs: jspdf + html2canvas-pro
 
-## Expanding the Oxlint configuration
+## Quick start (development)
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env   # fill in DB + JWT_SECRET
+npm run dev            # Vite on :5173, API on :3000
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The schema auto-creates on first server boot.
+
+## Deploying to production
+
+See [DEPLOY.md](./DEPLOY.md) — single-server deployment (Express serves the
+built SPA + API). Requires PostgreSQL, a strong `JWT_SECRET`, and `NODE_ENV=production`.
+
+```bash
+npm ci
+npm run build
+NODE_ENV=production npm start
+```
+
+## Scripts
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Run API + Vite concurrently |
+| `npm run typecheck` | Client typecheck |
+| `npm run typecheck:server` | Server typecheck |
+| `npm run lint` | Oxlint |
+| `npm run build` | Typecheck + build SPA + compile server |
+| `npm run start` | Run compiled server (`server/dist`) |

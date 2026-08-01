@@ -27,10 +27,10 @@ export class LabourSubmissionRepository extends BaseRepository<LabourSubmissionE
     return result.rows;
   }
 
-  async findAllByWorker(workerId: string): Promise<LabourSubmissionEntity[]> {
+  async findAllByWorker(workerId: string, orgId: string): Promise<LabourSubmissionEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 ORDER BY date DESC`,
-      [workerId]
+      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 AND organization_id = $2 ORDER BY date DESC`,
+      [workerId, orgId]
     );
     return result.rows;
   }
@@ -48,7 +48,8 @@ export class LabourSubmissionRepository extends BaseRepository<LabourSubmissionE
         time_in = EXCLUDED.time_in,
         time_out = EXCLUDED.time_out,
         remarks = EXCLUDED.remarks,
-        created_at = EXCLUDED.created_at;
+        created_at = EXCLUDED.created_at
+      WHERE labour_submissions.organization_id = EXCLUDED.organization_id;
     `, [
       ls.id, ls.worker_id, ls.date, ls.status, ls.is_night_shift, ls.overtime_hours, ls.time_in, ls.time_out, ls.remarks, ls.created_at, ls.organization_id
     ]);

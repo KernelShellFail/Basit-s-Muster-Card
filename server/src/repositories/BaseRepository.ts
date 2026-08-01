@@ -31,4 +31,12 @@ export abstract class BaseRepository<T> {
     const result = await this.query(`DELETE FROM ${this.tableName} WHERE id = $1 RETURNING id`, [id]);
     return (result.rowCount ?? 0) > 0;
   }
+
+  async deleteByIdAndOrg(id: string, orgId: string): Promise<boolean> {
+    const result = await this.query(
+      `DELETE FROM ${this.tableName} WHERE id = $1 AND organization_id = $2 RETURNING id`,
+      [id, orgId]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
 }

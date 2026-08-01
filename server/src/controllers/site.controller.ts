@@ -25,7 +25,16 @@ export const getSites = async (req: AuthenticatedRequest, res: Response) => {
 
 export const saveSite = async (req: AuthenticatedRequest, res: Response) => {
   const { id, name, address, gpsCoordinates, status, supervisorId, workersCount } = req.body;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
+    // Reject attempts to overwrite a site owned by another organization.
+    const existing = await siteRepo.findByIdAndOrg(id, orgId);
+    if (!existing && await siteRepo.findById(id)) {
+      return res.status(403).json({ error: 'Permission denied: site belongs to another organization' });
+    }
     const siteData: SiteEntity = {
       id,
       name,
@@ -34,7 +43,7 @@ export const saveSite = async (req: AuthenticatedRequest, res: Response) => {
       status,
       supervisor_id: supervisorId,
       workers_count: workersCount,
-      organization_id: req.user?.organizationId
+      organization_id: orgId
     };
     await siteRepo.save(siteData);
     res.json({ success: true });
@@ -46,8 +55,15 @@ export const saveSite = async (req: AuthenticatedRequest, res: Response) => {
 
 export const deleteSite = async (req: AuthenticatedRequest, res: Response) => {
   const id = req.params.id as string;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
-    await siteRepo.deleteSiteCascade(id);
+    const deleted = await siteRepo.deleteSiteCascade(id, orgId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Site not found' });
+    }
     res.json({ success: true });
   } catch (err) {
     console.error(err);

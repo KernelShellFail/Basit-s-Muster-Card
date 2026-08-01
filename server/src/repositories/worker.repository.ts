@@ -45,12 +45,28 @@ export class WorkerRepository extends BaseRepository<WorkerEntity> {
     return result.rows;
   }
 
-  async findAllBySite(siteId: string): Promise<WorkerEntity[]> {
+  async findAllBySite(siteId: string, orgId: string): Promise<WorkerEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE current_site_id = $1 ORDER BY name ASC`,
-      [siteId]
+      `SELECT * FROM ${this.tableName} WHERE current_site_id = $1 AND organization_id = $2 ORDER BY name ASC`,
+      [siteId, orgId]
     );
     return result.rows;
+  }
+
+  async findByIdAndOrg(id: string, orgId: string): Promise<WorkerEntity | null> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE id = $1 AND organization_id = $2`,
+      [id, orgId]
+    );
+    return result.rows[0] || null;
+  }
+
+  async deleteByIdAndOrg(id: string, orgId: string): Promise<boolean> {
+    const result = await this.query(
+      `DELETE FROM ${this.tableName} WHERE id = $1 AND organization_id = $2 RETURNING id`,
+      [id, orgId]
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   async save(w: WorkerEntity): Promise<void> {
@@ -89,8 +105,8 @@ export class WorkerRepository extends BaseRepository<WorkerEntity> {
         current_site_id = EXCLUDED.current_site_id,
         status = EXCLUDED.status,
         photo = EXCLUDED.photo,
-        notes = EXCLUDED.notes,
-        organization_id = EXCLUDED.organization_id;
+        notes = EXCLUDED.notes
+      WHERE workers.organization_id = EXCLUDED.organization_id;
     `, [
       w.id, w.name, w.father_name, w.gender, w.dob, w.phone, w.emergency_contact,
       w.address, w.village, w.district, w.state, w.pin_code, w.aadhaar, w.pan,

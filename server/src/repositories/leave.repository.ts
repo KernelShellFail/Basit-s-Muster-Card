@@ -27,10 +27,10 @@ export class LeaveRepository extends BaseRepository<LeaveEntity> {
     return result.rows;
   }
 
-  async findAllByWorker(workerId: string): Promise<LeaveEntity[]> {
+  async findAllByWorker(workerId: string, orgId: string): Promise<LeaveEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 ORDER BY created_at DESC`,
-      [workerId]
+      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 AND organization_id = $2 ORDER BY created_at DESC`,
+      [workerId, orgId]
     );
     return result.rows;
   }
@@ -43,7 +43,8 @@ export class LeaveRepository extends BaseRepository<LeaveEntity> {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       ON CONFLICT (id) DO UPDATE SET
         status = EXCLUDED.status,
-        comment = EXCLUDED.comment;
+        comment = EXCLUDED.comment
+      WHERE leaves.organization_id = EXCLUDED.organization_id;
     `, [
       l.id, l.worker_id, l.worker_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.comment, l.created_at, l.organization_id
     ]);

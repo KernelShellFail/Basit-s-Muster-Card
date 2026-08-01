@@ -12,7 +12,7 @@ export const getPayments = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const payments = user.role === 'labour' && user.workerId
-      ? await paymentRepo.findAllByWorker(user.workerId)
+      ? await paymentRepo.findAllByWorker(user.workerId, user.organizationId)
       : await paymentRepo.findAllByOrg(user.organizationId);
     const formatted = payments.map(p => ({
       id: p.id,
@@ -67,8 +67,15 @@ export const savePayment = async (req: AuthenticatedRequest, res: Response) => {
 
 export const deletePayment = async (req: AuthenticatedRequest, res: Response) => {
   const id = req.params.id as string;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
-    await paymentRepo.delete(id);
+    const deleted = await paymentRepo.deleteByIdAndOrg(id, orgId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
     res.json({ success: true });
   } catch (err) {
     console.error(err);

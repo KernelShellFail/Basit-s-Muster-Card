@@ -13,9 +13,9 @@ export const getAttendance = async (req: AuthenticatedRequest, res: Response) =>
 
     let records: AttendanceEntity[];
     if (user.role === 'labour' && user.workerId) {
-      records = await attendanceRepo.findAllByWorker(user.workerId);
+      records = await attendanceRepo.findAllByWorker(user.workerId, user.organizationId);
     } else if (user.role === 'supervisor' && user.siteId) {
-      records = await attendanceRepo.findAllBySite(user.siteId);
+      records = await attendanceRepo.findAllBySite(user.siteId, user.organizationId);
     } else {
       records = await attendanceRepo.findAllByOrg(user.organizationId);
     }

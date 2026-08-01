@@ -32,10 +32,26 @@ export class UserRepository extends BaseRepository<User> {
     return result.rows[0] || null;
   }
 
+  async findByUidAndOrg(uid: string, orgId: string): Promise<User | null> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE uid = $1 AND organization_id = $2`,
+      [uid, orgId]
+    );
+    return result.rows[0] || null;
+  }
+
   async findByUsername(username: string): Promise<User | null> {
     const result = await this.query(
       `SELECT * FROM ${this.tableName} WHERE LOWER(username) = LOWER($1)`,
       [username]
+    );
+    return result.rows[0] || null;
+  }
+
+  async findByUsernameInOrg(username: string, orgId: string): Promise<User | null> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE LOWER(username) = LOWER($1) AND organization_id = $2`,
+      [username, orgId]
     );
     return result.rows[0] || null;
   }
@@ -53,6 +69,14 @@ export class UserRepository extends BaseRepository<User> {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async deleteByUidAndOrg(uid: string, orgId: string): Promise<boolean> {
+    const result = await this.query(
+      `DELETE FROM ${this.tableName} WHERE uid = $1 AND organization_id = $2 RETURNING uid`,
+      [uid, orgId]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async save(user: User): Promise<void> {
     const userExist = await this.findByUid(user.uid);
     if (userExist) {
@@ -64,11 +88,10 @@ export class UserRepository extends BaseRepository<User> {
           phone = $5,
           role = $6,
           site_id = $7,
-          organization_id = $8,
           worker_id = $9,
           photo = $10,
           password = COALESCE($11, password)
-        WHERE uid = $1;
+        WHERE uid = $1 AND organization_id = $8;
       `, [user.uid, user.name, user.username || null, user.email, user.phone, user.role, user.site_id, user.organization_id || userExist.organization_id, user.worker_id || null, user.photo || null, user.password || null]);
     } else {
       await this.query(`

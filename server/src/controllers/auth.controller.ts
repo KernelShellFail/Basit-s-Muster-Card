@@ -43,7 +43,8 @@ export const registerOwner = async (req: AuthenticatedRequest, res: Response) =>
       address: 'Default company location',
       status: 'active',
       supervisor_id: ownerUid,
-      workers_count: 0
+      workers_count: 0,
+      organization_id: orgId
     });
 
     // 3. Create User Profile
@@ -98,7 +99,12 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'User profile not found' });
     }
 
-    if (user.password && !verifyPassword(password, user.password)) {
+    // Reject accounts that have never been provisioned with a password.
+    if (!user.password) {
+      return res.status(401).json({ error: 'Account not provisioned. Contact your administrator to set a password.' });
+    }
+
+    if (!verifyPassword(password, user.password)) {
       return res.status(401).json({ error: 'Incorrect credentials password' });
     }
 

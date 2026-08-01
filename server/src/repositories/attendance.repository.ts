@@ -31,18 +31,18 @@ export class AttendanceRepository extends BaseRepository<AttendanceEntity> {
     return result.rows;
   }
 
-  async findAllByWorker(workerId: string): Promise<AttendanceEntity[]> {
+  async findAllByWorker(workerId: string, orgId: string): Promise<AttendanceEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 ORDER BY date DESC`,
-      [workerId]
+      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 AND organization_id = $2 ORDER BY date DESC`,
+      [workerId, orgId]
     );
     return result.rows;
   }
 
-  async findAllBySite(siteId: string): Promise<AttendanceEntity[]> {
+  async findAllBySite(siteId: string, orgId: string): Promise<AttendanceEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE site_id = $1 ORDER BY date DESC`,
-      [siteId]
+      `SELECT * FROM ${this.tableName} WHERE site_id = $1 AND organization_id = $2 ORDER BY date DESC`,
+      [siteId, orgId]
     );
     return result.rows;
   }
@@ -73,8 +73,8 @@ export class AttendanceRepository extends BaseRepository<AttendanceEntity> {
             photo_proof = EXCLUDED.photo_proof,
             supervisor_id = EXCLUDED.supervisor_id,
             site_id = EXCLUDED.site_id,
-            remarks = EXCLUDED.remarks,
-            organization_id = EXCLUDED.organization_id;
+            remarks = EXCLUDED.remarks
+          WHERE attendance.organization_id = EXCLUDED.organization_id;
           `,
           [
             rec.id, rec.worker_id, rec.date, rec.status, rec.is_night_shift, rec.overtime_hours,

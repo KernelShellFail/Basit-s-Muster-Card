@@ -23,7 +23,6 @@ export const appConfig = {
     'VITE_DEFAULT_ATTENDANCE_PHOTO',
     'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=150&q=80'
   ),
-  loginPageDemoEmail: envString('VITE_DEMO_OWNER_EMAIL', 'owner@mustermate.com'),
 };
 
 // Generate a collision-resistant, dynamic entity id (e.g. WRK-<ts>-<rand>).

@@ -22,10 +22,10 @@ export const getWorkers = async (req: AuthenticatedRequest, res: Response) => {
 
     let workers: WorkerEntity[];
     if (user.role === 'labour' && user.workerId) {
-      const own = await workerRepo.findById(user.workerId);
+      const own = await workerRepo.findByIdAndOrg(user.workerId, user.organizationId);
       workers = own ? [own] : [];
     } else if (user.role === 'supervisor' && user.siteId) {
-      workers = await workerRepo.findAllBySite(user.siteId);
+      workers = await workerRepo.findAllBySite(user.siteId, user.organizationId);
     } else {
       workers = await workerRepo.findAllByOrg(user.organizationId);
     }
@@ -77,6 +77,10 @@ export const saveWorker = async (req: AuthenticatedRequest, res: Response) => {
   } = req.body;
 
   try {
+    const orgId = req.user?.organizationId;
+    if (!orgId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const workerData: WorkerEntity = {
       id,
       name,
@@ -105,11 +109,14 @@ export const saveWorker = async (req: AuthenticatedRequest, res: Response) => {
       status,
       photo,
       notes,
-      organization_id: req.user?.organizationId
+      organization_id: orgId
     };
 
     // Find original site assignment to handle changes
-    const existing = await workerRepo.findById(id);
+    const existing = await workerRepo.findByIdAndOrg(id, orgId);
+    if (existing === null && await workerRepo.findById(id)) {
+      return res.status(403).json({ error: 'Permission denied: worker belongs to another organization' });
+    }
     const prevSiteId = existing?.current_site_id;
 
     await workerRepo.save(workerData);
@@ -129,11 +136,18 @@ export const saveWorker = async (req: AuthenticatedRequest, res: Response) => {
 
 export const deleteWorker = async (req: AuthenticatedRequest, res: Response) => {
   const id = req.params.id as string;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
-    const existing = await workerRepo.findById(id);
+    const existing = await workerRepo.findByIdAndOrg(id, orgId);
     const siteId = existing?.current_site_id;
 
-    await workerRepo.delete(id);
+    const deleted = await workerRepo.deleteByIdAndOrg(id, orgId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
 
     // Sync site count stats
     if (siteId) {

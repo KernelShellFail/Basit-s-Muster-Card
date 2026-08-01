@@ -1,6 +1,4 @@
 import { pool } from '../db';
-import { config } from '../config';
-import { seedDemo } from './seedDemo';
 
 interface ColumnDef {
   name: string;
@@ -175,72 +173,6 @@ const ensureColumns = async () => {
   }
 };
 
-// Backfill organization_id for rows created before multi-tenancy was introduced.
-// Legacy rows are mapped via their supervisor/worker/site relationship, falling back to the configured demo org.
-const backfillOrganizationIds = async () => {
-  const fallbackOrg = config.backfillFallbackOrg;
-  await pool.query(`
-    UPDATE sites s
-    SET organization_id = u.organization_id
-    FROM users u
-    WHERE s.organization_id IS NULL
-      AND s.supervisor_id IS NOT NULL
-      AND s.supervisor_id <> ''
-      AND s.supervisor_id = u.uid
-  `);
-  await pool.query(`UPDATE sites SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE workers w
-    SET organization_id = COALESCE(s.organization_id, $1)
-    FROM sites s
-    WHERE w.organization_id IS NULL AND w.current_site_id = s.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE workers SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE attendance a
-    SET organization_id = COALESCE(s.organization_id, $1)
-    FROM sites s
-    WHERE a.organization_id IS NULL AND a.site_id = s.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE attendance SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE chat c
-    SET organization_id = COALESCE(s.organization_id, $1)
-    FROM sites s
-    WHERE c.organization_id IS NULL AND c.site_id = s.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE chat SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE payments p
-    SET organization_id = COALESCE(w.organization_id, $1)
-    FROM workers w
-    WHERE p.organization_id IS NULL AND p.worker_id = w.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE payments SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE leaves l
-    SET organization_id = COALESCE(w.organization_id, $1)
-    FROM workers w
-    WHERE l.organization_id IS NULL AND l.worker_id = w.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE leaves SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`
-    UPDATE labour_submissions ls
-    SET organization_id = COALESCE(w.organization_id, $1)
-    FROM workers w
-    WHERE ls.organization_id IS NULL AND ls.worker_id = w.id
-  `, [fallbackOrg]);
-  await pool.query(`UPDATE labour_submissions SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-
-  await pool.query(`UPDATE notifications SET organization_id = $1 WHERE organization_id IS NULL`, [fallbackOrg]);
-};
-
 export const initSchema = async () => {
   try {
     for (const [table, columns] of Object.entries(TABLES)) {
@@ -249,14 +181,8 @@ export const initSchema = async () => {
 
     // Add columns that may be missing from tables created before this schema definition.
     await ensureColumns();
-    await backfillOrganizationIds();
 
     console.log('Database schema synchronized and initialized successfully.');
-
-    // Refresh demo data (idempotent) when enabled.
-    if (config.demo.enabled) {
-      await seedDemo();
-    }
   } catch (error) {
     console.error('Error initializing schema:', error);
     throw error;

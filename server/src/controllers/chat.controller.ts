@@ -1,13 +1,23 @@
 import { Response } from 'express';
 import { ChatRepository, ChatMessageEntity } from '../repositories/chat.repository';
+import { SiteRepository } from '../repositories/site.repository';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 const chatRepo = new ChatRepository();
+const siteRepo = new SiteRepository();
+
+// The reserved, org-level (team HQ) channel id. Messages in this channel are
+// scoped to the caller's organization via organization_id on every row.
+export const GLOBAL_CHANNEL_ID = 'global';
 
 export const getChatMessages = async (req: AuthenticatedRequest, res: Response) => {
   const siteId = req.params.siteId as string;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
-    const messages = await chatRepo.findBySiteId(siteId, req.user?.organizationId);
+    const messages = await chatRepo.findBySiteId(siteId, orgId);
     const formatted = messages.map(c => ({
       id: c.id,
       siteId: c.site_id,
@@ -27,7 +37,18 @@ export const getChatMessages = async (req: AuthenticatedRequest, res: Response) 
 
 export const saveChatMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { id, siteId, senderId, senderName, senderRole, text, imageUrl, createdAt } = req.body;
+  const orgId = req.user?.organizationId;
+  if (!orgId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
+    // Only allow posting to the org-level channel or one of the org's own sites.
+    if (siteId !== GLOBAL_CHANNEL_ID) {
+      const site = await siteRepo.findByIdAndOrg(siteId, orgId);
+      if (!site) {
+        return res.status(403).json({ error: 'Permission denied: site does not belong to your organization' });
+      }
+    }
     const msgData: ChatMessageEntity = {
       id,
       site_id: siteId,
@@ -37,7 +58,7 @@ export const saveChatMessage = async (req: AuthenticatedRequest, res: Response) 
       text,
       image_url: imageUrl,
       created_at: createdAt || new Date().toISOString(),
-      organization_id: req.user?.organizationId
+      organization_id: orgId
     };
     await chatRepo.save(msgData);
     res.json({ success: true });

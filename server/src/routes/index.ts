@@ -10,13 +10,11 @@ import leaveRoutes from './leave.routes';
 import notifRoutes from './notification.routes';
 import chatRoutes from './chat.routes';
 import labourRoutes from './labourSubmission.routes';
-import metaRoutes from './meta.routes';
 
 const router = Router();
 
 router.get('/health', (req, res) => res.json({ status: 'UP' }));
 
-router.use('/meta', metaRoutes);
 router.use('/auth', authRoutes);
 router.use('/organization', orgRoutes);
 router.use('/users', userRoutes);

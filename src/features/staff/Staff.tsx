@@ -323,7 +323,7 @@ export const Staff = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. name@mustermate.com"
+                  placeholder="e.g. name@firm.com"
                 />
               </div>
 

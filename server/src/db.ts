@@ -16,21 +16,9 @@ export const hashPassword = (password: string): string => {
 export const verifyPassword = (password: string, storedHash: string): boolean => {
   if (!password || !storedHash) return false;
 
-  // Backward compatibility with legacy SHA-256 seeded passwords (no separator)
-  if (!storedHash.includes('$') && !storedHash.includes(':')) {
-    const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
-    return legacyHash === storedHash;
-  }
-
-  // Legacy PBKDF2 format (salt:hash, 1000 iterations)
-  if (!storedHash.includes('$')) {
-    const [salt, hash] = storedHash.split(':');
-    if (!salt || !hash) return false;
-    const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return hash === checkHash;
-  }
-
   // Current format: pbkdf2$sha512$<iterations>$<salt>$<hash>
+  // Legacy formats (plain SHA-256 or PBKDF2-1000 "salt:hash") are intentionally
+  // no longer accepted; accounts must have been re-seeded with the current format.
   const [algorithm, digest, iterationsStr, salt, hash] = storedHash.split('$');
   if (algorithm !== 'pbkdf2' || !salt || !hash) return false;
   const checkHash = crypto.pbkdf2Sync(password, salt, parseInt(iterationsStr, 10) || PBKDF2_ITERATIONS, 64, digest as any).toString('hex');

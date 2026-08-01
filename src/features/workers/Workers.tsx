@@ -31,7 +31,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '.
 import { slideUp, staggerContainer } from '../../utils/animations';
 import { 
   useWorkers, useSites, useAttendance, usePayments, useUsers, 
-  useAddWorker, useDeleteWorker, useAddUser, useRemoveUser 
+  useAddWorker, useDeleteWorker, useAddUser, useRemoveUser, useOrganization 
 } from '../../api/queries';
 import { appConfig, makeId, formatCurrency } from '../../config/appConfig';
 import { elementToPdf } from '../../utils/pdf';
@@ -43,6 +43,7 @@ export const Workers = () => {
   const { data: attendance = [] } = useAttendance();
   const { data: payments = [] } = usePayments();
   const { data: users = [] } = useUsers();
+  const { data: organization } = useOrganization();
   
   const { mutate: addWorker } = useAddWorker();
   const { mutate: deleteWorker } = useDeleteWorker();
@@ -213,7 +214,7 @@ export const Workers = () => {
         uid: linkedUser?.uid || `usr-labour-${Date.now()}`,
         name: formData.name,
         username: labourUsername || undefined,
-        email: `${formData.phone}@mustermate.com`,
+        email: '',
         phone: formData.phone,
         role: 'labour' as const,
         siteId: formData.currentSiteId,
@@ -241,7 +242,7 @@ export const Workers = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `MusterMate_Workers_${activeSiteId}_${new Date().toISOString().slice(0, 7)}.csv`;
+    a.download = `${(organization?.name || 'Workers').replace(/[^a-zA-Z0-9]+/g, '_')}_Workers_${activeSiteId}_${new Date().toISOString().slice(0, 7)}.csv`;
     a.click();
     showToast('Workers export csv generated successfully!');
   };

@@ -28,10 +28,10 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     return result.rows;
   }
 
-  async findAllByWorker(workerId: string): Promise<PaymentEntity[]> {
+  async findAllByWorker(workerId: string, orgId: string): Promise<PaymentEntity[]> {
     const result = await this.query(
-      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 ORDER BY date DESC, id DESC`,
-      [workerId]
+      `SELECT * FROM ${this.tableName} WHERE worker_id = $1 AND organization_id = $2 ORDER BY date DESC, id DESC`,
+      [workerId, orgId]
     );
     return result.rows;
   }
@@ -51,8 +51,8 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
         type = EXCLUDED.type,
         worker_signature = EXCLUDED.worker_signature,
         supervisor_signature = EXCLUDED.supervisor_signature,
-        notes = EXCLUDED.notes,
-        organization_id = EXCLUDED.organization_id;
+        notes = EXCLUDED.notes
+      WHERE payments.organization_id = EXCLUDED.organization_id;
     `, [
       p.id, p.worker_id, p.worker_name, p.date, p.amount, p.payment_type, p.reference_number, p.type, p.worker_signature, p.supervisor_signature, p.notes, p.organization_id
     ]);

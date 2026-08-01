@@ -25,7 +25,7 @@ const registerSchema = z.object({
     .regex(/^[a-zA-Z0-9._-]+$/, 'Only letters, numbers, dots, dashes, underscores'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   organizationName: z.string().min(2, 'Organization Name must be at least 2 characters'),
 });
 
@@ -35,11 +35,6 @@ export const AuthPage = () => {
   const { loginUser, registerUser, currentUser } = useAppStore();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [demoMeta, setDemoMeta] = useState<{
-    enabled: boolean;
-    organizationName: string;
-    accounts: { label: string; email: string; password: string }[];
-  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,19 +42,6 @@ export const AuthPage = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [currentUser, navigate]);
-
-  useEffect(() => {
-    let active = true;
-    fetch('/api/meta/demo')
-      .then(res => res.json())
-      .then((data) => {
-        if (active) setDemoMeta(data);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -183,23 +165,6 @@ export const AuthPage = () => {
               >
                 Log in
               </Button>
-
-              {/* Quick Demo Info Alert */}
-              {demoMeta?.enabled && (
-                <div className="pt-8 border-t border-border space-y-4">
-                  <span className="inline-block bg-muted px-4 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider text-surface-cream border border-border">
-                    Demo Credentials · {demoMeta.organizationName}
-                  </span>
-                  <ul className="text-[11px] text-surface-50 font-semibold uppercase tracking-wider space-y-3">
-                    {demoMeta.accounts.map((acc) => (
-                      <li key={acc.email} className="flex justify-between gap-4 border-b border-border/50 pb-2">
-                        <span>{acc.label}</span>
-                        <span className="text-shockingly-green font-semibold text-right break-all">{acc.email} · {acc.password}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </form>
           ) : (
             /* OWNER REGISTRATION FORM */

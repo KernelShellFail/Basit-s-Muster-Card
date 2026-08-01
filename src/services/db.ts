@@ -203,6 +203,8 @@ const checkServer = async (): Promise<boolean> => {
 
 // Session helpers for offline fallbacks. The backend is the source of truth
 // when online; localStorage is only a read cache when the server is down.
+// Writes are never queued locally — offline writes fail loudly so no data is
+// silently lost and no PII is persisted in plaintext localStorage.
 const getSessionOrgId = (): string => {
   const session = localStorage.getItem('mm_session_user');
   if (!session) return '';
@@ -213,12 +215,18 @@ const getSessionOrgId = (): string => {
   }
 };
 
+const requireOnlineForWrite = async (): Promise<void> => {
+  if (!(await checkServer())) {
+    throw new Error("You're offline. Connect to the internet to save changes.");
+  }
+};
+
 export const LocalDB = {
   // Initialization
   async init() {
     await checkServer();
     if (!isBackendOnline) {
-      console.warn('Backend server offline. Running in Local Storage Demo Mode.');
+      console.warn('Backend server offline. Showing cached data; saving is unavailable until the connection returns.');
     } else {
       console.log('Connected to Express + PostgreSQL Backend.');
     }
@@ -241,15 +249,12 @@ export const LocalDB = {
   },
 
   async saveOrganization(org: Organization): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/organization', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(org)
-      });
-      return;
-    }
-    localStorage.setItem('mm_org', JSON.stringify(org));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/organization', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(org)
+    });
   },
 
   // Users
@@ -273,28 +278,17 @@ export const LocalDB = {
   },
 
   async saveWorker(worker: Worker): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/workers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(worker)
-      });
-      return;
-    }
-    const workers = await this.getWorkers();
-    const index = workers.findIndex(w => w.id === worker.id);
-    if (index >= 0) workers[index] = worker;
-    else workers.push(worker);
-    localStorage.setItem('mm_workers', JSON.stringify(workers));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/workers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(worker)
+    });
   },
 
   async deleteWorker(id: string): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch(`/api/workers/${id}`, { method: 'DELETE' });
-      return;
-    }
-    const workers = await this.getWorkers();
-    localStorage.setItem('mm_workers', JSON.stringify(workers.filter(w => w.id !== id)));
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/workers/${id}`, { method: 'DELETE' });
   },
 
   // Sites
@@ -308,19 +302,12 @@ export const LocalDB = {
   },
 
   async saveSite(site: Site): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/sites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(site)
-      });
-      return;
-    }
-    const sites = await this.getSites();
-    const index = sites.findIndex(s => s.id === site.id);
-    if (index >= 0) sites[index] = site;
-    else sites.push(site);
-    localStorage.setItem('mm_sites', JSON.stringify(sites));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/sites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(site)
+    });
   },
 
   // Attendance
@@ -334,21 +321,12 @@ export const LocalDB = {
   },
 
   async saveAttendanceRecords(records: AttendanceRecord[]): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(records)
-      });
-      return;
-    }
-    const current = await this.getAttendance();
-    records.forEach(newRec => {
-      const idx = current.findIndex(r => r.workerId === newRec.workerId && r.date === newRec.date);
-      if (idx >= 0) current[idx] = newRec;
-      else current.push(newRec);
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(records)
     });
-    localStorage.setItem('mm_attendance', JSON.stringify(current));
   },
 
   // Leaves
@@ -362,19 +340,12 @@ export const LocalDB = {
   },
 
   async saveLeaveRequest(request: LeaveRequest): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/leaves', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
-      });
-      return;
-    }
-    const leaves = await this.getLeaves();
-    const index = leaves.findIndex(l => l.id === request.id);
-    if (index >= 0) leaves[index] = request;
-    else leaves.push(request);
-    localStorage.setItem('mm_leaves', JSON.stringify(leaves));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/leaves', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request)
+    });
   },
 
   // Payments
@@ -388,17 +359,12 @@ export const LocalDB = {
   },
 
   async savePayment(payment: PaymentRecord): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payment)
-      });
-      return;
-    }
-    const payments = await this.getPayments();
-    payments.push(payment);
-    localStorage.setItem('mm_payments', JSON.stringify(payments));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/payments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payment)
+    });
   },
 
   // Notifications
@@ -412,26 +378,13 @@ export const LocalDB = {
   },
 
   async markNotificationsRead(): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/notifications/read', { method: 'POST' });
-      return;
-    }
-    const notifs = await this.getNotifications();
-    notifs.forEach(n => n.read = true);
-    localStorage.setItem('mm_notifications', JSON.stringify(notifs));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/notifications/read', { method: 'POST' });
   },
 
   async markNotificationRead(id: string): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch(`/api/notifications/${id}/read`, { method: 'POST' });
-      return;
-    }
-    const notifs = await this.getNotifications();
-    const target = notifs.find(n => n.id === id);
-    if (target) {
-      target.read = true;
-      localStorage.setItem('mm_notifications', JSON.stringify(notifs));
-    }
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/notifications/${id}/read`, { method: 'POST' });
   },
 
   async createNotification(notif: Omit<SystemNotification, 'id' | 'createdAt' | 'read'> & { id?: string; createdAt?: string }): Promise<void> {
@@ -441,17 +394,12 @@ export const LocalDB = {
       createdAt: notif.createdAt || new Date().toISOString(),
       read: false,
     };
-    if (await checkServer()) {
-      await authenticatedFetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: payload.title, message: payload.message, type: payload.type, link: payload.link })
-      });
-      return;
-    }
-    const notifs = await this.getNotifications();
-    notifs.unshift(payload as SystemNotification);
-    localStorage.setItem('mm_notifications', JSON.stringify(notifs));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: payload.title, message: payload.message, type: payload.type, link: payload.link })
+    });
   },
 
   // Chat
@@ -465,60 +413,36 @@ export const LocalDB = {
   },
 
   async addChatMessage(msg: ChatMessage): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(msg)
-      });
-      return;
-    }
-    const chat = localStorage.getItem('mm_chat') ? JSON.parse(localStorage.getItem('mm_chat') || '[]') : [];
-    chat.push(msg);
-    localStorage.setItem('mm_chat', JSON.stringify(chat));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg)
+    });
   },
 
   async saveUser(user: UserProfile): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
-      });
-      return;
-    }
-    const users = await this.getUsers();
-    const index = users.findIndex(u => u.uid === user.uid);
-    if (index >= 0) users[index] = user;
-    else users.push(user);
-    localStorage.setItem('mm_users', JSON.stringify(users));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
   },
 
   async deleteUser(uid: string): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch(`/api/users/${uid}`, { method: 'DELETE' });
-      return;
-    }
-    const users = await this.getUsers();
-    localStorage.setItem('mm_users', JSON.stringify(users.filter(u => u.uid !== uid)));
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/users/${uid}`, { method: 'DELETE' });
   },
 
   async deleteSite(id: string): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch(`/api/sites/${id}`, { method: 'DELETE' });
-      return;
-    }
-    const sites = await this.getSites();
-    localStorage.setItem('mm_sites', JSON.stringify(sites.filter(s => s.id !== id)));
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/sites/${id}`, { method: 'DELETE' });
   },
 
   async deletePayment(id: string): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch(`/api/payments/${id}`, { method: 'DELETE' });
-      return;
-    }
-    const payments = await this.getPayments();
-    localStorage.setItem('mm_payments', JSON.stringify(payments.filter(p => p.id !== id)));
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/payments/${id}`, { method: 'DELETE' });
   },
 
   async getLabourSubmissions(): Promise<LabourSubmission[]> {
@@ -531,18 +455,11 @@ export const LocalDB = {
   },
 
   async saveLabourSubmission(submission: LabourSubmission): Promise<void> {
-    if (await checkServer()) {
-      await authenticatedFetch('/api/labour/submissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submission)
-      });
-      return;
-    }
-    const subs = await this.getLabourSubmissions();
-    const idx = subs.findIndex(s => s.workerId === submission.workerId && s.date === submission.date);
-    if (idx >= 0) subs[idx] = submission;
-    else subs.push(submission);
-    localStorage.setItem('mm_labour_subs', JSON.stringify(subs));
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/labour/submissions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submission)
+    });
   }
 };

@@ -20,7 +20,7 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../components/ui/Table';
 import { slideUp, staggerContainer } from '../../utils/animations';
-import { useWorkers, useAttendance, usePayments, useAddPayment, useRemovePayment } from '../../api/queries';
+import { useWorkers, useAttendance, usePayments, useAddPayment, useRemovePayment, useOrganization } from '../../api/queries';
 import { appConfig, formatCurrency } from '../../config/appConfig';
 import { elementToPdf } from '../../utils/pdf';
 
@@ -29,6 +29,7 @@ export const Payments = () => {
   const { data: workers = [] } = useWorkers();
   const { data: attendance = [] } = useAttendance();
   const { data: payments = [] } = usePayments();
+  const { data: organization } = useOrganization();
   const { mutate: processPayment } = useAddPayment();
   const { mutate: removePayment } = useRemovePayment();
   const { t } = useTranslation(currentLanguage);
@@ -483,7 +484,7 @@ export const Payments = () => {
                     <Card id="salary-slip" className="bg-card border border-border rounded-[8px] overflow-hidden">
                       <CardContent className="p-8 sm:p-10 space-y-8">
                         <div className="text-center pb-8 border-b border-border">
-                          <h4 className="text-[22px] font-semibold text-surface-cream tracking-tight">MusterMate Buildcon</h4>
+                          <h4 className="text-[22px] font-semibold text-surface-cream tracking-tight">{organization?.name || 'Wage Payment Receipt'}</h4>
                           <p className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mt-2">Wage Payment Receipt</p>
                         </div>
                         

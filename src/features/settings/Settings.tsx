@@ -98,7 +98,7 @@ export const Settings = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `MusterMate_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `${(organization?.name || 'MusterMate').replace(/[^a-zA-Z0-9]+/g, '_')}_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     showToast('Database backup file download started.');
   };

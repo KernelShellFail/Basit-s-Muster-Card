@@ -20,7 +20,7 @@ export const UserSchema = z.object({
   username: z.string().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
-  role: z.enum(['owner', 'admin', 'supervisor', 'labour', 'viewer']),
+  role: z.enum(['admin', 'supervisor', 'labour', 'viewer']).default('labour'),
   siteId: z.string().optional(),
   organizationId: z.string().optional(),
   workerId: z.string().optional(),
@@ -140,7 +140,7 @@ export const RegisterSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(6, "Valid phone number is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   organizationName: z.string().min(1, "Organization name is required"),
 }).passthrough();
 

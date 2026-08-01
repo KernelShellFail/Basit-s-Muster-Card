@@ -12,7 +12,7 @@ export const getLeaves = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const leaves = user.role === 'labour' && user.workerId
-      ? await leaveRepo.findAllByWorker(user.workerId)
+      ? await leaveRepo.findAllByWorker(user.workerId, user.organizationId)
       : await leaveRepo.findAllByOrg(user.organizationId);
     const formatted = leaves.map(l => ({
       id: l.id,
