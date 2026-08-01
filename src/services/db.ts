@@ -6,6 +6,7 @@ export type Role = 'owner' | 'admin' | 'supervisor' | 'labour';
 export interface UserProfile {
   uid: string;
   name: string;
+  username?: string;
   email: string;
   phone: string;
   role: Role;
@@ -13,6 +14,7 @@ export interface UserProfile {
   organizationId?: string;
   workerId?: string;
   password?: string;
+  photo?: string;
 }
 
 export interface LabourSubmission {
@@ -148,7 +150,8 @@ export interface SystemNotification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'info' | 'success' | 'warning' | 'error' | 'payment' | 'invoice' | 'customer';
+  link?: string;
   createdAt: string;
   read: boolean;
 }
@@ -415,6 +418,39 @@ export const LocalDB = {
     }
     const notifs = await this.getNotifications();
     notifs.forEach(n => n.read = true);
+    localStorage.setItem('mm_notifications', JSON.stringify(notifs));
+  },
+
+  async markNotificationRead(id: string): Promise<void> {
+    if (await checkServer()) {
+      await authenticatedFetch(`/api/notifications/${id}/read`, { method: 'POST' });
+      return;
+    }
+    const notifs = await this.getNotifications();
+    const target = notifs.find(n => n.id === id);
+    if (target) {
+      target.read = true;
+      localStorage.setItem('mm_notifications', JSON.stringify(notifs));
+    }
+  },
+
+  async createNotification(notif: Omit<SystemNotification, 'id' | 'createdAt' | 'read'> & { id?: string; createdAt?: string }): Promise<void> {
+    const payload = {
+      ...notif,
+      id: notif.id || `notif-${Date.now()}`,
+      createdAt: notif.createdAt || new Date().toISOString(),
+      read: false,
+    };
+    if (await checkServer()) {
+      await authenticatedFetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: payload.title, message: payload.message, type: payload.type, link: payload.link })
+      });
+      return;
+    }
+    const notifs = await this.getNotifications();
+    notifs.unshift(payload as SystemNotification);
     localStorage.setItem('mm_notifications', JSON.stringify(notifs));
   },
 

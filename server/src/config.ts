@@ -22,12 +22,14 @@ export const config = {
     orgEmail: process.env.DEMO_ORG_EMAIL || 'ops@mustermate.com',
     owner: {
       name: process.env.DEMO_OWNER_NAME || 'Rajesh Singhania',
+      username: process.env.DEMO_OWNER_USERNAME || 'rajesh',
       email: process.env.DEMO_OWNER_EMAIL || 'owner@mustermate.com',
       phone: process.env.DEMO_OWNER_PHONE || '+91 9876543210',
       password: process.env.DEMO_OWNER_PASSWORD || 'owner123',
     },
     admin: {
       name: process.env.DEMO_ADMIN_NAME || 'Amit Sharma',
+      username: process.env.DEMO_ADMIN_USERNAME || 'amit',
       email: process.env.DEMO_ADMIN_EMAIL || 'admin@mustermate.com',
       phone: process.env.DEMO_ADMIN_PHONE || '+91 9876543211',
       password: process.env.DEMO_ADMIN_PASSWORD || 'admin123',
@@ -35,12 +37,14 @@ export const config = {
     supervisors: [
       {
         name: process.env.DEMO_SUPERVISOR_1_NAME || 'Satish Kamble',
+        username: process.env.DEMO_SUPERVISOR_1_USERNAME || 'satish',
         email: process.env.DEMO_SUPERVISOR_1_EMAIL || 'satish@mustermate.com',
         phone: process.env.DEMO_SUPERVISOR_1_PHONE || '+91 9876543212',
         password: process.env.DEMO_SUPERVISOR_1_PASSWORD || 'super123',
       },
       {
         name: process.env.DEMO_SUPERVISOR_2_NAME || 'Dinesh Patel',
+        username: process.env.DEMO_SUPERVISOR_2_USERNAME || 'dinesh',
         email: process.env.DEMO_SUPERVISOR_2_EMAIL || 'dinesh@mustermate.com',
         phone: process.env.DEMO_SUPERVISOR_2_PHONE || '+91 9876543213',
         password: process.env.DEMO_SUPERVISOR_2_PASSWORD || 'dinesh123',
@@ -48,6 +52,7 @@ export const config = {
     ],
     labour: {
       name: process.env.DEMO_LABOUR_NAME || 'Ramesh Yadav',
+      username: process.env.DEMO_LABOUR_USERNAME || 'ramesh',
       email: process.env.DEMO_LABOUR_EMAIL || 'ramesh@mustermate.com',
       phone: process.env.DEMO_LABOUR_PHONE || '+91 9876543214',
       password: process.env.DEMO_LABOUR_PASSWORD || 'labour123',

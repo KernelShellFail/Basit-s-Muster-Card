@@ -11,11 +11,17 @@ const orgRepo = new OrganizationRepository();
 const siteRepo = new SiteRepository();
 
 export const registerOwner = async (req: AuthenticatedRequest, res: Response) => {
-  const { name, email, phone, password, organizationName } = req.body;
+  const { name, username, email, phone, password, organizationName, photo } = req.body;
   try {
-    const existing = await userRepo.findByIdentifier(email || phone || name);
+    const existing = await userRepo.findByIdentifier(email || phone || name || username);
     if (existing) {
-      return res.status(409).json({ error: 'A user with this email, phone, or ID already exists' });
+      return res.status(409).json({ error: 'A user with this email, phone, username, or ID already exists' });
+    }
+    if (username && username.trim()) {
+      const usernameTaken = await userRepo.findByUsername(username.trim());
+      if (usernameTaken) {
+        return res.status(409).json({ error: `Username "${username}" is already taken` });
+      }
     }
 
     const ownerUid = `usr-owner-${Date.now()}`;
@@ -44,12 +50,14 @@ export const registerOwner = async (req: AuthenticatedRequest, res: Response) =>
     const newUser: User = {
       uid: ownerUid,
       name,
+      username: username?.trim() || undefined,
       email,
       phone,
       role: 'owner',
       organization_id: orgId,
       site_id: defaultSiteId,
-      password: hashedPassword
+      password: hashedPassword,
+      photo: photo || null
     };
     await userRepo.save(newUser);
 
@@ -67,11 +75,13 @@ export const registerOwner = async (req: AuthenticatedRequest, res: Response) =>
       user: {
         uid: ownerUid,
         name,
+        username: newUser.username,
         email,
         phone,
         role: 'owner',
         organizationId: orgId,
-        siteId: defaultSiteId
+        siteId: defaultSiteId,
+        photo: newUser.photo
       }
     });
   } catch (err) {
@@ -106,12 +116,14 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
       user: {
         uid: user.uid,
         name: user.name,
+        username: user.username,
         email: user.email,
         phone: user.phone,
         role: user.role,
         siteId: user.site_id,
         organizationId: user.organization_id,
-        workerId: user.worker_id
+        workerId: user.worker_id,
+        photo: user.photo
       }
     });
   } catch (err) {

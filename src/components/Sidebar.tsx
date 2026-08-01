@@ -275,9 +275,13 @@ export const Sidebar = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center gap-3 mb-4 px-2 overflow-hidden"
               >
-                <div className="w-10 h-10 rounded-full border border-border text-surface-cream flex items-center justify-center font-medium text-[16px] uppercase shrink-0">
-                  {currentUser.name.slice(0, 2)}
-                </div>
+                {currentUser.photo ? (
+                  <img src={currentUser.photo} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover border border-border shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full border border-border text-surface-cream flex items-center justify-center font-medium text-[16px] uppercase shrink-0">
+                    {currentUser.name.slice(0, 2)}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="text-[14px] font-semibold truncate leading-tight text-surface-cream">{currentUser.name}</p>
                   <p className="text-[11px] text-surface-50 uppercase tracking-wider font-medium truncate mt-0.5">

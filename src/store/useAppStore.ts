@@ -13,6 +13,7 @@ interface AppState {
   // Actions
   initApp: () => Promise<void>;
   setUser: (user: UserProfile | null) => void;
+  updateCurrentUser: (updates: Partial<UserProfile>) => Promise<void>;
   setActiveSite: (siteId: string) => void;
   setActiveWorker: (workerId: string | null) => void;
   setLanguage: (lang: 'en' | 'hi' | 'mr' | 'gu' | 'ta') => void;
@@ -60,6 +61,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       set({ currentUser: null });
     }
+  },
+
+  updateCurrentUser: async (updates) => {
+    const user = get().currentUser;
+    if (!user) return;
+    const updated = { ...user, ...updates };
+    await LocalDB.saveUser(updated);
+    localStorage.setItem('mm_session_user', JSON.stringify(updated));
+    set({ currentUser: updated });
   },
 
 

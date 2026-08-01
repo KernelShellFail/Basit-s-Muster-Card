@@ -12,6 +12,7 @@ import { AttendanceRecord, LabourSubmission, Worker } from '../../services/db';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DatePicker } from '../../components/ui/DatePicker';
 import { Select } from '../../components/ui/Select';
 import { Badge } from '../../components/ui/Badge';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -127,11 +128,10 @@ export const CrossCheck = () => {
         {/* Date Selector */}
         <div className="w-full md:w-auto flex-1 flex items-center gap-4">
           <Calendar className="w-4 h-4 text-shockingly-green shrink-0" />
-          <Input
-            type="date"
+          <DatePicker
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full cursor-pointer"
+            onChange={setSelectedDate}
+            className="w-full"
           />
         </div>
 

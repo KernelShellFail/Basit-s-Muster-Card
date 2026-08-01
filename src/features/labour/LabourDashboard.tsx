@@ -13,6 +13,7 @@ import {
 import { AttendanceStatus } from '../../services/db';
 import { appConfig, formatCurrency } from '../../config/appConfig';
 import { Button } from '../../components/ui/Button';
+import { DatePicker } from '../../components/ui/DatePicker';
 import { StatCard } from '../../components/ui/StatCard';
 import { Eyebrow } from '../../components/ui/Eyebrow';
 import { motion } from 'framer-motion';
@@ -186,16 +187,12 @@ export const LabourDashboard = () => {
           </h3>
 
           <form onSubmit={handleClaimSubmit} className="space-y-5 text-xs">
-            <div>
-              <label className="text-[11px] font-bold text-surface-50 uppercase tracking-[0.1em] block mb-2">Select Date *</label>
-              <input
-                type="date"
-                required
-                value={claimDate}
-                onChange={(e) => setClaimDate(e.target.value)}
-                className={fieldClass}
-              />
-            </div>
+            <DatePicker
+              label="Select Date *"
+              required
+              value={claimDate}
+              onChange={setClaimDate}
+            />
 
             <div>
               <label className="text-[11px] font-bold text-surface-50 uppercase tracking-[0.1em] block mb-2">My Status *</label>

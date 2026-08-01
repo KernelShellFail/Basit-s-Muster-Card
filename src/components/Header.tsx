@@ -17,9 +17,10 @@ import {
   XCircle,
   ChevronRight
 } from 'lucide-react';
-import { useSites, useNotifications, useClearNotifications } from '../api/queries';
+import { useSites, useNotifications, useClearNotifications, useMarkNotificationRead } from '../api/queries';
 import { SystemNotification } from '../types';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const {
@@ -34,6 +35,18 @@ export const Header = () => {
   const { data: sites = [] } = useSites();
   const { data: notifications = [] } = useNotifications();
   const { mutate: clearNotifications } = useClearNotifications();
+  const { mutate: markNotificationRead } = useMarkNotificationRead();
+  const navigate = useNavigate();
+
+  const handleNotificationClick = (notif: SystemNotification) => {
+    if (!notif.read) {
+      markNotificationRead(notif.id);
+    }
+    setShowNotifications(false);
+    if (notif.link) {
+      navigate(notif.link);
+    }
+  };
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -385,7 +398,7 @@ export const Header = () => {
                 </div>
 
                 {/* Body */}
-                <div className="max-h-[420px] overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3">
+                <div data-lenis-prevent className="max-h-[420px] overflow-y-auto overscroll-contain custom-scrollbar p-4 flex flex-col gap-3">
                   {notifications.length === 0 ? (
                     <div className="py-16 text-center flex flex-col items-center justify-center gap-3">
                       <div className="p-4 bg-muted/40 rounded-full text-surface-50 flex items-center justify-center shrink-0">
@@ -424,6 +437,7 @@ export const Header = () => {
                               visible: { opacity: 1, y: 0, scale: 1 }
                             }}
                             key={notif.id}
+                            onClick={() => handleNotificationClick(notif)}
                             className={cn(
                               "group relative flex items-start gap-3.5 p-4 rounded-[8px] border border-border bg-card hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                               !notif.read && "border-primary/20"
@@ -478,7 +492,10 @@ export const Header = () => {
 
                 {/* Footer */}
                 <div className="sticky bottom-0 p-4 border-t border-border bg-off-black">
-                  <button className="group w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-full text-sm font-semibold btn-ghost-pill transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+                  <button
+                    onClick={() => { setShowNotifications(false); navigate('/notifications'); }}
+                    className="group w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-full text-sm font-semibold btn-ghost-pill transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                  >
                     View all notifications
                     <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </button>

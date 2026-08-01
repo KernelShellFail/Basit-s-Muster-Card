@@ -13,6 +13,7 @@ import {
 import type { LeaveRequest } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { DatePicker } from '../../components/ui/DatePicker';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
@@ -268,25 +269,20 @@ export const Leaves = () => {
               </Select>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[11px] font-bold text-surface-50 uppercase tracking-widest block mb-2">Start Date *</label>
-                  <Input
-                    type="date"
-                    required
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold text-surface-50 uppercase tracking-widest block mb-2">End Date *</label>
-                  <Input
-                    type="date"
-                    required
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <DatePicker
+                  label="Start Date *"
+                  required
+                  value={startDate}
+                  onChange={setStartDate}
+                />
+                <DatePicker
+                  label="End Date *"
+                  required
+                  value={endDate}
+                  onChange={setEndDate}
+                  minDate={startDate}
+                />
               </div>
 
               {/* Reason */}

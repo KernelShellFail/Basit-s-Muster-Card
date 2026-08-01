@@ -101,7 +101,15 @@ export const useAddWorker = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (worker: Worker) => LocalDB.saveWorker(worker),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.workers }),
+    onSuccess: (_, worker) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.workers });
+      LocalDB.createNotification({
+        title: 'Worker registered',
+        message: `${worker.name} has been added to the worker roster.`,
+        type: 'info',
+        link: '/workers',
+      }).catch(() => {});
+    },
   });
 };
 
@@ -117,7 +125,15 @@ export const useAddPayment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payment: PaymentRecord) => LocalDB.savePayment(payment),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.payments }),
+    onSuccess: (_, payment) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments });
+      LocalDB.createNotification({
+        title: 'Wage payment released',
+        message: `Payment of the amount was released to ${payment.workerName}.`,
+        type: 'payment',
+        link: '/payments',
+      }).catch(() => {});
+    },
   });
 };
 
@@ -125,7 +141,15 @@ export const useAddLeave = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (leave: LeaveRequest) => LocalDB.saveLeaveRequest(leave),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.leaves }),
+    onSuccess: (_, leave) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.leaves });
+      LocalDB.createNotification({
+        title: 'New leave request',
+        message: `${leave.workerName} requested ${leave.leaveType} leave (${leave.startDate} to ${leave.endDate}).`,
+        type: 'warning',
+        link: '/leaves',
+      }).catch(() => {});
+    },
   });
 };
 
@@ -200,10 +224,34 @@ export const useClearNotifications = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
   });
 };
+
+export const useMarkNotificationRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => LocalDB.markNotificationRead(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
+  });
+};
+
+export const useAddNotification = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (notif: Parameters<typeof LocalDB.createNotification>[0]) => LocalDB.createNotification(notif),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
+  });
+};
 export const useSubmitLabourAttendance = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (claim: any) => LocalDB.saveLabourSubmission(claim),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.labourSubmissions }),
+    onSuccess: (_, claim) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.labourSubmissions });
+      LocalDB.createNotification({
+        title: 'Attendance claim submitted',
+        message: claim?.workerName ? `${claim.workerName} submitted a daily attendance claim.` : 'A labour attendance claim was submitted for review.',
+        type: 'info',
+        link: '/verification',
+      }).catch(() => {});
+    },
   });
 };

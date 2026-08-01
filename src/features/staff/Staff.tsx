@@ -17,6 +17,7 @@ import { UserProfile, Role } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import { PhotoUpload } from '../../components/ui/PhotoUpload';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
@@ -42,31 +43,37 @@ export const Staff = () => {
 
   // Form State
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<Role>('supervisor');
   const [assignedSiteId, setAssignedSiteId] = useState('');
   const [password, setPassword] = useState('');
+  const [photo, setPhoto] = useState('');
 
   const handleEditClick = (staff: UserProfile) => {
     setEditingStaff(staff);
     setName(staff.name);
+    setUsername(staff.username || '');
     setEmail(staff.email);
     setPhone(staff.phone);
     setRole(staff.role);
     setAssignedSiteId(staff.siteId || '');
     setPassword('');
+    setPhoto(staff.photo || '');
     setShowModal(true);
   };
 
   const handleCreateClick = () => {
     setEditingStaff(null);
     setName('');
+    setUsername('');
     setEmail('');
     setPhone('');
     setRole('supervisor');
     setAssignedSiteId(sites[0]?.id || '');
     setPassword('');
+    setPhoto('');
     setShowModal(true);
   };
 
@@ -81,12 +88,14 @@ export const Staff = () => {
     const targetUser: UserProfile = {
       uid: targetUid,
       name,
+      username: username.trim() || undefined,
       email,
       phone,
       role,
       siteId: assignedSiteId || undefined,
       organizationId: currentUser?.organizationId || '',
-      password: password || undefined
+      password: password || undefined,
+      photo: photo || undefined
     };
 
     addUser(targetUser);
@@ -197,9 +206,13 @@ export const Staff = () => {
                     {/* Header Profile */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-background border border-border text-surface-cream font-bold flex items-center justify-center text-sm uppercase">
-                          {staff.name.slice(0, 2)}
-                        </div>
+                        {staff.photo ? (
+                          <img src={staff.photo} alt={staff.name} className="w-12 h-12 rounded-full object-cover border border-border" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-background border border-border text-surface-cream font-bold flex items-center justify-center text-sm uppercase">
+                            {staff.name.slice(0, 2)}
+                          </div>
+                        )}
                         <div>
                           <h3 className="text-[15px] font-bold text-surface-cream leading-tight">
                             {staff.name}
@@ -267,6 +280,13 @@ export const Staff = () => {
             title={editingStaff ? 'Edit Staff Profile' : 'Register New Staff'}
           >
             <form onSubmit={handleSaveStaff} className="space-y-5">
+              {/* Profile Photo */}
+              <PhotoUpload
+                label="Profile Photo"
+                value={photo}
+                onChange={setPhoto}
+              />
+
               {/* Full Name */}
               <Input
                 label="Full Name *"
@@ -275,6 +295,15 @@ export const Staff = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Ramesh Kamble"
+              />
+
+              {/* Username */}
+              <Input
+                label="Username (for login)"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. ramesh.kamble"
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

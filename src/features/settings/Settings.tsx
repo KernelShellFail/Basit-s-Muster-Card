@@ -15,6 +15,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
+import { PhotoUpload } from '../../components/ui/PhotoUpload';
 import { Button } from '../../components/ui/Button';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { slideUp, staggerContainer } from '../../utils/animations';
@@ -25,7 +26,8 @@ export const Settings = () => {
     currentUser, 
     currentLanguage, 
     setLanguage, 
-    selectedRole
+    selectedRole,
+    updateCurrentUser
   } = useAppStore();
 
   const { data: organization } = useOrganization();
@@ -38,6 +40,13 @@ export const Settings = () => {
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [profileUsername, setProfileUsername] = useState(currentUser?.username || '');
+  const [profilePhoto, setProfilePhoto] = useState(currentUser?.photo || '');
+
+  useEffect(() => {
+    setProfileUsername(currentUser?.username || '');
+    setProfilePhoto(currentUser?.photo || '');
+  }, [currentUser]);
 
   useEffect(() => {
     if (organization) {
@@ -63,6 +72,19 @@ export const Settings = () => {
     };
     updateOrganization(updated);
     showToast('Organization settings updated successfully.');
+  };
+
+  const handleSaveProfile = () => {
+    const username = profileUsername.trim();
+    if (username && !/^[a-zA-Z0-9._-]{3,}$/.test(username)) {
+      showToast('Username must be 3+ chars using letters, numbers, . _ -', 'error');
+      return;
+    }
+    updateCurrentUser({
+      username: username || undefined,
+      photo: profilePhoto || undefined
+    });
+    showToast('Profile updated successfully.');
   };
 
   const handleBackup = () => {
@@ -127,9 +149,13 @@ export const Settings = () => {
               </h3>
 
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-background border border-border text-surface-cream flex items-center justify-center font-bold text-sm uppercase">
-                  {currentUser?.name.substring(0, 2) || 'MM'}
-                </div>
+                {currentUser?.photo ? (
+                  <img src={currentUser.photo} alt={currentUser.name} className="w-12 h-12 rounded-full object-cover border border-border" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-background border border-border text-surface-cream flex items-center justify-center font-bold text-sm uppercase">
+                    {currentUser?.name.substring(0, 2) || 'MM'}
+                  </div>
+                )}
                 <div>
                   <h4 className="text-[15px] font-bold text-surface-cream leading-tight">{currentUser?.name}</h4>
                   <p className="text-[11px] text-surface-50 font-bold mt-1.5 uppercase tracking-wider bg-background px-2 py-0.5 rounded-full border border-border inline-block">Role: {selectedRole}</p>
@@ -137,8 +163,32 @@ export const Settings = () => {
               </div>
 
               <div className="text-[13px] text-surface-50 font-medium space-y-3 pt-2">
+                {currentUser?.username && <p><span className="text-surface-cream/75 font-semibold">Username:</span> {currentUser.username}</p>}
                 <p><span className="text-surface-cream/75 font-semibold">Email:</span> {currentUser?.email}</p>
                 <p><span className="text-surface-cream/75 font-semibold">Phone:</span> {currentUser?.phone}</p>
+              </div>
+
+              <div className="border-t border-border pt-5 space-y-4">
+                <PhotoUpload
+                  label="Your Photo"
+                  value={profilePhoto}
+                  onChange={(photo) => setProfilePhoto(photo)}
+                />
+                <Input
+                  label="Username (for login)"
+                  value={profileUsername}
+                  onChange={(e) => setProfileUsername(e.target.value)}
+                  placeholder="e.g. rajesh"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSaveProfile}
+                  className="w-full"
+                >
+                  Save Profile
+                </Button>
               </div>
             </CardContent>
           </Card>

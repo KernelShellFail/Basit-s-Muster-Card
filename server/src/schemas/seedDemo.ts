@@ -82,7 +82,7 @@ const ensureUsers = async (): Promise<SeedUsers> => {
 
   const upsert = async (
     role: string,
-    profile: { name: string; email: string; phone: string; password: string },
+    profile: { name: string; username?: string; email: string; phone: string; password: string },
     opts: { siteId?: string; workerId?: string; fallbackUid: string }
   ) => {
     const existingUid = await resolveUserByEmail(profile.email);
@@ -90,10 +90,11 @@ const ensureUsers = async (): Promise<SeedUsers> => {
     const hash = hashPassword(profile.password);
     await pool.query(
       `
-      INSERT INTO users (uid, name, email, phone, role, site_id, organization_id, password, worker_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO users (uid, name, username, email, phone, role, site_id, organization_id, password, worker_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       ON CONFLICT (uid) DO UPDATE SET
         name = EXCLUDED.name,
+        username = COALESCE(EXCLUDED.username, users.username),
         email = EXCLUDED.email,
         phone = EXCLUDED.phone,
         role = EXCLUDED.role,
@@ -102,7 +103,7 @@ const ensureUsers = async (): Promise<SeedUsers> => {
         password = EXCLUDED.password,
         worker_id = EXCLUDED.worker_id
       `,
-      [uid, profile.name, profile.email, profile.phone, role, opts.siteId || null, d.orgId, hash, opts.workerId || null]
+      [uid, profile.name, profile.username || null, profile.email, profile.phone, role, opts.siteId || null, d.orgId, hash, opts.workerId || null]
     );
     return uid;
   };
@@ -404,16 +405,16 @@ const seedLeaves = async () => {
 const seedNotifications = async () => {
   const d = config.demo;
   const rows: unknown[][] = [
-    ['notif-demo-1', 'Attendance finalized', 'Morning muster sheet finalized for today across active sites.', 'success', isoFromNow(0)],
-    ['notif-demo-2', 'New leave request', 'Manpreet Singh requested medical leave for the coming days.', 'warning', isoFromNow(0)],
-    ['notif-demo-3', 'Weekly wages released', 'Weekly wage payments were released to the masonry crew.', 'info', isoFromNow(0)],
+    ['notif-demo-1', 'Attendance finalized', 'Morning muster sheet finalized for today across active sites.', 'success', false, '/attendance', isoFromNow(0)],
+    ['notif-demo-2', 'New leave request', 'Manpreet Singh requested medical leave for the coming days.', 'warning', false, '/leaves', isoFromNow(0)],
+    ['notif-demo-3', 'Weekly wages released', 'Weekly wage payments were released to the masonry crew.', 'info', false, '/payments', isoFromNow(0)],
   ];
   const placeholders = rows.map((_, i) =>
-    `($${i * 6 + 1}, $${i * 6 + 2}, $${i * 6 + 3}, $${i * 6 + 4}, $${i * 6 + 5}, $${i * 6 + 6})`
+    `($${i * 8 + 1}, $${i * 8 + 2}, $${i * 8 + 3}, $${i * 8 + 4}, $${i * 8 + 5}, $${i * 8 + 6}, $${i * 8 + 7}, $${i * 8 + 8})`
   ).join(', ');
   await pool.query(
     `
-    INSERT INTO notifications (id, title, message, type, created_at, organization_id)
+    INSERT INTO notifications (id, title, message, type, read, link, created_at, organization_id)
     VALUES ${placeholders}
     ON CONFLICT (id) DO NOTHING
     `,

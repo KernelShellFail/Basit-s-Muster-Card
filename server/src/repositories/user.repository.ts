@@ -3,6 +3,7 @@ import { BaseRepository } from './BaseRepository';
 export interface User {
   uid: string;
   name: string;
+  username?: string;
   email?: string;
   phone?: string;
   role: string;
@@ -10,6 +11,7 @@ export interface User {
   organization_id?: string;
   password?: string;
   worker_id?: string;
+  photo?: string;
 }
 
 export class UserRepository extends BaseRepository<User> {
@@ -30,10 +32,18 @@ export class UserRepository extends BaseRepository<User> {
     return result.rows[0] || null;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    const result = await this.query(
+      `SELECT * FROM ${this.tableName} WHERE LOWER(username) = LOWER($1)`,
+      [username]
+    );
+    return result.rows[0] || null;
+  }
+
   async findByIdentifier(identifier: string): Promise<User | null> {
     const result = await this.query(`
       SELECT * FROM ${this.tableName} 
-      WHERE email = $1 OR phone = $1 OR uid = $1 OR worker_id = $1
+      WHERE email = $1 OR phone = $1 OR uid = $1 OR worker_id = $1 OR username = $1
     `, [identifier]);
     return result.rows[0] || null;
   }
@@ -49,20 +59,22 @@ export class UserRepository extends BaseRepository<User> {
       await this.query(`
         UPDATE ${this.tableName} SET
           name = $2,
-          email = $3,
-          phone = $4,
-          role = $5,
-          site_id = $6,
-          organization_id = $7,
-          worker_id = $8,
-          password = COALESCE($9, password)
+          username = $3,
+          email = $4,
+          phone = $5,
+          role = $6,
+          site_id = $7,
+          organization_id = $8,
+          worker_id = $9,
+          photo = $10,
+          password = COALESCE($11, password)
         WHERE uid = $1;
-      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id || userExist.organization_id, user.worker_id || null, user.password || null]);
+      `, [user.uid, user.name, user.username || null, user.email, user.phone, user.role, user.site_id, user.organization_id || userExist.organization_id, user.worker_id || null, user.photo || null, user.password || null]);
     } else {
       await this.query(`
-        INSERT INTO ${this.tableName} (uid, name, email, phone, role, site_id, organization_id, password, worker_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-      `, [user.uid, user.name, user.email, user.phone, user.role, user.site_id, user.organization_id, user.password || null, user.worker_id || null]);
+        INSERT INTO ${this.tableName} (uid, name, username, email, phone, role, site_id, organization_id, photo, password, worker_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
+      `, [user.uid, user.name, user.username || null, user.email, user.phone, user.role, user.site_id, user.organization_id, user.photo || null, user.password || null, user.worker_id || null]);
     }
   }
 }

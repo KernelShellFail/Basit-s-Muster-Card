@@ -80,7 +80,10 @@ export const Modal = ({ isOpen, onClose, title, description, children, className
                   )}
                 </div>
 
-              <div className="relative overflow-y-auto p-5 sm:p-6 pt-4 sm:pt-6 custom-scrollbar">
+              <div
+                data-lenis-prevent
+                className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 pt-4 sm:pt-6 custom-scrollbar"
+              >
                 {children}
               </div>            </motion.div>
           </div>

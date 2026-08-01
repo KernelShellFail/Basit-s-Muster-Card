@@ -19,6 +19,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .regex(/^[a-zA-Z0-9._-]+$/, 'Only letters, numbers, dots, dashes, underscores'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -69,6 +73,7 @@ export const AuthPage = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
+      username: '',
       email: '',
       phone: '',
       password: '',
@@ -152,8 +157,8 @@ export const AuthPage = () => {
             <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
               <div className="space-y-5">
                 <Input
-                  label="Login ID"
-                  placeholder="you@example.com"
+                  label="Login ID (Username / Email / Phone)"
+                  placeholder="e.g. rahul or you@example.com"
                   error={loginForm.formState.errors.loginId?.message}
                   {...loginForm.register('loginId')}
                   className="h-12"
@@ -209,6 +214,14 @@ export const AuthPage = () => {
                   placeholder="Your Full Name"
                   error={registerForm.formState.errors.name?.message}
                   {...registerForm.register('name')}
+                  className="h-12"
+                />
+
+                <Input
+                  label="Username"
+                  placeholder="e.g. rahul123"
+                  error={registerForm.formState.errors.username?.message}
+                  {...registerForm.register('username')}
                   className="h-12"
                 />
 

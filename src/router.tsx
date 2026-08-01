@@ -16,6 +16,7 @@ const Staff = lazy(() => import('./features/staff/Staff').then(module => ({ defa
 const AuthPage = lazy(() => import('./features/auth/AuthPage').then(module => ({ default: module.AuthPage })));
 const LabourDashboard = lazy(() => import('./features/labour/LabourDashboard').then(module => ({ default: module.LabourDashboard })));
 const CrossCheck = lazy(() => import('./features/verification/CrossCheck').then(module => ({ default: module.CrossCheck })));
+const Notifications = lazy(() => import('./features/notifications/Notifications').then(module => ({ default: module.Notifications })));
 
 const SuspenseLoader = () => (
   <div className="min-h-[50vh] flex items-center justify-center">
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
       { path: 'sites', element: <Sites /> },
       { path: 'staff', element: <Staff /> },
       { path: 'chat', element: <Chat /> },
+      { path: 'notifications', element: <Notifications /> },
       { path: 'settings', element: <Settings /> },
       { path: '*', element: <Navigate to="/dashboard" replace /> }
     ],

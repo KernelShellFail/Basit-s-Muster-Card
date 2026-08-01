@@ -17,6 +17,7 @@ export const OrganizationSchema = z.object({
 export const UserSchema = z.object({
   uid: z.string().optional(),
   name: z.string().min(1, "Name is required"),
+  username: z.string().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   role: z.enum(['owner', 'admin', 'supervisor', 'labour', 'viewer']),
@@ -24,6 +25,7 @@ export const UserSchema = z.object({
   organizationId: z.string().optional(),
   workerId: z.string().optional(),
   password: z.string().optional(),
+  photo: z.string().optional(),
 }).passthrough();
 
 export const SiteSchema = z.object({

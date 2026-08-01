@@ -23,6 +23,7 @@ const TABLES: Record<string, ColumnDef[]> = {
   users: [
     { name: 'uid', type: 'VARCHAR(50) PRIMARY KEY' },
     { name: 'name', type: 'VARCHAR(255) NOT NULL' },
+    { name: 'username', type: 'VARCHAR(100)' },
     { name: 'email', type: 'VARCHAR(255)' },
     { name: 'phone', type: 'VARCHAR(50)' },
     { name: 'role', type: 'VARCHAR(20) NOT NULL' },
@@ -30,6 +31,7 @@ const TABLES: Record<string, ColumnDef[]> = {
     { name: 'organization_id', type: 'VARCHAR(50)' },
     { name: 'password', type: 'TEXT' },
     { name: 'worker_id', type: 'VARCHAR(50)' },
+    { name: 'photo', type: 'TEXT' },
   ],
   sites: [
     { name: 'id', type: 'VARCHAR(50) PRIMARY KEY' },
@@ -122,6 +124,7 @@ const TABLES: Record<string, ColumnDef[]> = {
     { name: 'message', type: 'TEXT NOT NULL' },
     { name: 'type', type: 'VARCHAR(20) NOT NULL' },
     { name: 'read', type: 'BOOLEAN DEFAULT false' },
+    { name: 'link', type: 'VARCHAR(255)' },
     { name: 'created_at', type: 'VARCHAR(30) NOT NULL' },
     { name: 'organization_id', type: 'VARCHAR(50)' },
   ],

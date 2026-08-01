@@ -21,6 +21,8 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
+import { PhotoUpload } from '../../components/ui/PhotoUpload';
+import { DatePicker } from '../../components/ui/DatePicker';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -32,6 +34,7 @@ import {
   useAddWorker, useDeleteWorker, useAddUser, useRemoveUser 
 } from '../../api/queries';
 import { appConfig, makeId, formatCurrency } from '../../config/appConfig';
+import { elementToPdf } from '../../utils/pdf';
 
 export const Workers = () => {
   const { activeSiteId, currentLanguage, currentUser } = useAppStore();
@@ -57,7 +60,9 @@ export const Workers = () => {
   const [editingWorkerId, setEditingWorkerId] = useState<string | null>(null);
   const [selfLoginEnabled, setSelfLoginEnabled] = useState(false);
   const [labourPassword, setLabourPassword] = useState('');
+  const [labourUsername, setLabourUsername] = useState('');
   const [loading, setLoading] = useState(true);
+  const [printingCard, setPrintingCard] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,6 +96,7 @@ export const Workers = () => {
     overtimeRate: 0,
     currentSiteId: activeSiteId,
     notes: '',
+    photo: '',
   });
 
   const trades = ['All', ...new Set(workers.map(w => w.trade))];
@@ -120,11 +126,12 @@ export const Workers = () => {
     setEditingWorkerId(null);
     setSelfLoginEnabled(false);
     setLabourPassword('');
+    setLabourUsername('');
     setFormData({
       name: '', fatherName: '', gender: 'Male', dob: '', phone: '', emergencyContact: '',
       address: '', village: '', district: '', state: '', pinCode: '', aadhaar: '', pan: '',
       bankName: '', accountNumber: '', ifscCode: '', upiId: '', trade: 'Mason', department: 'Civil',
-      skillLevel: 'Skilled', dailyWage: 0, overtimeRate: 0, currentSiteId: activeSiteId, notes: ''
+      skillLevel: 'Skilled', dailyWage: 0, overtimeRate: 0, currentSiteId: activeSiteId, notes: '', photo: ''
     });
   };
 
@@ -133,6 +140,7 @@ export const Workers = () => {
     setEditingWorkerId(worker.id);
     setSelfLoginEnabled(!!linkedUser);
     setLabourPassword('');
+    setLabourUsername(linkedUser?.username || '');
     
     setFormData({
       name: worker.name,
@@ -159,6 +167,7 @@ export const Workers = () => {
       overtimeRate: worker.overtimeRate || 0,
       currentSiteId: worker.currentSiteId || activeSiteId,
       notes: worker.notes || '',
+      photo: worker.photo || '',
     });
     setShowAddModal(true);
   };
@@ -180,7 +189,7 @@ export const Workers = () => {
         id: editingWorkerId,
         joiningDate: existing?.joiningDate || new Date().toISOString().split('T')[0],
         status: existing?.status || 'Active',
-        photo: existing?.photo || appConfig.defaultWorkerPhoto,
+        photo: formData.photo || existing?.photo || appConfig.defaultWorkerPhoto,
         documents: existing?.documents || [],
       };
       addWorker(updatedWorker);
@@ -191,7 +200,7 @@ export const Workers = () => {
         id: workerId,
         joiningDate: new Date().toISOString().split('T')[0],
         status: 'Active',
-        photo: appConfig.defaultWorkerPhoto,
+        photo: formData.photo || appConfig.defaultWorkerPhoto,
         documents: [],
       };
       addWorker(newWorker);
@@ -203,13 +212,15 @@ export const Workers = () => {
       const userPayload = {
         uid: linkedUser?.uid || `usr-labour-${Date.now()}`,
         name: formData.name,
+        username: labourUsername || undefined,
         email: `${formData.phone}@mustermate.com`,
         phone: formData.phone,
         role: 'labour' as const,
         siteId: formData.currentSiteId,
         organizationId: currentUser?.organizationId || '',
         workerId: workerId,
-        password: labourPassword || undefined
+        password: labourPassword || undefined,
+        photo: formData.photo || undefined
       };
       addUser(userPayload);
     } else if (linkedUser) {
@@ -233,6 +244,21 @@ export const Workers = () => {
     a.download = `MusterMate_Workers_${activeSiteId}_${new Date().toISOString().slice(0, 7)}.csv`;
     a.click();
     showToast('Workers export csv generated successfully!');
+  };
+
+  const handlePrintCard = async () => {
+    const el = document.getElementById('worker-muster-card');
+    if (!el || !viewingWorker) return;
+    setPrintingCard(true);
+    try {
+      await elementToPdf(el, { filename: `${viewingWorker.name.replace(/\s+/g, '_')}_Muster_Card.pdf` });
+      showToast('Muster card PDF downloaded.');
+    } catch (err) {
+      console.error(err);
+      showToast('Could not generate PDF.', 'error');
+    } finally {
+      setPrintingCard(false);
+    }
   };
 
   const getWorkerMusterStats = (workerId: string) => {
@@ -448,7 +474,7 @@ export const Workers = () => {
           >
             <div className="space-y-6">
               {/* Profile Card Summary */}
-              <div className="p-8 sm:p-10 rounded-[8px] bg-card border border-border flex flex-col sm:flex-row items-center gap-8">
+              <div id="worker-muster-card" className="p-8 sm:p-10 rounded-[8px] bg-card border border-border flex flex-col sm:flex-row items-center gap-8">
                 <img src={viewingWorker.photo} alt={viewingWorker.name} className="w-28 h-28 rounded-full object-cover shrink-0 border-2 border-border" />
                 <div className="flex-1 text-center sm:text-left space-y-2">
                   <h4 className="text-[26px] font-semibold text-surface-cream tracking-tight">{viewingWorker.name}</h4>
@@ -516,8 +542,8 @@ export const Workers = () => {
                       {t('musterCard')} • {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}
                     </h5>
                     
-                    <Button variant="ghost" size="sm" onClick={() => window.print()} leftIcon={<Printer className="w-4 h-4" />}>
-                      Print Card
+                    <Button variant="ghost" size="sm" onClick={handlePrintCard} disabled={printingCard} leftIcon={<Printer className="w-4 h-4" />}>
+                      {printingCard ? 'Preparing PDF…' : 'Print Card'}
                     </Button>
                   </div>
 
@@ -664,11 +690,16 @@ export const Workers = () => {
           
           <div className="space-y-4">
             <h4 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest mb-2">1. Basic Details</h4>
+            <PhotoUpload
+              label="Worker Photo"
+              value={formData.photo}
+              onChange={(photo) => setFormData(prev => ({ ...prev, photo }))}
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Full Name *" name="name" required value={formData.name} onChange={handleInputChange} />
               <Input label="Father's Name" name="fatherName" value={formData.fatherName} onChange={handleInputChange} />
               <Input label="Phone Number *" name="phone" required value={formData.phone} onChange={handleInputChange} />
-              <Input label="DOB (YYYY-MM-DD)" type="date" name="dob" value={formData.dob} onChange={handleInputChange} />
+              <DatePicker label="Date of Birth" value={formData.dob} onChange={(v) => setFormData(prev => ({ ...prev, dob: v }))} />
               
               <Select label="Gender" name="gender" value={formData.gender} onChange={handleInputChange}>
                 <option value="Male">Male</option>
@@ -755,10 +786,12 @@ export const Workers = () => {
             {selfLoginEnabled && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3">
                 <div>
-                  <p className="text-[11px] text-surface-50 font-bold uppercase tracking-widest">LOGIN IDENTIFIER ID</p>
-                  <p className="text-sm font-bold text-surface-cream mt-1.5 select-all bg-background p-2.5 rounded-[8px] border border-border">
-                    {editingWorkerId || 'Will generate on registration'}
-                  </p>
+                  <Input
+                    label="Custom Username (यूज़रनेम)"
+                    value={labourUsername}
+                    onChange={(e) => setLabourUsername(e.target.value)}
+                    placeholder="e.g. ramesh.skilled"
+                  />
                 </div>
                 <div>
                   <Input 
@@ -769,6 +802,12 @@ export const Workers = () => {
                     onChange={(e) => setLabourPassword(e.target.value)} 
                     placeholder={editingWorkerId ? 'Leave blank to keep existing' : 'e.g. yadav123'} 
                   />
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-[11px] text-surface-50 font-bold uppercase tracking-widest">LOGIN IDENTIFIER ID</p>
+                  <p className="text-sm font-bold text-surface-cream mt-1.5 select-all bg-background p-2.5 rounded-[8px] border border-border">
+                    {editingWorkerId || 'Will generate on registration'}
+                  </p>
                 </div>
               </div>
             )}

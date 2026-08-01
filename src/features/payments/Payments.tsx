@@ -22,6 +22,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '.
 import { slideUp, staggerContainer } from '../../utils/animations';
 import { useWorkers, useAttendance, usePayments, useAddPayment, useRemovePayment } from '../../api/queries';
 import { appConfig, formatCurrency } from '../../config/appConfig';
+import { elementToPdf } from '../../utils/pdf';
 
 export const Payments = () => {
   const { activeSiteId, currentLanguage } = useAppStore();
@@ -43,6 +44,21 @@ export const Payments = () => {
     }
   };
 
+  const handlePrintReceipt = async () => {
+    const el = document.getElementById('salary-slip');
+    if (!el || !selectedReceipt) return;
+    setPrintingReceipt(true);
+    try {
+      await elementToPdf(el, { filename: `${selectedReceipt.workerName.replace(/\s+/g, '_')}_Salary_Receipt.pdf` });
+      showToast('Salary receipt PDF downloaded.');
+    } catch (err) {
+      console.error(err);
+      showToast('Could not generate PDF.', 'error');
+    } finally {
+      setPrintingReceipt(false);
+    }
+  };
+
   const siteWorkers = workers.filter(w => w.currentSiteId === activeSiteId && w.status === 'Active');
 
   const [payingWorker, setPayingWorker] = useState<Worker | null>(null);
@@ -53,6 +69,7 @@ export const Payments = () => {
   const [paymentType, setPaymentType] = useState<'Cash' | 'Bank Transfer' | 'UPI' | 'Cheque'>('Cash');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [printingReceipt, setPrintingReceipt] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -500,10 +517,11 @@ export const Payments = () => {
                       <Button
                         variant="outline"
                         className="flex-1 py-3.5"
-                        onClick={() => window.print()}
+                        onClick={handlePrintReceipt}
+                        disabled={printingReceipt}
                         leftIcon={<Printer className="w-4 h-4" />}
                       >
-                        Print Receipt
+                        {printingReceipt ? 'Preparing PDF…' : 'Print Receipt'}
                       </Button>
                       <Button
                         variant="ghost"

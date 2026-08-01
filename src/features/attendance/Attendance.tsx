@@ -12,9 +12,10 @@ import {
   Camera, 
   Search
 } from 'lucide-react';
-import { AttendanceRecord, AttendanceStatus } from '../../services/db';
+import { AttendanceRecord, AttendanceStatus, LocalDB } from '../../services/db';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { DatePicker } from '../../components/ui/DatePicker';
 import { Button } from '../../components/ui/Button';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { slideUp, staggerContainer } from '../../utils/animations';
@@ -135,6 +136,12 @@ export const Attendance = () => {
 
     saveAttendance(sanitized);
     showToast(`Attendance muster sheet finalized for ${selectedDate}.`);
+    LocalDB.createNotification({
+      title: 'Attendance finalized',
+      message: `Muster sheet for ${selectedDate} has been finalized across active sites.`,
+      type: 'success',
+      link: '/attendance',
+    }).catch(() => {});
   };
 
   const filteredSiteWorkers = siteWorkers.filter(w => 
@@ -154,11 +161,10 @@ export const Attendance = () => {
         actions={
           <div className="flex items-center gap-3 shrink-0">
             <Calendar className="w-5 h-5 text-pink" />
-            <Input
-              type="date"
+            <DatePicker
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-auto cursor-pointer"
+              onChange={setSelectedDate}
+              className="w-40"
             />
           </div>
         }
