@@ -46,6 +46,11 @@
   --color-input: #0e100f;
   --color-ring: #fffce1;
 
+  /* Highlight = the cream "selected" pill. Stays light (cream/paper) in both
+     themes so dark ink on it remains legible; use for selected states. */
+  --color-highlight: #fffce1;
+  --color-highlight-foreground: #0e100f;
+
   /* ─── Legacy construction palette remapped into the chalkboard system ─── */
   --color-construction-50: #191919;
   --color-construction-100: #191919;
@@ -132,7 +137,9 @@
   }
 }
 
-/* The chalkboard canvas is dark-only. */
+/* The chalkboard canvas. Default token set in @theme is the dark palette;
+   the .dark block re-asserts it explicitly, and :root:not(.dark) below
+   remaps the same tokens to a light chalk-and-paper palette. */
 .dark {
   --color-background: #0e100f;
   --color-foreground: #fffce1;
@@ -145,6 +152,40 @@
   --color-secondary-foreground: #fffce1;
   --color-muted: #191919;
   --color-muted-foreground: #7c7c6f;
+}
+
+:root:not(.dark) {
+  --color-background: #f6f4ec;
+  --color-foreground: #1a1c18;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1c18;
+  --color-border: #d9d6c8;
+  --color-input: #ffffff;
+  --color-ring: #1a1c18;
+  --color-secondary: #ffffff;
+  --color-secondary-foreground: #1a1c18;
+  --color-muted: #efede2;
+  --color-muted-foreground: #5b5b50;
+
+  /* Ink-on-paper: just-black stays dark ink for text-on-accent */
+  --color-off-black: #ffffff;
+  --color-surface-cream: #1a1c18;
+  --color-surface-50: #5b5b50;
+  --color-surface-25: #d0cdbe;
+  --color-primary-foreground: #f6f4ec;
+  --color-accent-foreground: #f6f4ec;
+  --color-destructive-foreground: #ffffff;
+  --color-construction-50: #ffffff;
+  --color-construction-100: #ffffff;
+  --color-construction-200: #ffffff;
+  --color-construction-400: #5b5b50;
+  --color-construction-450: #5b5b50;
+  --color-construction-500: #5b5b50;
+  --color-construction-550: #1a1c18;
+  --color-construction-800: #ffffff;
+  --color-construction-850: #1a1c18;
+  --color-construction-900: #f6f4ec;
+  --color-construction-950: #f6f4ec;
 }
 
 html,
@@ -207,7 +248,7 @@ body {
 .btn-gradient-cta {
   border: 1.5px solid transparent;
   background-image:
-    linear-gradient(#0e100f, #0e100f),
+    linear-gradient(var(--color-background), var(--color-background)),
     linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -215,7 +256,7 @@ body {
 
 .btn-gradient-cta:hover {
   background-image:
-    linear-gradient(#161812, #161812),
+    linear-gradient(color-mix(in srgb, var(--color-background) 92%, #161812), color-mix(in srgb, var(--color-background) 92%, #161812)),
     linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
 }
 

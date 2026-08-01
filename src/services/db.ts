@@ -382,6 +382,16 @@ export const LocalDB = {
     await authenticatedFetch('/api/notifications/read', { method: 'POST' });
   },
 
+  async deleteNotification(id: string): Promise<void> {
+    await requireOnlineForWrite();
+    await authenticatedFetch(`/api/notifications/${id}`, { method: 'DELETE' });
+  },
+
+  async deleteAllNotifications(): Promise<void> {
+    await requireOnlineForWrite();
+    await authenticatedFetch('/api/notifications', { method: 'DELETE' });
+  },
+
   async markNotificationRead(id: string): Promise<void> {
     await requireOnlineForWrite();
     await authenticatedFetch(`/api/notifications/${id}/read`, { method: 'POST' });
@@ -423,10 +433,15 @@ export const LocalDB = {
 
   async saveUser(user: UserProfile): Promise<void> {
     await requireOnlineForWrite();
+    const payload: Record<string, unknown> = { ...user };
+    // The schema rejects empty strings for optional fields; omit them.
+    for (const key of Object.keys(payload)) {
+      if (payload[key] === '') delete payload[key];
+    }
     await authenticatedFetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: JSON.stringify(payload)
     });
   },
 

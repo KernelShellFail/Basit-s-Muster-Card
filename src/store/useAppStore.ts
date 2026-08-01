@@ -9,6 +9,7 @@ interface AppState {
   activeWorkerId: string | null;
   currentLanguage: 'en' | 'hi' | 'mr' | 'gu' | 'ta';
   isMobileMenuOpen: boolean;
+  theme: 'light' | 'dark';
   
   // Actions
   initApp: () => Promise<void>;
@@ -18,6 +19,8 @@ interface AppState {
   setActiveWorker: (workerId: string | null) => void;
   setLanguage: (lang: 'en' | 'hi' | 'mr' | 'gu' | 'ta') => void;
   setMobileMenuOpen: (isOpen: boolean) => void;
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
 
   
   // Database update proxy triggers
@@ -35,6 +38,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeWorkerId: null,
   currentLanguage: 'en',
   isMobileMenuOpen: false,
+  theme: 'dark',
 
   initApp: async () => {
     await LocalDB.init();
@@ -43,15 +47,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     const session = localStorage.getItem('mm_session_user');
     const sessionUser = session ? (JSON.parse(session) as UserProfile) : null;
     
-    // The chalkboard canvas is dark-only.
-    document.documentElement.classList.add('dark');
+    // Chalkboard canvas supports light & dark. Default to dark for continuity.
+    const savedTheme = localStorage.getItem('mm_theme') as 'light' | 'dark' | null;
+    const theme = savedTheme === 'light' ? 'light' : 'dark';
+    document.documentElement.classList.toggle('dark', theme === 'dark');
     const lang = (localStorage.getItem('mm_lang') || 'en') as 'en' | 'hi' | 'mr' | 'gu' | 'ta';
 
     set({
       currentUser: sessionUser,
       selectedRole: sessionUser ? sessionUser.role : 'owner',
       activeSiteId: sessionUser?.siteId || '',
-      currentLanguage: lang
+      currentLanguage: lang,
+      theme
     });
   },
 
@@ -89,6 +96,17 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setMobileMenuOpen: (isOpen) => {
     set({ isMobileMenuOpen: isOpen });
+  },
+
+  setTheme: (theme) => {
+    localStorage.setItem('mm_theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    set({ theme });
+  },
+
+  toggleTheme: () => {
+    const next = get().theme === 'dark' ? 'light' : 'dark';
+    get().setTheme(next);
   },
 
   refreshData: async () => {

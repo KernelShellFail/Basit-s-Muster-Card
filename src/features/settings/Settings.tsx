@@ -9,8 +9,11 @@ import {
   Globe, 
   Download, 
   Upload, 
-  ShieldCheck
+  ShieldCheck,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -27,7 +30,9 @@ export const Settings = () => {
     currentLanguage, 
     setLanguage, 
     selectedRole,
-    updateCurrentUser
+    updateCurrentUser,
+    theme,
+    setTheme
   } = useAppStore();
 
   const { data: organization } = useOrganization();
@@ -200,6 +205,38 @@ export const Settings = () => {
                 <Globe className="w-4 h-4 text-blue" />
                 Theme & Language
               </h3>
+
+              {/* Theme Toggle */}
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[14px] font-semibold text-surface-cream">Appearance</p>
+                  <p className="text-[12px] text-surface-50 mt-0.5">Choose between light and dark mode.</p>
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+                  <button
+                    type="button"
+                    onClick={() => setTheme('light')}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-200",
+                      theme === 'light' ? "bg-highlight text-highlight-foreground" : "text-surface-50 hover:text-surface-cream"
+                    )}
+                  >
+                    <Sun className="w-4 h-4" />
+                    Light
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme('dark')}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-200",
+                      theme === 'dark' ? "bg-highlight text-highlight-foreground" : "text-surface-50 hover:text-surface-cream"
+                    )}
+                  >
+                    <Moon className="w-4 h-4" />
+                    Dark
+                  </button>
+                </div>
+              </div>
 
               {/* Language Selector */}
               <Select

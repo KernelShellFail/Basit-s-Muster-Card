@@ -15,9 +15,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  ChevronRight
+  ChevronRight,
+  Trash2,
+  Sun,
+  Moon
 } from 'lucide-react';
-import { useSites, useNotifications, useClearNotifications, useMarkNotificationRead } from '../api/queries';
+import { useSites, useNotifications, useClearNotifications, useMarkNotificationRead, useDeleteNotification, useDeleteAllNotifications } from '../api/queries';
 import { SystemNotification } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -29,13 +32,17 @@ export const Header = () => {
     setActiveSite,
     currentLanguage,
     setLanguage,
-    setMobileMenuOpen
+    setMobileMenuOpen,
+    theme,
+    toggleTheme
   } = useAppStore();
 
   const { data: sites = [] } = useSites();
   const { data: notifications = [] } = useNotifications();
   const { mutate: clearNotifications } = useClearNotifications();
   const { mutate: markNotificationRead } = useMarkNotificationRead();
+  const { mutate: deleteNotification } = useDeleteNotification();
+  const { mutate: deleteAllNotifications } = useDeleteAllNotifications();
   const navigate = useNavigate();
 
   const handleNotificationClick = (notif: SystemNotification) => {
@@ -45,6 +52,12 @@ export const Header = () => {
     setShowNotifications(false);
     if (notif.link) {
       navigate(notif.link);
+    }
+  };
+
+  const handleClearAllNotifications = () => {
+    if (window.confirm('Delete all notifications? This cannot be undone.')) {
+      deleteAllNotifications();
     }
   };
 
@@ -140,7 +153,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="h-[70px] bg-just-black/85 backdrop-blur-md px-4 md:px-8 flex items-center justify-between shrink-0 z-40 relative border-b border-border">
+    <header className="h-[70px] bg-background/85 backdrop-blur-md px-4 md:px-8 flex items-center justify-between shrink-0 z-40 relative border-b border-border">
 
       {/* Left: Hamburger & Custom Site Selector */}
       <div className="flex items-center gap-4 md:gap-6">
@@ -272,6 +285,28 @@ export const Header = () => {
           </AnimatePresence>
         </div>
 
+        {/* Theme Toggle */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => toggleTheme()}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="p-2.5 text-surface-cream border border-border rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 hover:text-surface-50"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={theme}
+              initial={{ opacity: 0, rotate: -90, scale: 0.7 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.7 }}
+              transition={{ duration: 0.2 }}
+            >
+              {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.button>
+
         {/* Language Selection */}
         <div className="relative" ref={langRef}>
           <button
@@ -395,6 +430,14 @@ export const Header = () => {
                       Mark all read
                     </button>
                   )}
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={handleClearAllNotifications}
+                      className="px-3 py-1.5 text-xs font-semibold text-fn-error hover:bg-fn-error/10 bg-transparent border border-transparent rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    >
+                      Clear all
+                    </button>
+                  )}
                 </div>
 
                 {/* Body */}
@@ -483,6 +526,20 @@ export const Header = () => {
                             <div className="self-center shrink-0 text-surface-50/40 group-hover:text-surface-cream group-hover:translate-x-0.5 transition-all duration-200">
                               <ChevronRight className="w-5 h-5" />
                             </div>
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notif.id);
+                              }}
+                              aria-label="Delete notification"
+                              title="Delete notification"
+                              className="self-center shrink-0 p-1.5 rounded-full text-surface-50/40 hover:text-fn-error hover:bg-fn-error/10 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </motion.div>
                         );
                       })}

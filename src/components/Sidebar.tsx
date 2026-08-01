@@ -128,7 +128,7 @@ export const Sidebar = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-just-black/60 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 md:hidden"
           />
         )}
       </AnimatePresence>
@@ -141,13 +141,16 @@ export const Sidebar = () => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 h-dvh md:h-screen bg-just-black/95 glass-panel border-r border-border flex flex-col justify-between md:relative transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-50 h-dvh md:h-screen bg-background/95 glass-panel border-r border-border flex flex-col justify-between md:relative transition-transform duration-300",
           isMobileMenuOpen ? "translate-x-0 w-[280px]" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 flex flex-col">
           {/* Brand header */}
-          <div className="h-[50px] flex items-center justify-between px-6 shrink-0 border-b border-transparent">
+          <div className={cn(
+            "h-[50px] flex items-center shrink-0 border-b border-transparent relative",
+            isEffectivelyCollapsed ? "justify-center px-0" : "justify-between px-6"
+          )}>
             <div className="flex items-center gap-3 overflow-hidden">
               <motion.div
                 whileHover={{ rotate: 15, scale: 1.1 }}
@@ -163,7 +166,7 @@ export const Sidebar = () => {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="font-semibold text-[22px] tracking-[-0.03em] truncate text-surface-cream whitespace-nowrap origin-left"
+                    className="font-semibold text-[22px] tracking-[-0.03em] truncate text-surface-cream whitespace-nowrap origin-left leading-none"
                   >
                     Muster<span className="text-shockingly-green">Mate</span>
                   </motion.span>
@@ -176,7 +179,9 @@ export const Sidebar = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden md:flex absolute -right-4 top-6 w-9 h-9 rounded-full text-surface-50 hover:text-surface-cream items-center justify-center transition-colors z-50"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-card border border-border text-surface-cream hover:text-shockingly-green items-center justify-center transition-colors z-50 shadow-lg"
             >
               <motion.div
                 initial={false}
@@ -266,7 +271,7 @@ export const Sidebar = () => {
         </div>
 
         {/* Session User Profile & Logout */}
-        <div className="p-4 border-t border-border bg-just-black/50 shrink-0">
+        <div className="p-4 border-t border-border bg-background/50 shrink-0">
           <AnimatePresence>
             {currentUser && !isEffectivelyCollapsed && (
               <motion.div

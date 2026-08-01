@@ -224,7 +224,7 @@ export const Attendance = () => {
                       let baseClass = "text-[11px] font-bold uppercase tracking-wider border px-4 py-2.5 rounded-full transition-all ";
                       
                       if (isActive) {
-                        if (st === 'Present') baseClass += "bg-surface-cream text-just-black border-surface-cream";
+                        if (st === 'Present') baseClass += "bg-highlight text-highlight-foreground border-highlight";
                         else if (st === 'Half-Day') baseClass += "bg-fn-warning/10 border border-fn-warning/30 text-fn-warning font-bold";
                         else if (st === 'Absent') baseClass += "bg-background border border-border text-surface-50/60";
                         else if (st === 'Paid-Leave') baseClass += "bg-background border border-border text-surface-cream font-bold";
@@ -256,7 +256,7 @@ export const Attendance = () => {
                       onClick={() => handleToggleNightShift(worker.id)}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-[11px] font-bold uppercase tracking-wider transition-all ${
                         isNightShift 
-                          ? 'bg-surface-cream text-just-black border-surface-cream' 
+                          ? 'bg-highlight text-highlight-foreground border-highlight' 
                           : 'border-border/80 text-surface-50 hover:bg-muted'
                       }`}
                     >

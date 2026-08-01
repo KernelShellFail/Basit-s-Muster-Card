@@ -336,7 +336,7 @@ export const Dashboard = () => {
                 </svg>
 
                 <div className="absolute right-4 bottom-14 flex items-center gap-4 text-[11px] font-semibold uppercase tracking-widest text-surface-50">
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-surface-cream rounded-full" /> Present</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-highlight rounded-full" /> Present</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-surface-25 rounded-full" /> Absent</span>
                 </div>
               </div>

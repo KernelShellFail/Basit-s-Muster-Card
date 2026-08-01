@@ -76,7 +76,7 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-just-black text-surface-cream relative flex flex-col items-center justify-center p-6 overflow-hidden">
+    <div className="min-h-screen bg-background text-surface-cream relative flex flex-col items-center justify-center p-6 overflow-hidden">
 
       {/* Ambient gradient glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[60%] rounded-full bg-shockingly-green/[0.05] blur-[120px] pointer-events-none" />

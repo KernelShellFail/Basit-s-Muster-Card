@@ -231,7 +231,7 @@ export const LabourDashboard = () => {
                   onClick={() => setIsNightShift(!isNightShift)}
                   className={`w-full py-3 rounded-[8px] border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     isNightShift
-                      ? 'bg-surface-cream text-just-black border-surface-cream'
+                      ? 'bg-highlight text-highlight-foreground border-highlight'
                       : 'border-border text-surface-50 hover:bg-muted'
                   }`}
                 >

@@ -79,13 +79,15 @@ export const useChat = (siteId: string) => {
     queryKey: queryKeys.chat(siteId),
     queryFn: () => LocalDB.getChat(siteId),
     enabled: !!siteId,
+    refetchInterval: 5000,
   });
 };
 
 export const useNotifications = () => {
   return useQuery({
     queryKey: queryKeys.notifications,
-    queryFn: () => LocalDB.getNotifications()
+    queryFn: () => LocalDB.getNotifications(),
+    refetchInterval: 15000,
   });
 };
 
@@ -229,6 +231,22 @@ export const useMarkNotificationRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => LocalDB.markNotificationRead(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
+  });
+};
+
+export const useDeleteNotification = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => LocalDB.deleteNotification(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
+  });
+};
+
+export const useDeleteAllNotifications = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => LocalDB.deleteAllNotifications(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications }),
   });
 };

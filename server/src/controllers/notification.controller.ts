@@ -49,6 +49,29 @@ export const markNotificationRead = async (req: AuthenticatedRequest, res: Respo
   }
 };
 
+export const deleteNotification = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const orgId = req.user?.organizationId;
+    const id = req.params.id as string;
+    await notificationRepo.deleteById(id, orgId || '');
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database delete failed' });
+  }
+};
+
+export const deleteAllNotifications = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const orgId = req.user?.organizationId;
+    await notificationRepo.deleteAllByOrg(orgId || '');
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database delete failed' });
+  }
+};
+
 export const createNotification = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title, message, type, link } = req.body;

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isToday, isSameMonth, parseISO } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isToday, isSameMonth, parseISO, setMonth, setYear } from 'date-fns';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface DatePickerProps {
@@ -15,10 +15,15 @@ interface DatePickerProps {
 }
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const clampYear = (y: number) => Math.min(2100, Math.max(1900, y));
 
 export const DatePicker = ({ value, onChange, label, className, maxDate, minDate }: DatePickerProps) => {
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => (value ? parseISO(value) : new Date()));
+  const [viewMode, setViewMode] = useState<'days' | 'months'>('days');
+  const [yearInput, setYearInput] = useState('');
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -60,6 +65,8 @@ export const DatePicker = ({ value, onChange, label, className, maxDate, minDate
       setPopoverPos({ top, left });
     }
     setViewMonth(selectedDate || new Date());
+    setViewMode('days');
+    setYearInput(String((selectedDate || new Date()).getFullYear()));
     setOpen(true);
   };
 
@@ -92,18 +99,42 @@ export const DatePicker = ({ value, onChange, label, className, maxDate, minDate
       <div className="flex items-center justify-between mb-3">
         <button
           type="button"
-          onClick={() => setViewMonth(subMonths(viewMonth, 1))}
+          onClick={() => {
+            if (viewMode === 'months') {
+              setViewMonth(subMonths(setYear(viewMonth, clampYear(parseInt(yearInput) || new Date().getFullYear())), 1));
+            } else {
+              setViewMonth(subMonths(viewMonth, 1));
+            }
+          }}
           className="p-1.5 rounded-full hover:bg-muted text-surface-cream transition-colors"
           aria-label="Previous month"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <span className="text-[14px] font-semibold text-surface-cream uppercase tracking-wider">
-          {format(viewMonth, 'MMMM yyyy')}
-        </span>
         <button
           type="button"
-          onClick={() => setViewMonth(addMonths(viewMonth, 1))}
+          onClick={() => {
+            setViewMode(viewMode === 'months' ? 'days' : 'months');
+            setYearInput(String(viewMonth.getFullYear()));
+          }}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted text-surface-cream transition-colors"
+          aria-label="Switch to month/year selector"
+          title="Pick month / year"
+        >
+          <span className="text-[14px] font-semibold uppercase tracking-wider">
+            {viewMode === 'months' ? format(viewMonth, 'yyyy') : format(viewMonth, 'MMMM yyyy')}
+          </span>
+          <ChevronsUpDown className="w-3.5 h-3.5 text-surface-50" />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (viewMode === 'months') {
+              setViewMonth(addMonths(setYear(viewMonth, clampYear(parseInt(yearInput) || new Date().getFullYear())), 1));
+            } else {
+              setViewMonth(addMonths(viewMonth, 1));
+            }
+          }}
           className="p-1.5 rounded-full hover:bg-muted text-surface-cream transition-colors"
           aria-label="Next month"
         >
@@ -111,7 +142,114 @@ export const DatePicker = ({ value, onChange, label, className, maxDate, minDate
         </button>
       </div>
 
-      {/* Weekday header */}
+      {viewMode === 'months' ? (
+        <div className="mb-2">
+          {/* Year stepper */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <button
+              type="button"
+              onClick={() => {
+                const y = clampYear((parseInt(yearInput) || viewMonth.getFullYear()) - 1);
+                setYearInput(String(y));
+                setViewMonth(setYear(viewMonth, y));
+              }}
+              className="p-1.5 rounded-full hover:bg-muted text-surface-cream transition-colors"
+              aria-label="Previous year"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={yearInput}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setYearInput(digits);
+                }}
+                onBlur={() => {
+                  const y = clampYear(parseInt(yearInput) || viewMonth.getFullYear());
+                  setYearInput(String(y));
+                  setViewMonth(setYear(viewMonth, y));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const y = clampYear(parseInt(yearInput) || viewMonth.getFullYear());
+                    setYearInput(String(y));
+                    setViewMonth(setYear(viewMonth, y));
+                  }
+                }}
+                className="w-[64px] h-9 rounded-[8px] border border-border bg-background text-center text-[14px] font-semibold text-surface-cream focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
+                aria-label="Type a year"
+                title="Type a year"
+              />
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const y = clampYear((parseInt(yearInput) || viewMonth.getFullYear()) + 1);
+                    setYearInput(String(y));
+                    setViewMonth(setYear(viewMonth, y));
+                  }}
+                  className="p-0.5 rounded hover:bg-muted text-surface-50 hover:text-surface-cream transition-colors"
+                  aria-label="Year up"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const y = clampYear((parseInt(yearInput) || viewMonth.getFullYear()) - 1);
+                    setYearInput(String(y));
+                    setViewMonth(setYear(viewMonth, y));
+                  }}
+                  className="p-0.5 rounded hover:bg-muted text-surface-50 hover:text-surface-cream transition-colors"
+                  aria-label="Year down"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const y = clampYear((parseInt(yearInput) || viewMonth.getFullYear()) + 1);
+                setYearInput(String(y));
+                setViewMonth(setYear(viewMonth, y));
+              }}
+              className="p-1.5 rounded-full hover:bg-muted text-surface-cream transition-colors"
+              aria-label="Next year"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Month grid */}
+          <div className="grid grid-cols-3 gap-1.5">
+            {MONTH_NAMES.map((m, i) => {
+              const isCurrent = viewMonth.getMonth() === i;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => {
+                    setViewMonth(setMonth(viewMonth, i));
+                    setViewMode('days');
+                  }}
+                  className={cn(
+                    "h-9 rounded-[6px] text-[13px] font-medium transition-all",
+                    isCurrent ? "bg-highlight text-highlight-foreground font-bold" : "text-surface-cream hover:bg-muted"
+                  )}
+                >
+                  {m}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Weekday header */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {WEEKDAYS.map((d, i) => (
           <div key={i} className="text-center text-[11px] font-bold text-surface-50 py-1">
@@ -138,7 +276,7 @@ export const DatePicker = ({ value, onChange, label, className, maxDate, minDate
                 !inMonth && "text-surface-50/40",
                 inMonth && !selected && !today && "text-surface-cream hover:bg-muted",
                 today && !selected && "border border-orangey text-orangey",
-                selected && "bg-surface-cream text-just-black font-bold",
+                selected && "bg-highlight text-highlight-foreground font-bold",
                 disabled && "opacity-30 cursor-not-allowed hover:bg-transparent"
               )}
             >
@@ -147,6 +285,8 @@ export const DatePicker = ({ value, onChange, label, className, maxDate, minDate
           );
         })}
       </div>
+        </>
+      )}
 
       {value && (
         <div className="mt-3 pt-3 border-t border-border flex justify-between items-center">

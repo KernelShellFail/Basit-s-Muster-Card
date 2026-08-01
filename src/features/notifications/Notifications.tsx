@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Bell, CheckCheck, Info, CheckCircle2, AlertTriangle, XCircle, CreditCard, FileText, User, ChevronRight } from 'lucide-react';
-import { useNotifications, useClearNotifications, useMarkNotificationRead } from '../../api/queries';
+import { Bell, CheckCheck, Trash2, Info, CheckCircle2, AlertTriangle, XCircle, CreditCard, FileText, User, ChevronRight } from 'lucide-react';
+import { useNotifications, useClearNotifications, useMarkNotificationRead, useDeleteNotification, useDeleteAllNotifications } from '../../api/queries';
 import { SystemNotification } from '../../services/db';
 import { cn } from '../../utils/cn';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -57,12 +57,20 @@ export const Notifications = () => {
   const { data: notifications = [] } = useNotifications();
   const { mutate: clearNotifications } = useClearNotifications();
   const { mutate: markNotificationRead } = useMarkNotificationRead();
+  const { mutate: deleteNotification } = useDeleteNotification();
+  const { mutate: deleteAllNotifications } = useDeleteAllNotifications();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleClick = (notif: SystemNotification) => {
     if (!notif.read) markNotificationRead(notif.id);
     if (notif.link) navigate(notif.link);
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm('Delete all notifications? This cannot be undone.')) {
+      deleteAllNotifications();
+    }
   };
 
   return (
@@ -72,11 +80,19 @@ export const Notifications = () => {
           title="Notifications"
           description={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` : 'You are all caught up'}
         />
-        {unreadCount > 0 && (
-          <Button variant="ghost" onClick={() => clearNotifications()}>
-            <CheckCheck className="w-4 h-4" />
-            Mark all read
-          </Button>
+        {notifications.length > 0 && (
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <Button variant="ghost" onClick={() => clearNotifications()}>
+                <CheckCheck className="w-4 h-4" />
+                Mark all read
+              </Button>
+            )}
+            <Button variant="ghost" onClick={handleClearAll} className="text-fn-error hover:text-fn-error">
+              <Trash2 className="w-4 h-4" />
+              Clear all
+            </Button>
+          </div>
         )}
       </div>
 
@@ -126,6 +142,18 @@ export const Notifications = () => {
                   <ChevronRight className="w-5 h-5" />
                 </div>
               )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteNotification(notif.id);
+                }}
+                aria-label="Delete notification"
+                title="Delete notification"
+                className="shrink-0 self-center p-2 rounded-full text-surface-50/40 hover:text-fn-error hover:bg-fn-error/10 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </motion.div>
           ))}
         </motion.div>

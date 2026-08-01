@@ -14,7 +14,7 @@ const colorMap: Record<NonNullable<BadgeProps['color']>, string> = {
   lilac: 'bg-lilac/10 text-lilac border-lilac/30',
   blue: 'bg-blue/10 text-blue border-blue/30',
   orange: 'bg-orangey/10 text-orangey border-orangey/30',
-  cream: 'bg-surface-cream text-just-black border-surface-cream',
+  cream: 'bg-highlight text-highlight-foreground border-highlight',
   muted: 'bg-background border-border text-surface-50',
 };
 

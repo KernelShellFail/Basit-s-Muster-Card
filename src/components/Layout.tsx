@@ -3,6 +3,7 @@ import Lenis from 'lenis';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ToastContainer } from './Toast';
+import { NotificationPopups } from './NotificationPopups';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { pageTransition } from '../utils/animations';
@@ -44,7 +45,7 @@ export const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="flex h-dvh w-screen bg-just-black text-surface-cream overflow-hidden font-mori selection:bg-primary selection:text-just-black">
+    <div className="flex h-dvh w-screen bg-background text-surface-cream overflow-hidden font-mori selection:bg-primary selection:text-just-black">
       {/* Skip to main content for accessibility */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:font-bold">
         Skip to main content
@@ -54,7 +55,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-just-black">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background">
         {/* Top Header Utilities */}
         <Header />
 
@@ -83,6 +84,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Global Action Toasts */}
       <ToastContainer />
+
+      {/* Real-time Notification Popups */}
+      <NotificationPopups />
     </div>
   );
 };

@@ -118,7 +118,7 @@ export const ChatMessageSchema = z.object({
   senderId: z.string(),
   senderName: z.string(),
   senderRole: z.string(),
-  text: z.string().optional(),
+  text: z.string().min(1, 'Message cannot be empty').max(2000, 'Message is too long').optional(),
   imageUrl: z.string().optional(),
   createdAt: z.string().optional(),
 }).passthrough();

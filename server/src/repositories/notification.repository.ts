@@ -35,6 +35,17 @@ export class NotificationRepository extends BaseRepository<NotificationEntity> {
     );
   }
 
+  async deleteById(id: string, orgId: string): Promise<void> {
+    await this.query(
+      `DELETE FROM ${this.tableName} WHERE id = $1 AND organization_id = $2`,
+      [id, orgId]
+    );
+  }
+
+  async deleteAllByOrg(orgId: string): Promise<void> {
+    await this.query(`DELETE FROM ${this.tableName} WHERE organization_id = $1`, [orgId]);
+  }
+
   async create(entity: NotificationEntity): Promise<void> {
     await this.query(
       `INSERT INTO ${this.tableName} (id, title, message, type, read, link, created_at, organization_id)

@@ -346,7 +346,7 @@ export const Staff = () => {
                     onClick={() => setRole('supervisor')}
                     className={`p-3.5 text-[11px] uppercase tracking-wider font-bold rounded-full border flex items-center justify-center gap-2 transition-all ${
                       role === 'supervisor'
-                        ? 'bg-surface-cream border-surface-cream text-just-black'
+                        ? 'bg-highlight border-highlight text-highlight-foreground'
                         : 'bg-background border-border text-surface-50 hover:bg-muted'
                     }`}
                   >
@@ -358,7 +358,7 @@ export const Staff = () => {
                     onClick={() => setRole('admin')}
                     className={`p-3.5 text-[11px] uppercase tracking-wider font-bold rounded-full border flex items-center justify-center gap-2 transition-all ${
                       role === 'admin'
-                        ? 'bg-surface-cream border-surface-cream text-just-black'
+                        ? 'bg-highlight border-highlight text-highlight-foreground'
                         : 'bg-background border-border text-surface-50 hover:bg-muted'
                     }`}
                   >

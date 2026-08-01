@@ -41,7 +41,7 @@ export const PhotoUpload = ({ value, onChange, label = 'Profile Photo', classNam
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-surface-cream text-just-black flex items-center justify-center border border-border shadow-lg hover:scale-105 transition-transform"
+          className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-highlight text-highlight-foreground flex items-center justify-center border border-border shadow-lg hover:scale-105 transition-transform"
           aria-label="Change photo"
         >
           <Camera className="w-4 h-4" />

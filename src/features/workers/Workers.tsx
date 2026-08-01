@@ -12,7 +12,6 @@ import {
   Printer, 
   Edit3,
   User,
-  CreditCard,
   FileText,
   Calendar
 } from 'lucide-react';
@@ -62,6 +61,7 @@ export const Workers = () => {
   const [selfLoginEnabled, setSelfLoginEnabled] = useState(false);
   const [labourPassword, setLabourPassword] = useState('');
   const [labourUsername, setLabourUsername] = useState('');
+  const [credentialModal, setCredentialModal] = useState<{ username: string; password: string; workerName: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [printingCard, setPrintingCard] = useState(false);
 
@@ -224,6 +224,13 @@ export const Workers = () => {
         photo: formData.photo || undefined
       };
       addUser(userPayload);
+
+      // One-time display of freshly set credentials so the owner knows what was created.
+      if (!linkedUser && labourUsername && labourPassword) {
+        setCredentialModal({ username: labourUsername, password: labourPassword, workerName: formData.name });
+      } else if (!linkedUser && labourUsername && !labourPassword) {
+        showToast(`Login created with username "${labourUsername}" (password not set).`, 'info');
+      }
     } else if (linkedUser) {
       removeUser(linkedUser.uid);
     }
@@ -523,7 +530,7 @@ export const Workers = () => {
 
                   <div className="pt-6 border-t border-border">
                     <h5 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest flex items-center gap-1.5 mb-4">
-                      <CreditCard className="w-4 h-4 text-surface-cream" />
+                      <User className="w-4 h-4 text-surface-cream" />
                       Bank Account Info
                     </h5>
                     <ul className="text-[13px] space-y-3 text-surface-cream font-medium">
@@ -532,6 +539,31 @@ export const Workers = () => {
                       <li><span className="text-surface-50 font-normal">IFSC Code:</span> {viewingWorker.ifscCode}</li>
                       <li><span className="text-surface-50 font-normal">UPI ID:</span> {viewingWorker.upiId || 'N/A'}</li>
                     </ul>
+                  </div>
+
+                  <div className="pt-6 border-t border-border">
+                    <h5 className="text-[11px] font-bold text-surface-50 uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                      <User className="w-4 h-4 text-surface-cream" />
+                      Login Credentials
+                    </h5>
+                    {(() => {
+                      const linkedUser = users.find(u => u.workerId === viewingWorker.id);
+                      if (!linkedUser) {
+                        return (
+                          <p className="text-[13px] text-surface-50 font-medium">
+                            No self-login set up. Edit the worker and enable <span className="text-surface-cream font-semibold">Labour Self-Login</span> to create credentials.
+                          </p>
+                        );
+                      }
+                      return (
+                        <div className="space-y-3">
+                          <p className="text-[13px] text-surface-cream font-medium">
+                            <span className="text-surface-50 font-normal">Username:</span> <span className="select-all font-bold">{linkedUser.username || '—'}</span>
+                          </p>
+                          <p className="text-[13px] text-surface-50 font-medium">Password is securely hashed and cannot be viewed. Reset it via Edit Profile.</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -565,7 +597,7 @@ export const Workers = () => {
                       const status = attendanceRecord ? attendanceRecord.status : 'Unmarked';
                       
                       const statusColorMap: Record<string, string> = {
-                        'Present': 'bg-surface-cream text-just-black font-bold',
+                        'Present': 'bg-highlight text-highlight-foreground font-bold',
                         'Half-Day': 'bg-fn-warning/10 border border-fn-warning/30 text-fn-warning font-bold',
                         'Absent': 'bg-background border border-border text-surface-50/60',
                         'Paid-Leave': 'bg-background border border-border text-surface-cream font-bold',
@@ -622,7 +654,7 @@ export const Workers = () => {
                       <div className="space-y-6">
                         {/* Attendance Counter Grid */}
                         <div className="grid grid-cols-4 gap-4 text-center text-[11px] uppercase tracking-widest font-bold">
-                          <div className="p-4 rounded-[8px] border border-border bg-surface-cream text-just-black">
+                          <div className="p-4 rounded-[8px] border border-border bg-highlight text-highlight-foreground">
                             <p className="opacity-70">Presents</p>
                             <h4 className="text-[24px] font-semibold mt-2">{stats.presents}</h4>
                           </div>
@@ -824,6 +856,52 @@ export const Workers = () => {
           </div>
         </form>
       </Modal>
+
+      {/* One-Time Login Credentials Modal */}
+      <AnimatePresence>
+        {credentialModal && (
+          <Modal
+            isOpen={!!credentialModal}
+            onClose={() => setCredentialModal(null)}
+            title="Login Credentials Created"
+            description={`Self-login for ${credentialModal.workerName}`}
+            className="max-w-md"
+          >
+            <div className="space-y-5">
+              <div className="p-4 rounded-[8px] bg-fn-info/10 border border-fn-info/30 text-[13px] text-surface-cream leading-relaxed">
+                These credentials are shown once. Store them somewhere safe — the password is encrypted and cannot be retrieved later.
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-surface-50 uppercase tracking-widest">Username (Login ID)</p>
+                <p className="text-sm font-bold text-surface-cream select-all bg-background p-2.5 rounded-[8px] border border-border">
+                  {credentialModal.username}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-surface-50 uppercase tracking-widest">Password</p>
+                <p className="text-sm font-bold text-surface-cream select-all bg-background p-2.5 rounded-[8px] border border-border">
+                  {credentialModal.password}
+                </p>
+              </div>
+
+              <p className="text-[12px] text-surface-50 leading-relaxed">
+                The worker can log in at the Labour Portal using these details. You can also change the username later from Edit Profile.
+              </p>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="ghost" onClick={() => navigator.clipboard.writeText(`${credentialModal.username} / ${credentialModal.password}`).then(() => showToast('Credentials copied to clipboard!'))}>
+                  Copy
+                </Button>
+                <Button onClick={() => setCredentialModal(null)}>
+                  Done
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
 
     </motion.div>
   );
