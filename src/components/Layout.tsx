@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { Watermark } from './Watermark';
 import { ToastContainer } from './Toast';
 import { NotificationPopups } from './NotificationPopups';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -54,18 +55,21 @@ export const Layout = ({ children }: LayoutProps) => {
       {/* Dynamic Navigation Sidebar */}
       <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background">
-        {/* Top Header Utilities */}
-        <Header />
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background">
+          {/* Top Header Utilities */}
+          <Header />
 
-        {/* Scrollable Page Screen */}
+          {/* "basit's Muster Card" background mark */}
+          <Watermark className="bottom-8 right-10 text-[clamp(40px,6vw,88px)]" />
+
+          {/* Scrollable Page Screen */}
         <main 
           id="main-content"
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 md:p-8 focus:outline-none relative z-10 custom-scrollbar"
         >
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-7xl h-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}

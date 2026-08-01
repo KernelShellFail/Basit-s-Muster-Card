@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
-import { 
-  Send, 
-  MessageSquare, 
+import {
+  Send,
+  MessageSquare,
   CheckCheck
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { Eyebrow } from '../../components/ui/Eyebrow';
 import { slideUp } from '../../utils/animations';
@@ -23,51 +22,74 @@ const GLOBAL_CHANNEL_ID = 'global';
 const MAX_MESSAGE_LENGTH = 2000;
 
 export const Chat = () => {
-  const { 
-    currentUser, 
-    selectedRole, 
-    activeSiteId 
+  const {
+    currentUser,
+    selectedRole,
+    activeSiteId
   } = useAppStore();
   const { data: sites = [] } = useSites();
 
   const [text, setText] = useState('');
   const [activeChannel, setActiveChannel] = useState<'global' | 'site'>('global');
-  
+
   const chatSiteId = activeChannel === 'global' ? GLOBAL_CHANNEL_ID : activeSiteId;
   const { data: chatMessages = [] } = useChat(chatSiteId);
   const { mutate: sendChatMessage } = useSendChatMessage();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showNewBanner, setShowNewBanner] = useState(false);
-  const wasNearBottomRef = useRef(true);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isNearBottomRef = useRef(true);
+  const [showNewBanner, setShowNewBanner] = useState(false);
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    const el = containerRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior });
     setShowNewBanner(false);
   };
 
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    isNearBottomRef.current = near;
+    if (near) setShowNewBanner(false);
+  };
+
+  // Channel switch: jump straight to the bottom, no smooth scrolling.
   useEffect(() => {
-    scrollToBottom();
-    wasNearBottomRef.current = true;
+    const el = containerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+    isNearBottomRef.current = true;
+    setShowNewBanner(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatSiteId]);
 
-  // If we're not near the bottom when new messages arrive, show a "new messages" pill.
-  const containerRef = useRef<HTMLDivElement>(null);
+  // New messages arrive (polling): auto-scroll only if the user was already near
+  // the bottom, otherwise surface the "New messages" pill. We use the pre-arrival
+  // position tracked by onScroll (isNearBottomRef) because the DOM has already
+  // grown by the time this effect runs, so a fresh distance calc would always
+  // look "far" from the bottom.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-    if (!isNearBottom) setShowNewBanner(true);
-    wasNearBottomRef.current = isNearBottom;
-    if (isNearBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isNearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
       setShowNewBanner(false);
+    } else {
+      setShowNewBanner(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatMessages]);
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Auto-grow the textarea up to a max height.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+  }, [text]);
+
+  const submitMessage = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -84,6 +106,18 @@ export const Chat = () => {
     sendChatMessage(message);
     setText('');
     scrollToBottom();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitMessage();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitMessage();
+    }
   };
 
   const formatMessageTime = (isoString: string) => {
@@ -108,13 +142,13 @@ export const Chat = () => {
   const charCount = text.trim().length;
 
   return (
-    <motion.div variants={slideUp} initial="hidden" animate="visible" className="h-[calc(100dvh-12rem)] md:h-[calc(100vh-13rem)]">
-      <div className="mb-6">
+    <motion.div variants={slideUp} initial="hidden" animate="visible" className="flex flex-col h-full min-h-0">
+      <div className="mb-6 shrink-0">
         <Eyebrow text="chat" color="text-blue" />
         <h1 className="mt-3 text-3xl sm:text-4xl lg:text-[48px] font-semibold tracking-[-0.02em] leading-[1] text-surface-cream">Muster Team Chat</h1>
       </div>
-      <Card className="h-full flex overflow-hidden p-0 border border-border">
-        
+      <Card className="flex-1 min-h-0 flex overflow-hidden p-0 border border-border">
+
         {/* Channels Sidebar List (Hidden for Labour role for simplicity) */}
         {selectedRole !== 'labour' && (
           <div className="w-64 border-r border-border bg-background flex flex-col p-5 space-y-5 shrink-0 hidden md:flex animate-fade-in">
@@ -122,7 +156,7 @@ export const Chat = () => {
               <MessageSquare className="w-4 h-4 text-blue" />
               Muster Channels
             </h3>
-            
+
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => {
@@ -154,7 +188,7 @@ export const Chat = () => {
         )}
 
         {/* Chat Conversation pane */}
-        <div className="flex-1 flex flex-col justify-between overflow-hidden bg-background">
+        <div className="flex-1 min-w-0 flex flex-col bg-background">
           {/* Header bar */}
           <div className="h-16 border-b border-border px-6 sm:px-8 flex items-center justify-between shrink-0 bg-card/65 backdrop-blur-md">
             <div>
@@ -199,7 +233,12 @@ export const Chat = () => {
           </div>
 
           {/* Message Stream */}
-          <div ref={containerRef} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+          <div
+            ref={containerRef}
+            onScroll={handleScroll}
+            data-lenis-prevent
+            className="flex-1 min-h-0 overflow-y-auto overscroll-contain custom-scrollbar p-6 sm:p-8"
+          >
             {chatMessages.length === 0 ? (
               <div className="text-center py-20 text-sm text-surface-50 font-semibold">
                 No messages posted here yet. Start the conversation!
@@ -208,43 +247,54 @@ export const Chat = () => {
               (() => {
                 const rendered: React.ReactNode[] = [];
                 let lastDateKey: string | null = null;
+                let lastSenderId: string | null = null;
                 chatMessages.forEach((msg, idx) => {
                   const dateKey = msg.createdAt?.slice(0, 10) || '';
                   if (dateKey && dateKey !== lastDateKey) {
                     rendered.push(
-                      <div key={`date-${dateKey}-${idx}`} className="flex items-center gap-3 py-1">
+                      <div key={`date-${dateKey}-${idx}`} className="flex items-center gap-3 py-4">
                         <div className="flex-1 h-px bg-border" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-surface-50">{getDateLabel(msg.createdAt)}</span>
                         <div className="flex-1 h-px bg-border" />
                       </div>
                     );
                     lastDateKey = dateKey;
+                    lastSenderId = null;
                   }
 
                   const isMe = msg.senderId === currentUser?.uid;
+                  const isNewRun = lastSenderId === null || msg.senderId !== lastSenderId;
+                  lastSenderId = msg.senderId;
+
                   rendered.push(
                     <motion.div
                       key={msg.id}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={isNewRun ? { opacity: 0, y: 10 } : false}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: Math.min(idx * 0.02, 0.4) }}
-                      className={`flex gap-3 max-w-[85%] sm:max-w-[70%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}
+                      transition={{ duration: 0.3 }}
+                      className={`flex gap-3 max-w-[85%] sm:max-w-[70%] ${isMe ? 'ml-auto flex-row-reverse' : ''} ${isNewRun ? 'mt-6' : 'mt-1.5'}`}
                     >
-                      <div className="w-9 h-9 rounded-full bg-background text-surface-cream flex items-center justify-center font-bold text-xs shrink-0 border border-border uppercase">
-                        {msg.senderName.substring(0, 2)}
-                      </div>
+                      {isNewRun ? (
+                        <div className="w-9 h-9 rounded-full bg-background text-surface-cream flex items-center justify-center font-bold text-xs shrink-0 border border-border uppercase">
+                          {msg.senderName.substring(0, 2)}
+                        </div>
+                      ) : (
+                        <div className="w-9 shrink-0" />
+                      )}
 
                       <div className={`space-y-1 ${isMe ? 'items-end flex flex-col' : 'items-start flex flex-col'}`}>
-                        <div className={`flex items-center gap-2 text-[11px] font-bold text-surface-50 uppercase tracking-wider ${isMe ? 'flex-row-reverse' : ''}`}>
-                          <span>{msg.senderName}</span>
-                          <span className="bg-card px-1.5 py-0.5 rounded text-[11px] tracking-widest uppercase border border-border">
-                            {msg.senderRole}
-                          </span>
-                        </div>
+                        {isNewRun && (
+                          <div className={`flex items-center gap-2 text-[11px] font-bold text-surface-50 uppercase tracking-wider ${isMe ? 'flex-row-reverse' : ''}`}>
+                            <span>{msg.senderName}</span>
+                            <span className="bg-card px-1.5 py-0.5 rounded text-[11px] tracking-widest uppercase border border-border">
+                              {msg.senderRole}
+                            </span>
+                          </div>
+                        )}
 
-                        <div className={`p-4 rounded-[8px] text-[13px] font-semibold leading-relaxed whitespace-pre-wrap break-words border ${
-                          isMe 
-                            ? 'bg-blue/15 border-blue/40 text-surface-cream rounded-tr-sm' 
+                        <div className={`p-3 sm:p-4 rounded-[8px] text-[13px] font-semibold leading-relaxed whitespace-pre-wrap break-words border ${
+                          isMe
+                            ? 'bg-blue/15 border-blue/40 text-surface-cream rounded-tr-sm'
                             : 'bg-card text-surface-cream rounded-tl-sm border-border'
                         }`}>
                           {msg.text}
@@ -261,8 +311,6 @@ export const Chat = () => {
                 return rendered;
               })()
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {/* New messages pill */}
@@ -273,7 +321,7 @@ export const Chat = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
-                  onClick={scrollToBottom}
+                  onClick={() => scrollToBottom()}
                   className="absolute left-1/2 -top-14 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-blue text-background text-[12px] font-bold shadow-lg"
                 >
                   New messages ↓
@@ -283,17 +331,20 @@ export const Chat = () => {
           </div>
 
           {/* Input Bar */}
-          <form onSubmit={handleSend} className="p-4 sm:p-6 border-t border-border bg-card/65 backdrop-blur-md shrink-0 flex items-center gap-3">
-            <Input
-              type="text"
-              placeholder="Type your message here..."
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 border-t border-border bg-card/65 backdrop-blur-md shrink-0 flex items-end gap-3">
+            <textarea
+              ref={textareaRef}
               value={text}
-              maxLength={MAX_MESSAGE_LENGTH}
               onChange={(e) => setText(e.target.value)}
-              className="flex-1 h-11 text-xs"
+              onKeyDown={handleKeyDown}
+              maxLength={MAX_MESSAGE_LENGTH}
+              rows={1}
+              placeholder="Type your message here…  (Enter to send, Shift+Enter for new line)"
+              aria-label="Message"
+              className="flex-1 resize-none overflow-y-auto min-h-[44px] max-h-[128px] custom-scrollbar rounded-[8px] border border-border bg-background px-4 py-3 text-[14px] font-medium text-surface-cream placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring transition-all duration-200"
             />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {charCount > 0 && (
                 <span className={`text-[10px] font-bold tabular-nums ${charCount >= MAX_MESSAGE_LENGTH ? 'text-fn-warning' : 'text-surface-50'}`}>
                   {charCount}/{MAX_MESSAGE_LENGTH}

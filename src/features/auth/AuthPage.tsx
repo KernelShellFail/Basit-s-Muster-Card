@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { Eyebrow } from '../../components/ui/Eyebrow';
+import { Watermark } from '../../components/Watermark';
 
 const loginSchema = z.object({
   loginId: z.string().min(1, 'Login ID is required'),
@@ -78,6 +79,9 @@ export const AuthPage = () => {
   return (
     <div className="min-h-screen bg-background text-surface-cream relative flex flex-col items-center justify-center p-6 overflow-hidden">
 
+      {/* "basit's Muster Card" background mark */}
+      <Watermark className="bottom-6 right-8 text-[clamp(28px,5vw,56px)]" />
+
       {/* Ambient gradient glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[60%] rounded-full bg-shockingly-green/[0.05] blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-25%] right-[-15%] w-[55%] h-[65%] rounded-full bg-lilac/[0.06] blur-[120px] pointer-events-none" />
@@ -92,7 +96,7 @@ export const AuthPage = () => {
       <div className="w-full max-w-7xl px-6 md:px-8 flex justify-between items-center mb-10 lg:absolute lg:top-8 lg:left-0 lg:right-0 lg:mx-auto">
         <h1 className="text-[12px] font-bold uppercase tracking-widest text-surface-cream flex items-center gap-2">
           <HardHat className="w-4 h-4 text-shockingly-green" />
-          Perk / <span className="text-shockingly-green">Muster</span>Mate
+          Muster<span className="text-shockingly-green">Mate</span>
         </h1>
       </div>
 

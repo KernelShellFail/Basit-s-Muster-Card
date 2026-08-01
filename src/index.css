@@ -152,6 +152,7 @@
   --color-secondary-foreground: #fffce1;
   --color-muted: #191919;
   --color-muted-foreground: #7c7c6f;
+  --color-watermark: color-mix(in srgb, #fffce1 7%, transparent);
 }
 
 :root:not(.dark) {
@@ -166,6 +167,7 @@
   --color-secondary-foreground: #1a1c18;
   --color-muted: #efede2;
   --color-muted-foreground: #5b5b50;
+  --color-watermark: color-mix(in srgb, #1a1c18 7%, transparent);
 
   /* Ink-on-paper: just-black stays dark ink for text-on-accent */
   --color-off-black: #ffffff;
