@@ -18,6 +18,13 @@ with role-based access (owner / admin / supervisor / labour).
 - Backend: Express 5, PostgreSQL, custom JWT auth, zod validation
 - PDFs: jspdf + html2canvas-pro
 
+## Documentation
+
+- [How it works — Architecture](./docs/ARCHITECTURE.md) — request flow, auth,
+  roles & org-scoping, schema, real-time behavior, module map.
+- [How to deploy — Deployment Guide](./DEPLOY.md) — env vars, build/run, service
+  management, reverse proxy + TLS, backups, troubleshooting.
+
 ## Quick start (development)
 
 ```bash
@@ -32,12 +39,6 @@ The schema auto-creates on first server boot.
 
 See [DEPLOY.md](./DEPLOY.md) — single-server deployment (Express serves the
 built SPA + API). Requires PostgreSQL, a strong `JWT_SECRET`, and `NODE_ENV=production`.
-
-```bash
-npm ci
-npm run build
-NODE_ENV=production npm start
-```
 
 ## Scripts
 
